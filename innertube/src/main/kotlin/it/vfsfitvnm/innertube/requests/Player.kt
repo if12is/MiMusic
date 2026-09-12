@@ -215,10 +215,11 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
         )).withAudioStreams(body.videoId, audioStreams)
     }
 
-    val muxed = lastResponse?.streamingData?.muxedFallbackFormat
-    if (muxed?.url != null) {
+    val muxedResponse = lastResponse
+    val muxed = muxedResponse?.streamingData?.muxedFallbackFormat
+    if (muxedResponse != null && muxed?.url != null) {
         PlayerLog.append("using muxed fallback itag=${muxed.itag} mime=${muxed.mimeType}")
-        return@runCatchingNonCancellable lastResponse
+        return@runCatchingNonCancellable muxedResponse
     }
 
     val status = lastResponse?.playabilityStatus
