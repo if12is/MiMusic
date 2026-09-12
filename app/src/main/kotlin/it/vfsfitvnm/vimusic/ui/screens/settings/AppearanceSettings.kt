@@ -49,7 +49,7 @@ fun AppearanceSettings() {
         thumbnailRoundnessKey,
         ThumbnailRoundness.Light
     )
-    var useSystemFont by rememberPreference(useSystemFontKey, true)
+    var useSystemFont by rememberPreference(useSystemFontKey, false)
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
     var isShowingThumbnailInLockscreen by rememberPreference(
         isShowingThumbnailInLockscreenKey,

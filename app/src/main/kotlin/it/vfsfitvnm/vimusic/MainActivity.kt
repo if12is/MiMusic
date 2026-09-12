@@ -172,7 +172,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
 
                     val appLanguage = getEnum(appLanguageKey, AppLanguage.Arabic)
                     applyInnertubeLocale(appLanguage)
-                    val useSystemFont = getBoolean(useSystemFontKey, true) || appLanguage.isRtl
+                    val useSystemFont = getBoolean(useSystemFontKey, false)
                     val applyFontPadding = getBoolean(applyFontPaddingKey, false)
 
                     val colorPalette =
@@ -286,11 +286,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                             }
 
                             useSystemFontKey, applyFontPaddingKey -> {
-                                val appLanguage = sharedPreferences.getEnum(
-                                    appLanguageKey,
-                                    AppLanguage.Arabic
-                                )
-                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, true) || appLanguage.isRtl
+                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, false)
                                 val applyFontPadding = sharedPreferences.getBoolean(applyFontPaddingKey, false)
 
                                 appearance = appearance.copy(

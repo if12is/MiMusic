@@ -16,7 +16,7 @@ class LandingPageRequestTest {
         assertNotNull("Landing page should not be null", page)
         assertFalse("Landing page should not be empty", page!!.isEmpty)
         assertTrue(
-            "Landing page should include songs, playlists, albums, or artists",
+            "Arabic landing should include songs, playlists, albums, or artists",
             !page.songs.isNullOrEmpty() ||
                 !page.playlists.isNullOrEmpty() ||
                 !page.albums.isNullOrEmpty() ||

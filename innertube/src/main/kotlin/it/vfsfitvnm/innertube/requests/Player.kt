@@ -12,6 +12,7 @@ import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.Context
 import it.vfsfitvnm.innertube.models.PlayerResponse
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
+import it.vfsfitvnm.innertube.utils.PlayerLog
 import it.vfsfitvnm.innertube.utils.runCatchingNonCancellable
 import kotlinx.serialization.json.JsonObject
 import kotlinx.serialization.json.contentOrNull
@@ -38,7 +39,9 @@ private val streamProxyUrls = listOf(
     "https://inv.nadeko.net/api/v1/videos/",
     "https://yewtu.be/api/v1/videos/",
     "https://invidious.nerdvpn.de/api/v1/videos/",
-    "https://iv.ggtyler.dev/api/v1/videos/"
+    "https://iv.ggtyler.dev/api/v1/videos/",
+    "https://invidious.fdn.fr/api/v1/videos/",
+    "https://inv.tux.pizza/api/v1/videos/"
 )
 
 private data class AudioStream(
@@ -93,8 +96,10 @@ private suspend fun Innertube.proxyAudioStreams(videoId: String): List<AudioStre
         }.getOrNull()
 
         if (!streams.isNullOrEmpty()) {
+            PlayerLog.append("proxy $baseUrl -> ${streams.size} audio streams")
             return streams
         }
+        PlayerLog.append("proxy $baseUrl -> empty")
     }
 
     return emptyList()
@@ -163,22 +168,36 @@ private fun PlayerResponse.withAudioStreams(
 }
 
 suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
+    PlayerLog.append("resolve ${body.videoId} hl=${Context.hl} gl=${Context.gl}")
     var lastResponse: PlayerResponse? = null
 
     for (context in playerClients) {
         val response = runCatching {
             requestPlayer(body, context)
+        }.onFailure { error ->
+            PlayerLog.append("${context.client.clientName} failed: ${error.message}")
         }.getOrNull() ?: continue
 
         lastResponse = response
+        val formatCount = response.streamingData?.adaptiveFormats.orEmpty().size +
+            response.streamingData?.formats.orEmpty().size
+        val urlCount = (response.streamingData?.adaptiveFormats.orEmpty() +
+            response.streamingData?.formats.orEmpty()).count { !it.url.isNullOrBlank() }
+        PlayerLog.append(
+            "${context.client.clientName} status=${response.playabilityStatus?.status} " +
+                "reason=${response.playabilityStatus?.reason} formats=$formatCount urls=$urlCount"
+        )
 
         if (response.hasPlayableAudio()) {
+            val format = response.streamingData?.highestQualityFormat
+            PlayerLog.append("using ${context.client.clientName} itag=${format?.itag} mime=${format?.mimeType}")
             return@runCatchingNonCancellable response
         }
     }
 
     val audioStreams = proxyAudioStreams(body.videoId)
     if (audioStreams.isNotEmpty()) {
+        PlayerLog.append("using proxy streams=${audioStreams.size}")
         return@runCatchingNonCancellable (lastResponse ?: PlayerResponse(
             playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
             playerConfig = null,
@@ -187,5 +206,7 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
         )).withAudioStreams(body.videoId, audioStreams)
     }
 
+    val status = lastResponse?.playabilityStatus
+    PlayerLog.append("unresolved status=${status?.status} reason=${status?.reason}")
     lastResponse ?: error("Unable to resolve a playable stream")
 }

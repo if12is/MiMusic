@@ -68,6 +68,8 @@ import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.enums.AppLanguage
+import it.vfsfitvnm.vimusic.utils.LocalAppLanguage
 import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.SnapLayoutInfoProvider
 import it.vfsfitvnm.vimusic.utils.asMediaItem
@@ -94,6 +96,7 @@ fun QuickPicks(
     val menuState = LocalMenuState.current
     val windowInsets = LocalPlayerAwareWindowInsets.current
     val strings = LocalStrings.current
+    val appLanguage = LocalAppLanguage.current
 
     var trending by persist<Song?>("home/trending")
 
@@ -106,9 +109,14 @@ fun QuickPicks(
         } ?: Result.failure(TimeoutException("home"))
     }
 
-    LaunchedEffect(reloadToken) {
+    LaunchedEffect(reloadToken, appLanguage) {
         if (relatedPageResult == null || reloadToken > 0) {
-            relatedPageResult = loadLanding(trending?.id ?: DefaultLandingVideoId)
+            val seed = if (appLanguage == AppLanguage.Arabic) {
+                DefaultLandingVideoId
+            } else {
+                trending?.id ?: DefaultLandingVideoId
+            }
+            relatedPageResult = loadLanding(seed)
         }
     }
 
@@ -116,7 +124,12 @@ fun QuickPicks(
         Database.trending().distinctUntilChanged().collect { song ->
             val changed = trending?.id != song?.id
             trending = song
-            if (song != null && changed && relatedPageResult != null) {
+            if (
+                song != null &&
+                changed &&
+                relatedPageResult != null &&
+                appLanguage != AppLanguage.Arabic
+            ) {
                 relatedPageResult = loadLanding(song.id)
             }
         }

@@ -11,6 +11,7 @@ import it.vfsfitvnm.vimusic.utils.coilDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.withAppLanguage
 
 class MainApplication : Application(), ImageLoaderFactory {
@@ -21,6 +22,7 @@ class MainApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         applyInnertubeLocale(preferredAppLanguage())
+        PlaybackLogStore.init(this)
         DatabaseInitializer()
     }
 

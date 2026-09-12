@@ -892,6 +892,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     ringBuffer.getOrNull(1)?.first -> dataSpec.withUri(ringBuffer.getOrNull(1)!!.second)
                     else -> {
                         val urlResult = runBlocking(Dispatchers.IO) {
+                            it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append("player request $videoId")
                             Innertube.player(PlayerBody(videoId = videoId))
                         }?.mapCatching { body ->
                             val returnedVideoId = body.videoDetails?.videoId
@@ -933,6 +934,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                                         )
                                     }
 
+                                    it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append(
+                                        "resolved $videoId itag=${format.itag} mime=${format.mimeType}"
+                                    )
                                     format.url
                                 } ?: throw PlayableFormatNotFoundException()
 
@@ -950,11 +954,17 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             ringBuffer.append(videoId to url.toUri())
                             dataSpec.withUri(url.toUri())
                                 .subrange(dataSpec.uriPositionOffset, chunkLength)
-                        } ?: throw PlaybackException(
-                            null,
-                            urlResult?.exceptionOrNull(),
-                            PlaybackException.ERROR_CODE_REMOTE_ERROR
-                        )
+                        } ?: run {
+                            val cause = urlResult?.exceptionOrNull()
+                            it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append(
+                                "playback failed $videoId: ${cause?.javaClass?.simpleName} ${cause?.message} ${it.vfsfitvnm.innertube.utils.PlayerLog.lastSummary}"
+                            )
+                            throw PlaybackException(
+                                cause?.message ?: it.vfsfitvnm.innertube.utils.PlayerLog.lastSummary,
+                                cause,
+                                PlaybackException.ERROR_CODE_REMOTE_ERROR
+                            )
+                        }
                     }
                 }
             }

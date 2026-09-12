@@ -40,6 +40,7 @@ import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.currentWindow
 import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.thumbnail
@@ -171,7 +172,14 @@ fun Thumbnail(
                             strings.loginRequired
                         causes.any { it is VideoIdMismatchException } ->
                             strings.videoIdMismatch
-                        else -> strings.unknownPlaybackError
+                        else -> {
+                            val summary = PlaybackLogStore.lastSummary()
+                            if (summary.isBlank()) {
+                                strings.unknownPlaybackError
+                            } else {
+                                "${strings.unknownPlaybackError}\n$summary"
+                            }
+                        }
                     }
                 },
                 onDismiss = player::prepare

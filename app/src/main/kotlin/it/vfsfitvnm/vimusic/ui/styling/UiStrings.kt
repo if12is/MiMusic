@@ -56,7 +56,10 @@ class UiStrings(private val language: AppLanguage) {
     val themeMode = t("Theme mode", "وضع السمة")
     val thumbnailRoundness = t("Thumbnail roundness", "استدارة الصورة")
     val useSystemFont = t("Use system font", "استخدام خط النظام")
-    val useSystemFontDescription = t("Use the font applied by the system", "استخدم الخط المعتمد من النظام")
+    val useSystemFontDescription = t(
+        "Use the system font instead of Cairo for Arabic and English names",
+        "استخدم خط النظام بدلاً من خط Cairo لأسماء الأغاني العربية والإنجليزية"
+    )
     val applyFontPadding = t("Apply font padding", "تطبيق تباعد الخط")
     val applyFontPaddingDescription = t("Add spacing around texts", "إضافة مسافات حول النصوص")
     val showSongCover = t("Show song cover", "إظهار غلاف الأغنية")
@@ -300,7 +303,23 @@ class UiStrings(private val language: AppLanguage) {
     val upToDate = t("You are using the latest version", "أنت تستخدم أحدث إصدار")
     val updateCheckFailed = t("Couldn't check for updates", "تعذر التحقق من التحديثات")
     val downloadingUpdate = t("Downloading update…", "جاري تنزيل التحديث…")
-    val installUpdate = t("Install", "تثبيت")
+    val installUpdate = t("Update", "تحديث")
+    val updateSignatureMismatch = t(
+        "This APK is signed differently from the installed app, so Android cannot upgrade it. Uninstall MiMusic once, then install this file.",
+        "توقيع هذا الملف يختلف عن التطبيق المثبت، لذلك لا يمكن لأندرويد ترقيته. أزل MiMusic مرة واحدة ثم ثبّت هذا الملف."
+    )
+    val updatePackageMismatch = t(
+        "This APK belongs to a different app package and cannot update the current install.",
+        "هذا الملف لتطبيق مختلف ولا يمكنه تحديث النسخة الحالية."
+    )
+    val updateInstallFailed = t("Couldn't start the update installer", "تعذر بدء مثبت التحديث")
+    val playbackLog = t("Playback log", "سجل التشغيل")
+    val playbackLogDescription = t(
+        "Copy the last stream-resolution attempts to find why a song will not play",
+        "انسخ آخر محاولات جلب الصوت لمعرفة سبب توقف التشغيل"
+    )
+    val playbackLogEmpty = t("No playback log yet. Play a song first.", "لا يوجد سجل بعد. شغّل أغنية أولاً.")
+    val playbackLogCopied = t("Playback log copied", "تم نسخ سجل التشغيل")
 
     fun colorPaletteName(value: ColorPaletteName) = when (value) {
         ColorPaletteName.Default -> themeDefault

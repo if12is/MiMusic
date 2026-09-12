@@ -46,34 +46,17 @@ data class Typography(
     }
 }
 
+private val CairoFamily = FontFamily(
+    Font(resId = R.font.cairo_w300, weight = FontWeight.Light),
+    Font(resId = R.font.cairo_w400, weight = FontWeight.Normal),
+    Font(resId = R.font.cairo_w500, weight = FontWeight.Medium),
+    Font(resId = R.font.cairo_w600, weight = FontWeight.SemiBold),
+    Font(resId = R.font.cairo_w700, weight = FontWeight.Bold),
+)
+
 fun typographyOf(color: Color, useSystemFont: Boolean, applyFontPadding: Boolean): Typography {
     val textStyle = TextStyle(
-        fontFamily = if (useSystemFont) {
-            FontFamily.Default
-        } else {
-            FontFamily(
-                Font(
-                    resId = R.font.poppins_w300,
-                    weight = FontWeight.Light
-                ),
-                Font(
-                    resId = R.font.poppins_w400,
-                    weight = FontWeight.Normal
-                ),
-                Font(
-                    resId = R.font.poppins_w500,
-                    weight = FontWeight.Medium
-                ),
-                Font(
-                    resId = R.font.poppins_w600,
-                    weight = FontWeight.SemiBold
-                ),
-                Font(
-                    resId = R.font.poppins_w700,
-                    weight = FontWeight.Bold
-                ),
-            )
-        },
+        fontFamily = if (useSystemFont) FontFamily.Default else CairoFamily,
         fontWeight = FontWeight.Normal,
         color = color,
         platformStyle = @Suppress("DEPRECATION") (PlatformTextStyle(includeFontPadding = applyFontPadding))
