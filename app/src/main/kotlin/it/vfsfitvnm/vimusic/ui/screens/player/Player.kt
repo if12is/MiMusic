@@ -41,8 +41,6 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
-import androidx.compose.ui.platform.LocalLayoutDirection
-import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
@@ -134,8 +132,6 @@ fun Player(
             binder.player.clearMediaItems()
         },
         collapsedContent = {
-            val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
-
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top,
@@ -144,18 +140,17 @@ fun Player(
                     .fillMaxSize()
                     .padding(horizontalBottomPaddingValues)
                     .drawBehind {
-                        val progress =
-                            positionAndDuration.first.toFloat() / positionAndDuration.second.absoluteValue
-                        val endX = if (isRtl) {
-                            size.width * (1f - progress)
+                        val duration = positionAndDuration.second.absoluteValue
+                        val progress = if (duration == 0L) {
+                            0f
                         } else {
-                            size.width * progress
+                            (positionAndDuration.first.toFloat() / duration).coerceIn(0f, 1f)
                         }
 
                         drawLine(
                             color = colorPalette.collapsedPlayerProgressBar,
                             start = Offset(x = 0f, y = 1.dp.toPx()),
-                            end = Offset(x = endX, y = 1.dp.toPx()),
+                            end = Offset(x = size.width * progress, y = 1.dp.toPx()),
                             strokeWidth = 2.dp.toPx()
                         )
                     }
