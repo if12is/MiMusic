@@ -1204,7 +1204,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                     downloadCache.applyContentMetadataMutations(
                         mediaId,
-                        ContentMetadataMutations().setContentLength(storedLength)
+                        ContentMetadataMutations.setContentLength(
+                            ContentMetadataMutations(),
+                            storedLength
+                        )
                     )
 
                     query {
