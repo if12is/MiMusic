@@ -2,7 +2,6 @@ package it.vfsfitvnm.innertube
 
 import it.vfsfitvnm.innertube.requests.DefaultLandingVideoId
 import it.vfsfitvnm.innertube.requests.landingPage
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertFalse
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
@@ -10,7 +9,7 @@ import org.junit.Test
 
 class LandingPageRequestTest {
     @Test
-    fun landingPageReturnsContentForArabicLocale() = runBlocking {
+    fun landingPageReturnsContentForArabicLocale() = LiveNetworkTest.runOrSkip {
         val page = Innertube.landingPage(DefaultLandingVideoId)?.getOrThrow()
 
         assertNotNull("Landing page should not be null", page)
