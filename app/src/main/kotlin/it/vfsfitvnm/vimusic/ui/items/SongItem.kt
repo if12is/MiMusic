@@ -58,7 +58,7 @@ fun SongItem(
     SongItem(
         thumbnailUrl = song.mediaMetadata.artworkUri.thumbnail(thumbnailSizePx)?.toString(),
         title = song.mediaMetadata.title.toString(),
-        authors = song.mediaMetadata.artist.toString(),
+        authors = song.mediaMetadata.artist?.toString().orEmpty(),
         duration = song.mediaMetadata.extras?.getString("durationText"),
         thumbnailSizeDp = thumbnailSizeDp,
         onThumbnailContent = onThumbnailContent,

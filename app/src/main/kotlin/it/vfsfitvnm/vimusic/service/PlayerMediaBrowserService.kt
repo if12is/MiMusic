@@ -52,7 +52,9 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
         if (service is PlayerService.Binder) {
             bound = true
             sessionToken = service.mediaSession.sessionToken
-            service.mediaSession.setCallback(SessionCallback(service.player, service.cache))
+            service.mediaSession.setCallback(
+                SessionCallback(service.player, service.cache, service.downloadCache)
+            )
         }
     }
 
@@ -221,8 +223,11 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
             BrowserMediaItem.FLAG_PLAYABLE
         )
 
-    private inner class SessionCallback(private val player: Player, private val cache: Cache) :
-        MediaSession.Callback() {
+    private inner class SessionCallback(
+        private val player: Player,
+        private val cache: Cache,
+        private val downloadCache: Cache
+    ) : MediaSession.Callback() {
         override fun onPlay() = player.play()
         override fun onPause() = player.pause()
         override fun onSkipToPrevious() = player.forceSeekToPrevious()
@@ -251,11 +256,11 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
                         .shuffled()
 
                     MediaId.offline -> Database
-                        .songsWithContentLength()
+                        .downloadedSongs()
                         .first()
                         .filter { song ->
-                            song.contentLength?.let {
-                                cache.isCached(song.song.id, 0, it)
+                            song.contentLength?.let { length ->
+                                downloadCache.isCached(song.song.id, 0, length)
                             } ?: false
                         }
                         .map(SongWithContentLength::song)

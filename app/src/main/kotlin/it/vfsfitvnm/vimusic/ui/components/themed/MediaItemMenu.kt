@@ -200,6 +200,7 @@ fun BaseMediaItemMenu(
     modifier: Modifier = Modifier,
     onGoToEqualizer: (() -> Unit)? = null,
     onShowSleepTimer: (() -> Unit)? = null,
+    onShowLyrics: (() -> Unit)? = null,
     onStartRadio: (() -> Unit)? = null,
     onPlayNext: (() -> Unit)? = null,
     onEnqueue: (() -> Unit)? = null,
@@ -215,6 +216,7 @@ fun BaseMediaItemMenu(
         onDismiss = onDismiss,
         onGoToEqualizer = onGoToEqualizer,
         onShowSleepTimer = onShowSleepTimer,
+        onShowLyrics = onShowLyrics,
         onStartRadio = onStartRadio,
         onPlayNext = onPlayNext,
         onEnqueue = onEnqueue,
@@ -260,6 +262,7 @@ fun MediaItemMenu(
     modifier: Modifier = Modifier,
     onGoToEqualizer: (() -> Unit)? = null,
     onShowSleepTimer: (() -> Unit)? = null,
+    onShowLyrics: (() -> Unit)? = null,
     onStartRadio: (() -> Unit)? = null,
     onPlayNext: (() -> Unit)? = null,
     onEnqueue: (() -> Unit)? = null,
@@ -412,10 +415,12 @@ fun MediaItemMenu(
                         .padding(end = 12.dp)
                 ) {
                     SongItem(
-                        thumbnailUrl = mediaItem.mediaMetadata.artworkUri.thumbnail(thumbnailSizePx)
-                            ?.toString(),
+                        thumbnailUrl = mediaItem.mediaMetadata.artworkUri.thumbnail(
+                            thumbnailSizePx,
+                            mediaItem.mediaId
+                        )?.toString(),
                         title = mediaItem.mediaMetadata.title.toString(),
-                        authors = mediaItem.mediaMetadata.artist.toString(),
+                        authors = mediaItem.mediaMetadata.artist?.toString().orEmpty(),
                         duration = null,
                         thumbnailSizeDp = thumbnailSizeDp,
                         modifier = Modifier
@@ -536,6 +541,17 @@ fun MediaItemMenu(
                         }
                     }
                 )
+
+                onShowLyrics?.let { onShowLyrics ->
+                    MenuEntry(
+                        icon = R.drawable.text,
+                        text = strings.lyrics,
+                        onClick = {
+                            onDismiss()
+                            onShowLyrics()
+                        }
+                    )
+                }
 
                 onGoToEqualizer?.let { onGoToEqualizer ->
                     MenuEntry(

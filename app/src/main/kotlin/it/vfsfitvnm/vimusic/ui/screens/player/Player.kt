@@ -41,6 +41,8 @@ import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
@@ -132,6 +134,8 @@ fun Player(
             binder.player.clearMediaItems()
         },
         collapsedContent = {
+            val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+
             Row(
                 horizontalArrangement = Arrangement.spacedBy(12.dp),
                 verticalAlignment = Alignment.Top,
@@ -142,11 +146,16 @@ fun Player(
                     .drawBehind {
                         val progress =
                             positionAndDuration.first.toFloat() / positionAndDuration.second.absoluteValue
+                        val endX = if (isRtl) {
+                            size.width * (1f - progress)
+                        } else {
+                            size.width * progress
+                        }
 
                         drawLine(
                             color = colorPalette.collapsedPlayerProgressBar,
                             start = Offset(x = 0f, y = 1.dp.toPx()),
-                            end = Offset(x = size.width * progress, y = 1.dp.toPx()),
+                            end = Offset(x = endX, y = 1.dp.toPx()),
                             strokeWidth = 2.dp.toPx()
                         )
                     }
@@ -278,6 +287,7 @@ fun Player(
                 shouldBePlaying = shouldBePlaying,
                 position = positionAndDuration.first,
                 duration = positionAndDuration.second,
+                onShowLyrics = { isShowingLyrics = true },
                 modifier = modifier
             )
         }
@@ -353,7 +363,8 @@ fun Player(
                                 PlayerMenu(
                                     onDismiss = menuState::hide,
                                     mediaItem = mediaItem,
-                                    binder = binder
+                                    binder = binder,
+                                    onShowLyrics = { isShowingLyrics = true }
                                 )
                             }
                         },
@@ -380,7 +391,8 @@ fun Player(
 private fun PlayerMenu(
     binder: PlayerService.Binder,
     mediaItem: MediaItem,
-    onDismiss: () -> Unit
+    onDismiss: () -> Unit,
+    onShowLyrics: () -> Unit = {},
 ) {
     val context = LocalContext.current
 
@@ -389,6 +401,7 @@ private fun PlayerMenu(
 
     BaseMediaItemMenu(
         mediaItem = mediaItem,
+        onShowLyrics = onShowLyrics,
         onStartRadio = {
             binder.stopRadio()
             binder.player.seamlessPlay(mediaItem)

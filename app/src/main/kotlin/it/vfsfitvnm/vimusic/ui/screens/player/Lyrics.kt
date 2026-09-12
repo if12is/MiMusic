@@ -67,6 +67,7 @@ import it.vfsfitvnm.vimusic.ui.styling.DefaultDarkColorPalette
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.PureBlackColorPalette
 import it.vfsfitvnm.vimusic.ui.styling.onOverlayShimmer
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.SynchronizedLyrics
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.color
@@ -100,6 +101,7 @@ fun Lyrics(
         val context = LocalContext.current
         val menuState = LocalMenuState.current
         val currentView = LocalView.current
+        val strings = LocalStrings.current
 
         var isShowingSynchronizedLyrics by rememberPreference(isShowingSynchronizedLyricsKey, false)
 
@@ -169,7 +171,7 @@ fun Lyrics(
 
         if (isEditing) {
             TextFieldDialog(
-                hintText = "Enter the lyrics",
+                hintText = strings.enterLyrics,
                 initialTextInput = text ?: "",
                 singleLine = false,
                 maxLines = 10,

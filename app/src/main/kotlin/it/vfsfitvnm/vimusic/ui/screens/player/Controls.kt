@@ -62,13 +62,13 @@ fun Controls(
     shouldBePlaying: Boolean,
     position: Long,
     duration: Long,
+    onShowLyrics: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val (colorPalette, typography) = LocalAppearance.current
 
     val binder = LocalPlayerServiceBinder.current
     binder?.player ?: return
-
     var trackLoopEnabled by rememberPreference(trackLoopEnabledKey, defaultValue = false)
 
     var scrubbingPosition by remember(mediaId) {
@@ -264,6 +264,15 @@ fun Controls(
                 icon = R.drawable.infinite,
                 color = if (trackLoopEnabled) colorPalette.text else colorPalette.textDisabled,
                 onClick = { trackLoopEnabled = !trackLoopEnabled },
+                modifier = Modifier
+                    .weight(1f)
+                    .size(24.dp)
+            )
+
+            IconButton(
+                icon = R.drawable.text,
+                color = colorPalette.text,
+                onClick = onShowLyrics,
                 modifier = Modifier
                     .weight(1f)
                     .size(24.dp)
