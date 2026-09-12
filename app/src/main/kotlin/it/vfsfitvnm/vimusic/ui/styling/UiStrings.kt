@@ -203,6 +203,7 @@ class UiStrings(private val language: AppLanguage) {
     val sleepTimerEnded = t("Sleep timer ended", "انتهى مؤقت النوم")
     val nowPlaying = t("Now playing", "قيد التشغيل الآن")
     val queueLoop = t("Queue loop", "تكرار القائمة")
+    val lyrics = t("Lyrics", "الكلمات")
     val editLyrics = t("Edit lyrics", "تعديل الكلمات")
     val searchLyricsOnline = t("Search lyrics online", "البحث عن الكلمات عبر الإنترنت")
     val fetchLyricsAgain = t("Fetch lyrics again", "جلب الكلمات مرة أخرى")

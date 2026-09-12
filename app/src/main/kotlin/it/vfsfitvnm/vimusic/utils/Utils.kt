@@ -76,16 +76,31 @@ val Song.asMediaItem: MediaItem
         .setCustomCacheKey(id)
         .build()
 
-fun String?.thumbnail(size: Int): String? {
+fun String?.thumbnail(size: Int, videoId: String? = null): String? {
+    if (this == null) return videoId?.let { youtubeVideoThumbnail(it, size) }
+
     return when {
-        this?.startsWith("https://lh3.googleusercontent.com") == true -> "$this-w$size-h$size"
-        this?.startsWith("https://yt3.ggpht.com") == true -> "$this-w$size-h$size-s$size"
-        else -> this
+        startsWith("https://lh3.googleusercontent.com") -> "$this-w$size-h$size"
+        startsWith("https://yt3.ggpht.com") -> "$this-w$size-h$size-s$size"
+        contains("i.ytimg.com/vi/") || contains("img.youtube.com/vi/") -> {
+            val id = Regex("""(?:i\.ytimg\.com|img\.youtube\.com)/vi/([^/]+)/""").find(this)
+                ?.groupValues
+                ?.get(1)
+                ?: return videoId?.let { youtubeVideoThumbnail(it, size) } ?: this
+            youtubeVideoThumbnail(id, size)
+        }
+        else -> videoId?.let { youtubeVideoThumbnail(it, size) } ?: this
     }
 }
 
-fun Uri?.thumbnail(size: Int): Uri? {
-    return toString().thumbnail(size)?.toUri()
+private fun youtubeVideoThumbnail(videoId: String, size: Int): String = when {
+    size >= 480 -> "https://i.ytimg.com/vi/$videoId/maxresdefault.jpg"
+    size >= 240 -> "https://i.ytimg.com/vi/$videoId/hqdefault.jpg"
+    else -> "https://i.ytimg.com/vi/$videoId/mqdefault.jpg"
+}
+
+fun Uri?.thumbnail(size: Int, videoId: String? = null): Uri? {
+    return toString().thumbnail(size, videoId)?.toUri()
 }
 
 fun formatAsDuration(millis: Long) = DateUtils.formatElapsedTime(millis / 1000).removePrefix("0")

@@ -128,7 +128,10 @@ fun Thumbnail(
                 .size(thumbnailSizeDp)
         ) {
             AsyncImage(
-                model = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(thumbnailSizePx),
+                model = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
+                    thumbnailSizePx,
+                    currentWindow.mediaItem.mediaId
+                ),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
                 modifier = Modifier

@@ -64,7 +64,7 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                 .favorites()
 
             BuiltInPlaylist.Offline -> Database
-                .songsWithContentLength()
+                .downloadedSongs()
                 .flowOn(Dispatchers.IO)
                 .map { songs ->
                     songs.filter { song ->

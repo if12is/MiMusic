@@ -282,6 +282,10 @@ interface Database {
     @Query("SELECT Song.*, contentLength FROM Song JOIN Format ON id = songId WHERE contentLength IS NOT NULL AND totalPlayTimeMs > 0 ORDER BY Song.ROWID DESC")
     fun songsWithContentLength(): Flow<List<SongWithContentLength>>
 
+    @Transaction
+    @Query("SELECT Song.*, contentLength FROM Song JOIN Format ON id = songId WHERE contentLength IS NOT NULL ORDER BY Song.ROWID DESC")
+    fun downloadedSongs(): Flow<List<SongWithContentLength>>
+
     @Query("""
         UPDATE SongPlaylistMap SET position = 
           CASE 

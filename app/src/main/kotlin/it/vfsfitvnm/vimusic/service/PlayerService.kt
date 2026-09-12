@@ -52,6 +52,7 @@ import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
 import androidx.media3.datasource.cache.CacheWriter
 import androidx.media3.datasource.cache.ContentMetadata
+import androidx.media3.datasource.cache.ContentMetadataMutations
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
@@ -846,9 +847,36 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
+    private fun downloadedContentLength(mediaId: String): Long? {
+        val metadataLength = ContentMetadata.getContentLength(downloadCache.getContentMetadata(mediaId))
+        if (metadataLength != C.LENGTH_UNSET.toLong()) return metadataLength
+
+        val cachedBytes = downloadCache.getCachedBytes(mediaId, 0, Long.MAX_VALUE)
+        return cachedBytes.takeIf { it > 0L }
+    }
+
     private fun isFullyDownloaded(mediaId: String): Boolean {
-        val length = ContentMetadata.getContentLength(downloadCache.getContentMetadata(mediaId))
-        return length != C.LENGTH_UNSET.toLong() && downloadCache.isCached(mediaId, 0, length)
+        val length = downloadedContentLength(mediaId) ?: return false
+        return downloadCache.isCached(mediaId, 0, length)
+    }
+
+    private suspend fun resolvePlayableFormat(
+        videoId: String
+    ): Pair<it.vfsfitvnm.innertube.models.PlayerResponse, it.vfsfitvnm.innertube.models.PlayerResponse.StreamingData.AdaptiveFormat> {
+        val response = Innertube.player(PlayerBody(videoId = videoId))?.getOrThrow()
+            ?: throw PlayableFormatNotFoundException()
+
+        when (response.playabilityStatus?.status) {
+            "OK" -> Unit
+            "LOGIN_REQUIRED" -> throw LoginRequiredException()
+            "UNPLAYABLE" -> throw UnplayableException()
+            else -> throw PlayableFormatNotFoundException()
+        }
+
+        val format = response.streamingData?.playableFormat ?: throw PlayableFormatNotFoundException()
+        if (format.url.isNullOrBlank()) throw PlayableFormatNotFoundException()
+
+        return response to format
     }
 
     private fun createHttpDataSourceFactory(): DataSource.Factory {
@@ -898,7 +926,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             if (
                 isRangeCached(downloadCache, videoId, dataSpec.position, chunkLength) ||
-                isRangeCached(cache, videoId, dataSpec.position, chunkLength)
+                isRangeCached(cache, videoId, dataSpec.position, chunkLength) ||
+                isFullyDownloaded(videoId)
             ) {
                 dataSpec
             } else {
@@ -1136,12 +1165,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (downloadJobs.containsKey(mediaId) || isFullyDownloaded(mediaId)) return
 
             setDownloadStatus(mediaId, DownloadStatus.Downloading)
-            downloadJobs[mediaId] = coroutineScope.launch {
+            downloadJobs[mediaId] = coroutineScope.launch(Dispatchers.IO) {
                 val result = runCatching {
-                    val response = Innertube.player(PlayerBody(videoId = mediaId))?.getOrThrow()
-                        ?: error("unavailable")
-                    val format = response.streamingData?.playableFormat
-                        ?: throw PlayableFormatNotFoundException()
+                    val (response, format) = resolvePlayableFormat(mediaId)
                     val url = format.url ?: throw PlayableFormatNotFoundException()
 
                     query {
@@ -1173,25 +1199,29 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         null
                     ).cache()
 
-                    val storedLength = format.contentLength
-                        ?: ContentMetadata.getContentLength(
-                            this@PlayerService.downloadCache.getContentMetadata(mediaId)
-                        ).takeIf { it != C.LENGTH_UNSET.toLong() }
+                    val storedLength = downloadedContentLength(mediaId)
+                        ?: throw PlayableFormatNotFoundException()
 
-                    if (storedLength != null && storedLength != format.contentLength) {
-                        query {
-                            Database.insert(
-                                Format(
-                                    songId = mediaId,
-                                    itag = format.itag,
-                                    mimeType = format.mimeType,
-                                    bitrate = format.bitrate,
-                                    loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
-                                    contentLength = storedLength,
-                                    lastModified = format.lastModified
-                                )
+                    downloadCache.applyContentMetadataMutations(
+                        mediaId,
+                        ContentMetadataMutations.setContentLength(
+                            ContentMetadataMutations(),
+                            storedLength
+                        )
+                    )
+
+                    query {
+                        Database.insert(
+                            Format(
+                                songId = mediaId,
+                                itag = format.itag,
+                                mimeType = format.mimeType,
+                                bitrate = format.bitrate,
+                                loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
+                                contentLength = storedLength,
+                                lastModified = format.lastModified
                             )
-                        }
+                        )
                     }
                 }
 

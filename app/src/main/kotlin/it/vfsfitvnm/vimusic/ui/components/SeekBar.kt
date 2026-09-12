@@ -21,7 +21,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.RectangleShape
 import androidx.compose.ui.graphics.Shape
 import androidx.compose.ui.input.pointer.pointerInput
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.Dp
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import kotlin.math.roundToLong
 
@@ -42,6 +44,13 @@ fun SeekBar(
     shape: Shape = RectangleShape,
     drawSteps: Boolean = false,
 ) {
+    val isRtl = LocalLayoutDirection.current == LayoutDirection.Rtl
+    val fraction = if (maximumValue < minimumValue) {
+        0f
+    } else {
+        (value.toFloat() - minimumValue) / (maximumValue - minimumValue)
+    }
+
     val isDragging = remember {
         MutableTransitionState(false)
     }
@@ -53,7 +62,7 @@ fun SeekBar(
 
     Box(
         modifier = modifier
-            .pointerInput(minimumValue, maximumValue) {
+            .pointerInput(minimumValue, maximumValue, isRtl) {
                 if (maximumValue < minimumValue) return@pointerInput
 
                 var acc = 0f
@@ -63,7 +72,8 @@ fun SeekBar(
                         isDragging.targetState = true
                     },
                     onHorizontalDrag = { _, delta ->
-                        acc += delta / size.width * (maximumValue - minimumValue)
+                        val directedDelta = if (isRtl) -delta else delta
+                        acc += directedDelta / size.width * (maximumValue - minimumValue)
 
                         if (acc !in -1f..1f) {
                             onDrag(acc.toLong())
@@ -82,12 +92,16 @@ fun SeekBar(
                     }
                 )
             }
-            .pointerInput(minimumValue, maximumValue) {
+            .pointerInput(minimumValue, maximumValue, isRtl) {
                 if (maximumValue < minimumValue) return@pointerInput
 
                 detectTapGestures(
                     onPress = { offset ->
-                        onDragStart((offset.x / size.width * (maximumValue - minimumValue) + minimumValue).roundToLong())
+                        val fraction = offset.x / size.width
+                        val normalized = if (isRtl) 1f - fraction else fraction
+                        onDragStart(
+                            (normalized * (maximumValue - minimumValue) + minimumValue).roundToLong()
+                        )
                     },
                     onTap = {
                         onDragEnd()
@@ -98,10 +112,10 @@ fun SeekBar(
             .drawWithContent {
                 drawContent()
 
-                val scrubberPosition = if (maximumValue < minimumValue) {
-                    0f
+                val scrubberPosition = if (isRtl) {
+                    (1f - fraction) * size.width
                 } else {
-                    (value.toFloat() - minimumValue) / (maximumValue - minimumValue) * size.width
+                    fraction * size.width
                 }
 
                 drawCircle(
@@ -112,8 +126,12 @@ fun SeekBar(
 
                 if (drawSteps) {
                     for (i in value + 1..maximumValue) {
-                        val stepPosition =
-                            (i.toFloat() - minimumValue) / (maximumValue - minimumValue) * size.width
+                        val stepFraction = (i.toFloat() - minimumValue) / (maximumValue - minimumValue)
+                        val stepPosition = if (isRtl) {
+                            (1f - stepFraction) * size.width
+                        } else {
+                            stepFraction * size.width
+                        }
                         drawCircle(
                             color = scrubberColor,
                             radius = scrubberRadius.toPx() / 2,
@@ -135,9 +153,9 @@ fun SeekBar(
         Spacer(
             modifier = Modifier
                 .height(currentBarHeight)
-                .fillMaxWidth((value.toFloat() - minimumValue) / (maximumValue - minimumValue))
+                .fillMaxWidth(fraction.coerceIn(0f, 1f))
                 .background(color = color, shape = shape)
-                .align(Alignment.CenterStart)
+                .align(if (isRtl) Alignment.CenterEnd else Alignment.CenterStart)
         )
     }
 }
