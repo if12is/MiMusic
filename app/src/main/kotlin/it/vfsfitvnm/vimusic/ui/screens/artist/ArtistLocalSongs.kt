@@ -36,6 +36,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
@@ -52,6 +53,7 @@ fun ArtistLocalSongs(
     val binder = LocalPlayerServiceBinder.current
     val (colorPalette) = LocalAppearance.current
     val menuState = LocalMenuState.current
+    val strings = LocalStrings.current
 
     var songs by persist<List<Song>?>("artist/$browseId/localSongs")
 
@@ -81,7 +83,7 @@ fun ArtistLocalSongs(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         headerContent {
                             SecondaryTextButton(
-                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.enqueue,
+                                text = strings.enqueue,
                                 enabled = !songs.isNullOrEmpty(),
                                 onClick = {
                                     binder?.player?.enqueue(songs!!.map(Song::asMediaItem))

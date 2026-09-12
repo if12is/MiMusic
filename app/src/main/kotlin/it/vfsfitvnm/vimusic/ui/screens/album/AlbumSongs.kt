@@ -38,6 +38,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.color
@@ -58,6 +59,7 @@ fun AlbumSongs(
     val (colorPalette, typography) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
+    val strings = LocalStrings.current
 
     var songs by persistList<Song>("album/$browseId/songs")
 
@@ -86,14 +88,14 @@ fun AlbumSongs(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         headerContent {
                             SecondaryTextButton(
-                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.enqueue,
+                                text = strings.enqueue,
                                 enabled = songs.isNotEmpty(),
                                 onClick = {
                                     binder?.player?.enqueue(songs.map(Song::asMediaItem))
                                 }
                             )
                             SecondaryTextButton(
-                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.downloadAll,
+                                text = strings.downloadAll,
                                 enabled = songs.isNotEmpty(),
                                 onClick = {
                                     binder?.downloadAll(songs.map(Song::asMediaItem))

@@ -1012,7 +1012,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                                     it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append(
                                         "resolved $videoId itag=${format.itag} mime=${format.mimeType}"
                                     )
-                                    format.url to isProgressiveMuxed(format)
+                                    val streamUrl = format.url ?: throw PlayableFormatNotFoundException()
+                                    streamUrl to isProgressiveMuxed(format)
                                 } ?: throw PlayableFormatNotFoundException()
 
                                 "UNPLAYABLE" -> throw UnplayableException()

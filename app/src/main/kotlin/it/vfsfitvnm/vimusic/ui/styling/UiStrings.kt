@@ -384,7 +384,7 @@ class UiStrings(private val language: AppLanguage) {
         "منع إطفاء الشاشة أثناء تشغيل الموسيقى"
     )
     val skipBackward = t("Back 15 seconds", "رجوع 15 ثانية")
-    val skipForward = t("Forward 15 seconds", "تقديم 15 ثانية")
+    val skip15Forward = t("Forward 15 seconds", "تقديم 15 ثانية")
     val recentlyPlayed = t("Recently played", "استُمع إليه مؤخراً")
     val songOfTheDay = t("Song of the day", "أغنية اليوم")
     val moods = t("Moods", "المزاج")
