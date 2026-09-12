@@ -3,6 +3,7 @@ package it.vfsfitvnm.innertube
 import io.ktor.client.HttpClient
 import io.ktor.client.engine.okhttp.OkHttp
 import io.ktor.client.plugins.BrowserUserAgent
+import io.ktor.client.plugins.HttpTimeout
 import io.ktor.client.plugins.compression.ContentEncoding
 import io.ktor.client.plugins.compression.brotli
 import io.ktor.client.plugins.contentnegotiation.ContentNegotiation
@@ -22,7 +23,13 @@ object Innertube {
     val client = HttpClient(OkHttp) {
         BrowserUserAgent()
 
-        expectSuccess = true
+        expectSuccess = false
+
+        install(HttpTimeout) {
+            requestTimeoutMillis = 20_000
+            connectTimeoutMillis = 15_000
+            socketTimeoutMillis = 20_000
+        }
 
         install(ContentNegotiation) {
             @OptIn(ExperimentalSerializationApi::class)
@@ -30,6 +37,7 @@ object Innertube {
                 ignoreUnknownKeys = true
                 explicitNulls = false
                 encodeDefaults = true
+                isLenient = true
             })
         }
 
@@ -194,7 +202,13 @@ object Innertube {
         val playlists: List<PlaylistItem>? = null,
         val albums: List<AlbumItem>? = null,
         val artists: List<ArtistItem>? = null,
-    )
+    ) {
+        val isEmpty: Boolean
+            get() = songs.isNullOrEmpty() &&
+                playlists.isNullOrEmpty() &&
+                albums.isNullOrEmpty() &&
+                artists.isNullOrEmpty()
+    }
 
     data class ItemsPage<T : Item>(
         val items: List<T>?,

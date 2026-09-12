@@ -5,68 +5,71 @@ import io.ktor.client.request.post
 import io.ktor.client.request.setBody
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.BrowseResponse
-import it.vfsfitvnm.innertube.models.MusicCarouselShelfRenderer
 import it.vfsfitvnm.innertube.models.NextResponse
+import it.vfsfitvnm.innertube.models.SectionListRenderer
 import it.vfsfitvnm.innertube.models.bodies.BrowseBody
 import it.vfsfitvnm.innertube.models.bodies.NextBody
-import it.vfsfitvnm.innertube.utils.findSectionByStrapline
-import it.vfsfitvnm.innertube.utils.findSectionByTitle
-import it.vfsfitvnm.innertube.utils.from
+import it.vfsfitvnm.innertube.utils.relatedBrowseId
 import it.vfsfitvnm.innertube.utils.runCatchingNonCancellable
+import it.vfsfitvnm.innertube.utils.toRelatedPage
+
+const val DefaultLandingVideoId = "J7p4bzqLvCw"
+
+suspend fun Innertube.landingPage(videoId: String = DefaultLandingVideoId) = runCatchingNonCancellable {
+    val related = runCatching { relatedPageOrNull(videoId) }.getOrNull()
+    if (related != null && !related.isEmpty) {
+        return@runCatchingNonCancellable related
+    }
+
+    val home = homePageOrNull()
+    if (home != null && !home.isEmpty) {
+        return@runCatchingNonCancellable home
+    }
+
+    related ?: home ?: error("Unable to load home recommendations")
+}
 
 suspend fun Innertube.relatedPage(body: NextBody) = runCatchingNonCancellable {
+    relatedPageOrNull(body.videoId) ?: homePageOrNull()
+}
+
+private suspend fun Innertube.relatedPageOrNull(videoId: String?): Innertube.RelatedPage? {
+    if (videoId.isNullOrBlank()) return null
+
     val nextResponse = client.post(next) {
-        setBody(body)
-        mask("contents.singleColumnMusicWatchNextResultsRenderer.tabbedRenderer.watchNextTabbedResultsRenderer.tabs.tabRenderer(endpoint,title)")
+        setBody(NextBody(videoId = videoId))
     }.body<NextResponse>()
 
-    val browseId = nextResponse
-        .contents
-        ?.singleColumnMusicWatchNextResultsRenderer
-        ?.tabbedRenderer
-        ?.watchNextTabbedResultsRenderer
-        ?.tabs
-        ?.getOrNull(2)
-        ?.tabRenderer
-        ?.endpoint
-        ?.browseEndpoint
-        ?.browseId
-        ?: return@runCatchingNonCancellable null
+    val browseId = relatedBrowseId(
+        nextResponse
+            .contents
+            ?.singleColumnMusicWatchNextResultsRenderer
+            ?.tabbedRenderer
+            ?.watchNextTabbedResultsRenderer
+            ?.tabs
+    ) ?: return null
 
     val response = client.post(browse) {
         setBody(BrowseBody(browseId = browseId))
-        mask("contents.sectionListRenderer.contents.musicCarouselShelfRenderer(header.musicCarouselShelfBasicHeaderRenderer(title,strapline),contents($musicResponsiveListItemRendererMask,$musicTwoRowItemRendererMask))")
     }.body<BrowseResponse>()
 
-    val sectionListRenderer = response
-        .contents
-        ?.sectionListRenderer
-
-    Innertube.RelatedPage(
-        songs = sectionListRenderer
-            ?.findSectionByTitle("You might also like")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicResponsiveListItemRenderer)
-            ?.mapNotNull(Innertube.SongItem::from),
-        playlists = sectionListRenderer
-            ?.findSectionByTitle("Recommended playlists")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
-            ?.mapNotNull(Innertube.PlaylistItem::from)
-            ?.sortedByDescending { it.channel?.name == "YouTube Music" },
-        albums = sectionListRenderer
-            ?.findSectionByStrapline("MORE FROM")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
-            ?.mapNotNull(Innertube.AlbumItem::from),
-        artists = sectionListRenderer
-            ?.findSectionByTitle("Similar artists")
-            ?.musicCarouselShelfRenderer
-            ?.contents
-            ?.mapNotNull(MusicCarouselShelfRenderer.Content::musicTwoRowItemRenderer)
-            ?.mapNotNull(Innertube.ArtistItem::from),
-    )
+    return response.sectionListRenderer()?.toRelatedPage()?.takeUnless { it.isEmpty }
 }
+
+internal suspend fun Innertube.homePageOrNull(): Innertube.RelatedPage? {
+    val response = client.post(browse) {
+        setBody(BrowseBody(browseId = "FEmusic_home"))
+    }.body<BrowseResponse>()
+
+    return response.sectionListRenderer()?.toRelatedPage()?.takeUnless { it.isEmpty }
+}
+
+private fun BrowseResponse.sectionListRenderer(): SectionListRenderer? =
+    contents?.sectionListRenderer
+        ?: contents
+            ?.singleColumnBrowseResultsRenderer
+            ?.tabs
+            ?.firstOrNull()
+            ?.tabRenderer
+            ?.content
+            ?.sectionListRenderer

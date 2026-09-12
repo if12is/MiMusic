@@ -1,13 +1,15 @@
 package it.vfsfitvnm.innertube.models
 
+import it.vfsfitvnm.innertube.utils.FlexibleIntSerializer
+import it.vfsfitvnm.innertube.utils.FlexibleLongSerializer
 import kotlinx.serialization.Serializable
 
 @Serializable
 data class PlayerResponse(
-    val playabilityStatus: PlayabilityStatus?,
-    val playerConfig: PlayerConfig?,
-    val streamingData: StreamingData?,
-    val videoDetails: VideoDetails?,
+    val playabilityStatus: PlayabilityStatus? = null,
+    val playerConfig: PlayerConfig? = null,
+    val streamingData: StreamingData? = null,
+    val videoDetails: VideoDetails? = null,
 ) {
     @Serializable
     data class PlayabilityStatus(
@@ -55,11 +57,15 @@ data class PlayerResponse(
             val mimeType: String,
             val bitrate: Long? = null,
             val averageBitrate: Long? = null,
+            @Serializable(with = FlexibleLongSerializer::class)
             val contentLength: Long? = null,
             val audioQuality: String? = null,
+            @Serializable(with = FlexibleLongSerializer::class)
             val approxDurationMs: Long? = null,
+            @Serializable(with = FlexibleLongSerializer::class)
             val lastModified: Long? = null,
             val loudnessDb: Double? = null,
+            @Serializable(with = FlexibleIntSerializer::class)
             val audioSampleRate: Int? = null,
             val url: String? = null,
             val signatureCipher: String? = null,
@@ -69,6 +75,6 @@ data class PlayerResponse(
 
     @Serializable
     data class VideoDetails(
-        val videoId: String?
+        val videoId: String? = null
     )
 }

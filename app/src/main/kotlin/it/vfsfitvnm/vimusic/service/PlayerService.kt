@@ -853,7 +853,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         return DefaultHttpDataSource.Factory()
             .setConnectTimeoutMs(16000)
             .setReadTimeoutMs(8000)
-            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
+            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+            .setDefaultRequestProperties(
+                mapOf(
+                    "Origin" to "https://www.youtube.com",
+                    "Referer" to "https://www.youtube.com/"
+                )
+            )
     }
 
     private fun createCacheDataSource(): DataSource.Factory {

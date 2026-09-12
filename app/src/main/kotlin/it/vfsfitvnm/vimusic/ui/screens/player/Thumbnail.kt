@@ -159,12 +159,18 @@ fun Thumbnail(
             PlaybackError(
                 isDisplayed = error != null,
                 messageProvider = {
-                    when (error?.cause?.cause) {
-                        is UnresolvedAddressException, is UnknownHostException -> strings.networkError
-                        is PlayableFormatNotFoundException -> strings.playableFormatNotFound
-                        is UnplayableException -> strings.unplayable
-                        is LoginRequiredException -> strings.loginRequired
-                        is VideoIdMismatchException -> strings.videoIdMismatch
+                    val causes = generateSequence(error as Throwable?) { it.cause }.toList()
+                    when {
+                        causes.any { it is UnresolvedAddressException || it is UnknownHostException } ->
+                            strings.networkError
+                        causes.any { it is PlayableFormatNotFoundException } ->
+                            strings.playableFormatNotFound
+                        causes.any { it is UnplayableException } ->
+                            strings.unplayable
+                        causes.any { it is LoginRequiredException } ->
+                            strings.loginRequired
+                        causes.any { it is VideoIdMismatchException } ->
+                            strings.videoIdMismatch
                         else -> strings.unknownPlaybackError
                     }
                 },
