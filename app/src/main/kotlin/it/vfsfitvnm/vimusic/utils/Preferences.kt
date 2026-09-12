@@ -39,6 +39,8 @@ const val searchResultScreenTabIndexKey = "searchResultScreenTabIndex"
 const val artistScreenTabIndexKey = "artistScreenTabIndex"
 const val pauseSearchHistoryKey = "pauseSearchHistory"
 const val lastUpdateCheckMsKey = "lastUpdateCheckMs"
+const val playbackSpeedKey = "playbackSpeed"
+const val keepScreenOnKey = "keepScreenOn"
 
 inline fun <reified T : Enum<T>> SharedPreferences.getEnum(
     key: String,
@@ -77,6 +79,16 @@ fun rememberPreference(key: String, defaultValue: Int): MutableState<Int> {
     return remember {
         mutableStatePreferenceOf(context.preferences.getInt(key, defaultValue)) {
             context.preferences.edit { putInt(key, it) }
+        }
+    }
+}
+
+@Composable
+fun rememberPreference(key: String, defaultValue: Float): MutableState<Float> {
+    val context = LocalContext.current
+    return remember {
+        mutableStatePreferenceOf(context.preferences.getFloat(key, defaultValue)) {
+            context.preferences.edit { putFloat(key, it) }
         }
     }
 }

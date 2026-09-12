@@ -40,6 +40,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persist
+import it.vfsfitvnm.compose.persist.persistList
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.innertube.requests.DefaultLandingVideoId
@@ -74,6 +75,7 @@ import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.SnapLayoutInfoProvider
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.center
+import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.isLandscape
 import it.vfsfitvnm.vimusic.utils.secondary
@@ -90,6 +92,7 @@ fun QuickPicks(
     onArtistClick: (String) -> Unit,
     onPlaylistClick: (String) -> Unit,
     onSearchClick: () -> Unit,
+    onMoodClick: (String) -> Unit = {},
 ) {
     val (colorPalette, typography) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
@@ -99,6 +102,7 @@ fun QuickPicks(
     val appLanguage = LocalAppLanguage.current
 
     var trending by persist<Song?>("home/trending")
+    var recentlyPlayed by persistList<Song>("home/recentlyPlayed")
 
     var relatedPageResult by persist<Result<Innertube.RelatedPage>>(tag = "home/relatedPageResult")
     var reloadToken by remember { mutableStateOf(0) }
@@ -117,6 +121,12 @@ fun QuickPicks(
                 trending?.id ?: DefaultLandingVideoId
             }
             relatedPageResult = loadLanding(seed)
+        }
+    }
+
+    LaunchedEffect(Unit) {
+        Database.recentlyPlayed().distinctUntilChanged().collect { songs ->
+            recentlyPlayed = songs
         }
     }
 
@@ -188,6 +198,69 @@ fun QuickPicks(
                 modifier = Modifier
                     .padding(endPaddingValues)
             )
+
+            val moods = listOf(
+                strings.moodCalm to "موسيقى هادئة",
+                strings.moodEnergetic to "أغاني حماسية",
+                strings.moodTarab to "طرب عربي",
+                strings.moodShaabi to "شعبي مصري",
+                strings.moodQuran to "تلاوة قرآن",
+                strings.moodFocus to "موسيقى للعمل"
+            )
+
+            BasicText(
+                text = strings.moods,
+                style = typography.m.semiBold,
+                modifier = sectionTextModifier
+            )
+
+            LazyRow(contentPadding = endPaddingValues) {
+                items(moods, key = { it.first }) { (label, query) ->
+                    BasicText(
+                        text = label,
+                        style = typography.xs.semiBold.color(colorPalette.text),
+                        modifier = Modifier
+                            .padding(end = 8.dp)
+                            .clickable { onMoodClick(query) }
+                            .background(colorPalette.background2, androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
+                            .padding(horizontal = 14.dp, vertical = 8.dp)
+                    )
+                }
+            }
+
+            recentlyPlayed.takeIf { it.isNotEmpty() }?.let { recent ->
+                BasicText(
+                    text = strings.recentlyPlayed,
+                    style = typography.m.semiBold,
+                    modifier = sectionTextModifier
+                )
+
+                LazyRow(contentPadding = endPaddingValues) {
+                    items(recent, key = Song::id) { song ->
+                        SongItem(
+                            song = song,
+                            thumbnailSizePx = songThumbnailSizePx,
+                            thumbnailSizeDp = songThumbnailSizeDp,
+                            modifier = Modifier
+                                .width(itemInHorizontalGridWidth)
+                                .combinedClickable(
+                                    onLongClick = {
+                                        menuState.display {
+                                            NonQueuedMediaItemMenu(
+                                                onDismiss = menuState::hide,
+                                                mediaItem = song.asMediaItem
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        binder?.stopRadio()
+                                        binder?.player?.forcePlay(song.asMediaItem)
+                                    }
+                                )
+                        )
+                    }
+                }
+            }
 
             relatedPageResult?.getOrNull()?.takeUnless { it.isEmpty }?.let { related ->
                 LazyHorizontalGrid(

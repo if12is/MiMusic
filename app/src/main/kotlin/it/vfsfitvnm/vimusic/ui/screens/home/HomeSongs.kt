@@ -104,6 +104,7 @@ fun HomeSongs(
                 key = "header",
                 contentType = 0
             ) {
+                androidx.compose.foundation.layout.Column {
                 Header(title = strings.songs) {
                     HeaderIconButton(
                         icon = R.drawable.trending,
@@ -135,6 +136,12 @@ fun HomeSongs(
                         modifier = Modifier
                             .graphicsLayer { rotationZ = sortOrderIconRotation }
                     )
+                }
+                BasicText(
+                    text = strings.librarySongsHint,
+                    style = typography.xxs.semiBold,
+                    modifier = Modifier.padding(horizontal = 16.dp, vertical = 4.dp)
+                )
                 }
             }
 

@@ -45,6 +45,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.align
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.color
@@ -67,6 +68,7 @@ fun ArtistOverview(
     val (colorPalette, typography) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
+    val strings = LocalStrings.current
     val windowInsets = LocalPlayerAwareWindowInsets.current
 
     val songThumbnailSizeDp = Dimensions.thumbnails.song
@@ -103,7 +105,7 @@ fun ArtistOverview(
                     headerContent {
                         youtubeArtistPage?.shuffleEndpoint?.let { endpoint ->
                             SecondaryTextButton(
-                                text = "Shuffle",
+                                text = strings.shuffle,
                                 onClick = {
                                     binder?.stopRadio()
                                     binder?.playRadio(endpoint)
@@ -132,7 +134,7 @@ fun ArtistOverview(
 
                             youtubeArtistPage.songsEndpoint?.let {
                                 BasicText(
-                                    text = "View all",
+                                    text = strings.viewAll,
                                     style = typography.xs.secondary,
                                     modifier = sectionTextModifier
                                         .clickable(onClick = onViewAllSongsClick),
@@ -185,7 +187,7 @@ fun ArtistOverview(
 
                             youtubeArtistPage.albumsEndpoint?.let {
                                 BasicText(
-                                    text = "View all",
+                                    text = strings.viewAll,
                                     style = typography.xs.secondary,
                                     modifier = sectionTextModifier
                                         .clickable(onClick = onViewAllAlbumsClick),
@@ -230,7 +232,7 @@ fun ArtistOverview(
 
                             youtubeArtistPage.singlesEndpoint?.let {
                                 BasicText(
-                                    text = "View all",
+                                    text = strings.viewAll,
                                     style = typography.xs.secondary,
                                     modifier = sectionTextModifier
                                         .clickable(onClick = onViewAllSinglesClick),

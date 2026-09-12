@@ -10,7 +10,9 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
+import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
+import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
@@ -43,6 +45,8 @@ import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.currentWindow
 import it.vfsfitvnm.vimusic.utils.DisposableListener
+import it.vfsfitvnm.vimusic.utils.forceSeekToNext
+import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
 import it.vfsfitvnm.vimusic.utils.thumbnail
 import java.net.UnknownHostException
 import java.nio.channels.UnresolvedAddressException
@@ -54,6 +58,7 @@ fun Thumbnail(
     onShowLyrics: (Boolean) -> Unit,
     isShowingStatsForNerds: Boolean,
     onShowStatsForNerds: (Boolean) -> Unit,
+    onSwipeCollapse: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val binder = LocalPlayerServiceBinder.current
@@ -139,6 +144,29 @@ fun Thumbnail(
                         detectTapGestures(
                             onTap = { onShowLyrics(true) },
                             onLongPress = { onShowStatsForNerds(true) }
+                        )
+                    }
+                    .pointerInput(player) {
+                        var acc = 0f
+                        detectHorizontalDragGestures(
+                            onDragEnd = {
+                                when {
+                                    acc > 80f -> player.forceSeekToPrevious()
+                                    acc < -80f -> player.forceSeekToNext()
+                                }
+                                acc = 0f
+                            },
+                            onHorizontalDrag = { _, delta -> acc += delta }
+                        )
+                    }
+                    .pointerInput(Unit) {
+                        var acc = 0f
+                        detectVerticalDragGestures(
+                            onDragEnd = {
+                                if (acc > 80f) onSwipeCollapse()
+                                acc = 0f
+                            },
+                            onVerticalDrag = { _, delta -> acc += delta }
                         )
                     }
                     .fillMaxSize()

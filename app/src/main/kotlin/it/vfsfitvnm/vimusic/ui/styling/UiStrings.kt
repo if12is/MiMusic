@@ -363,4 +363,48 @@ class UiStrings(private val language: AppLanguage) {
         PlaylistSortBy.DateAdded -> t("Date added", "تاريخ الإضافة")
         PlaylistSortBy.SongCount -> t("Song count", "عدد الأغاني")
     }
+
+    val no = t("No", "لا")
+    val downloadAll = t("Download all", "تنزيل الكل")
+    val downloadStartedCount: (Int) -> String = { count ->
+        t("Downloading $count songs", "جاري تنزيل $count أغنية")
+    }
+    val downloadFavorites = t("Download favorites", "تنزيل المفضلة")
+    val downloadsCache = t("DOWNLOADS", "التنزيلات")
+    val downloadsDescription = t(
+        "Songs saved for offline playback. These are kept separately from the streaming cache.",
+        "الأغاني المحفوظة للتشغيل بدون اتصال. تُحفظ منفصلة عن ذاكرة البث."
+    )
+    val clearDownloads = t("Remove all downloads", "حذف كل التنزيلات")
+    val downloadsCleared = t("Downloads removed", "تم حذف التنزيلات")
+    val playbackSpeed = t("Playback speed", "سرعة التشغيل")
+    val keepScreenOn = t("Keep screen on", "إبقاء الشاشة مضاءة")
+    val keepScreenOnDescription = t(
+        "Prevent the screen from turning off while music is playing",
+        "منع إطفاء الشاشة أثناء تشغيل الموسيقى"
+    )
+    val skipBackward = t("Back 15 seconds", "رجوع 15 ثانية")
+    val skip15Forward = t("Forward 15 seconds", "تقديم 15 ثانية")
+    val recentlyPlayed = t("Recently played", "استُمع إليه مؤخراً")
+    val songOfTheDay = t("Song of the day", "أغنية اليوم")
+    val moods = t("Moods", "المزاج")
+    val moodCalm = t("Calm", "هادي")
+    val moodEnergetic = t("Energetic", "حماسي")
+    val moodTarab = t("Tarab", "طرب")
+    val moodShaabi = t("Shaabi", "شعبي")
+    val moodQuran = t("Quran", "قرآن")
+    val moodFocus = t("Focus", "عمل")
+    val librarySongsHint = t(
+        "Songs you have played appear here",
+        "الأغاني التي شغّلتها تظهر هنا"
+    )
+    val libraryArtistsHint = t(
+        "Bookmark artists to see them here",
+        "احفظ الفنانين لتظهر هنا"
+    )
+    val libraryAlbumsHint = t(
+        "Bookmark albums to see them here",
+        "احفظ الألبومات لتظهر هنا"
+    )
+    val sharedViaMimusic = t("Shared via MiMusic", "مُشارك عبر MiMusic")
 }

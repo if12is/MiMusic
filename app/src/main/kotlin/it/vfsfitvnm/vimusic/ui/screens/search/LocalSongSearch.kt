@@ -95,7 +95,7 @@ fun LocalSongSearch(
                     actionsContent = {
                         if (textFieldValue.text.isNotEmpty()) {
                             SecondaryTextButton(
-                                text = "Clear",
+                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.clear,
                                 onClick = { onTextFieldValueChanged(TextFieldValue()) }
                             )
                         }

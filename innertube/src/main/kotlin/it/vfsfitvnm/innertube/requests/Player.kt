@@ -152,7 +152,7 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
         val muxed = unlocked.streamingData?.muxedFallbackFormat
         if (muxed != null) {
             PlayerLog.append(
-                "${context.client.clientName} skipped muxed-only itag=${muxed.itag} mime=${muxed.mimeType}"
+                "${context.client.clientName} keeping muxed fallback itag=${muxed.itag} mime=${muxed.mimeType}"
             )
         }
     }
@@ -163,14 +163,17 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
     }.onFailure { error ->
         PlayerLog.append("NewPipe failed: ${error.message}")
     }.getOrDefault(emptyList())
-    if (audioStreams.isNotEmpty()) {
-        PlayerLog.append("using NewPipe streams=${audioStreams.size}")
+    val newPipeAudioOnly = audioStreams.filter { stream ->
+        stream.mimeType?.contains("audio", ignoreCase = true) == true
+    }
+    if (newPipeAudioOnly.isNotEmpty()) {
+        PlayerLog.append("using NewPipe audio streams=${newPipeAudioOnly.size}")
         return@runCatchingNonCancellable (lastResponse ?: PlayerResponse(
             playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
             playerConfig = null,
             streamingData = null,
             videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
-        )).withAudioStreams(body.videoId, audioStreams)
+        )).withAudioStreams(body.videoId, newPipeAudioOnly)
     }
 
     val muxedResponse = lastResponse
@@ -178,6 +181,16 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
     if (muxedResponse != null && muxed?.url != null) {
         PlayerLog.append("using muxed fallback itag=${muxed.itag} mime=${muxed.mimeType}")
         return@runCatchingNonCancellable muxedResponse
+    }
+
+    if (audioStreams.isNotEmpty()) {
+        PlayerLog.append("using NewPipe muxed streams=${audioStreams.size}")
+        return@runCatchingNonCancellable (lastResponse ?: PlayerResponse(
+            playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
+            playerConfig = null,
+            streamingData = null,
+            videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
+        )).withAudioStreams(body.videoId, audioStreams)
     }
 
     val status = lastResponse?.playabilityStatus

@@ -269,6 +269,7 @@ fun Player(
                 onShowLyrics = { isShowingLyrics = it },
                 isShowingStatsForNerds = isShowingStatsForNerds,
                 onShowStatsForNerds = { isShowingStatsForNerds = it },
+                onSwipeCollapse = layoutState::collapseSoft,
                 modifier = modifier
                     .nestedScroll(layoutState.preUpPostDownNestedScrollConnection)
             )
@@ -283,6 +284,16 @@ fun Player(
                 position = positionAndDuration.first,
                 duration = positionAndDuration.second,
                 onShowLyrics = { isShowingLyrics = true },
+                onShowSleepTimer = {
+                    menuState.display {
+                        PlayerMenu(
+                            onDismiss = menuState::hide,
+                            mediaItem = mediaItem,
+                            binder = binder,
+                            onShowLyrics = { isShowingLyrics = true }
+                        )
+                    }
+                },
                 modifier = modifier
             )
         }
@@ -390,6 +401,7 @@ private fun PlayerMenu(
     onShowLyrics: () -> Unit = {},
 ) {
     val context = LocalContext.current
+    val strings = it.vfsfitvnm.vimusic.utils.LocalStrings.current
 
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
@@ -412,7 +424,7 @@ private fun PlayerMenu(
                     }
                 )
             } catch (e: ActivityNotFoundException) {
-                context.toast("Couldn't find an application to equalize audio")
+                context.toast(strings.equalizerMissing)
             }
         },
         onShowSleepTimer = {},

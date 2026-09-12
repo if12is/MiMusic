@@ -110,6 +110,16 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                         }
                     )
 
+                    if (builtInPlaylist == BuiltInPlaylist.Favorites) {
+                        SecondaryTextButton(
+                            text = strings.downloadFavorites,
+                            enabled = songs.isNotEmpty(),
+                            onClick = {
+                                binder?.downloadAll(songs.map(Song::asMediaItem))
+                            }
+                        )
+                    }
+
                     Spacer(
                         modifier = Modifier
                             .weight(1f)

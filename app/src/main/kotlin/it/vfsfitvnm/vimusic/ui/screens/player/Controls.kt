@@ -54,6 +54,7 @@ import it.vfsfitvnm.vimusic.utils.formatAsDuration
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
+import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -66,6 +67,7 @@ fun Controls(
     position: Long,
     duration: Long,
     onShowLyrics: () -> Unit = {},
+    onShowSleepTimer: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
     val (colorPalette, typography) = LocalAppearance.current
@@ -73,6 +75,8 @@ fun Controls(
     val binder = LocalPlayerServiceBinder.current
     binder?.player ?: return
     var trackLoopEnabled by rememberPreference(trackLoopEnabledKey, defaultValue = false)
+    var playbackSpeed by rememberPreference(playbackSpeedKey, 1f)
+    val speedOptions = listOf(0.75f, 1f, 1.25f, 1.5f)
 
     var scrubbingPosition by remember(mediaId) {
         mutableStateOf<Long?>(null)
@@ -281,6 +285,56 @@ fun Controls(
                 modifier = Modifier
                     .weight(1f)
                     .size(24.dp)
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .height(12.dp)
+        )
+
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            IconButton(
+                icon = R.drawable.play_skip_back,
+                color = colorPalette.text,
+                onClick = { binder.player.seekTo((binder.player.currentPosition - 15_000).coerceAtLeast(0)) },
+                modifier = Modifier.size(20.dp)
+            )
+
+            IconButton(
+                icon = R.drawable.alarm,
+                color = colorPalette.text,
+                onClick = onShowSleepTimer,
+                modifier = Modifier.size(20.dp)
+            )
+
+            BasicText(
+                text = "${playbackSpeed}×",
+                style = typography.xs.semiBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable {
+                        val index = speedOptions.indexOfFirst { it == playbackSpeed }
+                        playbackSpeed = speedOptions[(index + 1).mod(speedOptions.size)]
+                        binder.setPlaybackSpeed(playbackSpeed)
+                    }
+                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+
+            IconButton(
+                icon = R.drawable.play_skip_forward,
+                color = colorPalette.text,
+                onClick = {
+                    val duration = binder.player.duration
+                    if (duration != C.TIME_UNSET) {
+                        binder.player.seekTo((binder.player.currentPosition + 15_000).coerceAtMost(duration))
+                    }
+                },
+                modifier = Modifier.size(20.dp)
             )
         }
 

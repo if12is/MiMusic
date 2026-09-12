@@ -40,18 +40,39 @@ internal fun PlayerResponse.withDecipheredUrls(videoId: String): PlayerResponse 
 internal fun newPipeAudioStreams(videoId: String): List<ResolvedAudioStream> {
     NewPipeSupport.ensureInitialized()
     val info = StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")
-    return info.audioStreams.mapNotNull { stream ->
-        val url = stream.content.takeIf { it.isNotBlank() } ?: return@mapNotNull null
-        val bitrate = stream.averageBitrate.takeIf { it > 0 }?.let { kbps ->
-            if (kbps < 10_000) kbps * 1000L else kbps.toLong()
-        }
-        ResolvedAudioStream(
-            url = url,
-            bitrate = bitrate,
-            mimeType = stream.format?.mimeType,
-            itag = stream.itag
-        )
+    val audio = info.audioStreams.mapNotNull { stream ->
+        stream.toResolvedAudio()
     }
+    if (audio.isNotEmpty()) return audio
+
+    // Quran recitations and many official videos only expose muxed progressive MP4.
+    return info.videoStreams.mapNotNull { stream ->
+        if (stream.isVideoOnly) return@mapNotNull null
+        stream.toResolvedAudio()
+    }
+}
+
+private fun org.schabi.newpipe.extractor.stream.AudioStream.toResolvedAudio(): ResolvedAudioStream? {
+    val url = content.takeIf { it.isNotBlank() } ?: return null
+    val bitrate = averageBitrate.takeIf { it > 0 }?.let { kbps ->
+        if (kbps < 10_000) kbps * 1000L else kbps.toLong()
+    }
+    return ResolvedAudioStream(
+        url = url,
+        bitrate = bitrate,
+        mimeType = format?.mimeType,
+        itag = itag
+    )
+}
+
+private fun org.schabi.newpipe.extractor.stream.VideoStream.toResolvedAudio(): ResolvedAudioStream? {
+    val url = content.takeIf { it.isNotBlank() } ?: return null
+    return ResolvedAudioStream(
+        url = url,
+        bitrate = null,
+        mimeType = format?.mimeType ?: "video/mp4",
+        itag = itag
+    )
 }
 
 private fun PlayerResponse.StreamingData.AdaptiveFormat.withDecipheredUrl(

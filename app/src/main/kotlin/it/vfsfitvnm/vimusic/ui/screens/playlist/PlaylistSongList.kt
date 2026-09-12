@@ -92,7 +92,7 @@ fun PlaylistSongList(
 
     if (isImportingPlaylist) {
         TextFieldDialog(
-            hintText = "Enter the playlist name",
+            hintText = it.vfsfitvnm.vimusic.utils.LocalStrings.current.enterPlaylistName,
             initialTextInput = playlistPage?.title ?: "",
             onDismiss = { isImportingPlaylist = false },
             onDone = { text ->
@@ -125,7 +125,7 @@ fun PlaylistSongList(
         } else {
             Header(title = playlistPage?.title ?: "Unknown") {
                 SecondaryTextButton(
-                    text = "Enqueue",
+                    text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.enqueue,
                     enabled = playlistPage?.songsPage?.items?.isNotEmpty() == true,
                     onClick = {
                         playlistPage?.songsPage?.items?.map(Innertube.SongItem::asMediaItem)?.let { mediaItems ->

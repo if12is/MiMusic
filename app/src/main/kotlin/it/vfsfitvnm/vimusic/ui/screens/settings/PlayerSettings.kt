@@ -31,6 +31,7 @@ import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.resumePlaybackWhenDeviceConnectedKey
 import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.toast
+import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
 
 @ExperimentalAnimationApi
@@ -48,6 +49,7 @@ fun PlayerSettings() {
     )
     var skipSilence by rememberPreference(skipSilenceKey, false)
     var volumeNormalization by rememberPreference(volumeNormalizationKey, false)
+    var keepScreenOn by rememberPreference(keepScreenOnKey, false)
 
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
@@ -86,6 +88,13 @@ fun PlayerSettings() {
                 }
             )
         }
+
+        SwitchSettingEntry(
+            title = strings.keepScreenOn,
+            text = strings.keepScreenOnDescription,
+            isChecked = keepScreenOn,
+            onCheckedChange = { keepScreenOn = it }
+        )
 
         SettingsGroupSpacer()
 

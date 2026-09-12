@@ -9,6 +9,7 @@ import android.content.SharedPreferences
 import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
+import android.view.WindowManager
 import android.os.IBinder
 import android.widget.Toast
 import androidx.core.content.ContextCompat
@@ -103,7 +104,9 @@ import it.vfsfitvnm.vimusic.utils.intent
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
+import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
 import it.vfsfitvnm.vimusic.utils.lastUpdateCheckMsKey
+import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
@@ -374,6 +377,17 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
 
                 val appLanguage = remember {
                     preferences.getEnum(appLanguageKey, AppLanguage.Arabic)
+                }
+                val keepScreenOn by rememberPreference(keepScreenOnKey, false)
+                DisposableEffect(keepScreenOn) {
+                    if (keepScreenOn) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
+                    onDispose {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+                    }
                 }
 
                 CompositionLocalProvider(

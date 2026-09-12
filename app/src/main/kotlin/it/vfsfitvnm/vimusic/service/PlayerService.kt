@@ -117,6 +117,7 @@ import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.resumePlaybackWhenDeviceConnectedKey
 import it.vfsfitvnm.vimusic.utils.shouldBePlaying
+import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
 import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.startMediaForeground
 import it.vfsfitvnm.vimusic.utils.timer
@@ -276,6 +277,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
 
         player.skipSilenceEnabled = preferences.getBoolean(skipSilenceKey, false)
+        player.setPlaybackSpeed(preferences.getFloat(playbackSpeedKey, 1f).coerceIn(0.5f, 2f))
         player.addListener(this)
         player.addAnalyticsListener(PlaybackStatsListener(false, this))
 
@@ -917,23 +919,52 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             .setUpstreamDataSourceFactory(downloadSourceFactory)
     }
 
+    private data class ResolvedUri(
+        val videoId: String,
+        val uri: Uri,
+        val progressiveMuxed: Boolean
+    )
+
+    private fun applyResolvedUri(dataSpec: DataSpec, resolved: ResolvedUri, chunkLength: Long): DataSpec {
+        val withUri = dataSpec.withUri(resolved.uri)
+        return if (resolved.progressiveMuxed) {
+            withUri
+        } else {
+            withUri.subrange(dataSpec.uriPositionOffset, chunkLength)
+        }
+    }
+
+    private fun isProgressiveMuxed(
+        format: it.vfsfitvnm.innertube.models.PlayerResponse.StreamingData.AdaptiveFormat
+    ): Boolean {
+        return !format.isAudioOnly ||
+            format.itag == 18 ||
+            format.itag == 22 ||
+            format.mimeType.contains("video", ignoreCase = true)
+    }
+
     private fun createDataSourceFactory(): DataSource.Factory {
         val chunkLength = 512 * 1024L
-        val ringBuffer = RingBuffer<Pair<String, Uri>?>(2) { null }
+        val ringBuffer = RingBuffer<ResolvedUri?>(2) { null }
 
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val videoId = dataSpec.key ?: error("A key must be set")
 
-            if (
-                isRangeCached(downloadCache, videoId, dataSpec.position, chunkLength) ||
-                isRangeCached(cache, videoId, dataSpec.position, chunkLength) ||
-                isFullyDownloaded(videoId)
-            ) {
+            val requestedLength = dataSpec.length
+            val canServeFromCache = isFullyDownloaded(videoId) || (
+                requestedLength != C.LENGTH_UNSET.toLong() &&
+                    (
+                        isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
+                            isRangeCached(cache, videoId, dataSpec.position, requestedLength)
+                    )
+            )
+
+            if (canServeFromCache) {
                 dataSpec
             } else {
                 when (videoId) {
-                    ringBuffer.getOrNull(0)?.first -> dataSpec.withUri(ringBuffer.getOrNull(0)!!.second)
-                    ringBuffer.getOrNull(1)?.first -> dataSpec.withUri(ringBuffer.getOrNull(1)!!.second)
+                    ringBuffer.getOrNull(0)?.videoId -> applyResolvedUri(dataSpec, ringBuffer.getOrNull(0)!!, chunkLength)
+                    ringBuffer.getOrNull(1)?.videoId -> applyResolvedUri(dataSpec, ringBuffer.getOrNull(1)!!, chunkLength)
                     else -> {
                         val urlResult = runBlocking(Dispatchers.IO) {
                             it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append("player request $videoId")
@@ -981,7 +1012,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                                     it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append(
                                         "resolved $videoId itag=${format.itag} mime=${format.mimeType}"
                                     )
-                                    format.url
+                                    val streamUrl = format.url ?: throw PlayableFormatNotFoundException()
+                                    streamUrl to isProgressiveMuxed(format)
                                 } ?: throw PlayableFormatNotFoundException()
 
                                 "UNPLAYABLE" -> throw UnplayableException()
@@ -994,10 +1026,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             }
                         }
 
-                        urlResult?.getOrThrow()?.let { url ->
-                            ringBuffer.append(videoId to url.toUri())
-                            dataSpec.withUri(url.toUri())
-                                .subrange(dataSpec.uriPositionOffset, chunkLength)
+                        urlResult?.getOrThrow()?.let { (url, progressiveMuxed) ->
+                            val resolved = ResolvedUri(videoId, url.toUri(), progressiveMuxed)
+                            ringBuffer.append(resolved)
+                            applyResolvedUri(dataSpec, resolved, chunkLength)
                         } ?: run {
                             val cause = urlResult?.exceptionOrNull()
                             it.vfsfitvnm.vimusic.utils.PlaybackLogStore.append(
@@ -1021,7 +1053,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private fun createExtractorsFactory(): ExtractorsFactory {
         return ExtractorsFactory {
-            arrayOf(MatroskaExtractor(), FragmentedMp4Extractor(), Mp4Extractor())
+            arrayOf(
+                Mp4Extractor(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS),
+                FragmentedMp4Extractor(),
+                MatroskaExtractor()
+            )
         }
     }
 
@@ -1159,6 +1195,20 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     ?: if (isFullyDownloaded(mediaId)) DownloadStatus.Completed else DownloadStatus.None
             }
             .distinctUntilChanged()
+
+        fun setPlaybackSpeed(speed: Float) {
+            val normalized = speed.coerceIn(0.5f, 2f)
+            preferences.edit().putFloat(playbackSpeedKey, normalized).apply()
+            player.setPlaybackSpeed(normalized)
+        }
+
+        fun downloadAll(mediaItems: List<MediaItem>) {
+            mediaItems.forEach(::download)
+        }
+
+        fun clearDownloads() {
+            downloadCache.keys.forEach(::removeDownload)
+        }
 
         fun download(mediaItem: MediaItem) {
             val mediaId = mediaItem.mediaId

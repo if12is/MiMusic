@@ -134,7 +134,8 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
                             onAlbumClick = { albumRoute(it) },
                             onArtistClick = { artistRoute(it) },
                             onPlaylistClick = { playlistRoute(it) },
-                            onSearchClick = { searchRoute("") }
+                            onSearchClick = { searchRoute("") },
+                            onMoodClick = { searchResultRoute(it) }
                         )
 
                         1 -> HomeSongs(
