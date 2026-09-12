@@ -20,7 +20,7 @@ class PlayerRequestTest {
             response!!.playabilityStatus?.status == "OK"
         )
 
-        val format = response.streamingData?.highestQualityFormat
+        val format = response.streamingData?.playableFormat
         assertNotNull("A playable audio format should be available", format)
         assertNotNull("The audio format should include a stream URL", format!!.url)
 

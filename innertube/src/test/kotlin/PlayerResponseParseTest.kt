@@ -80,4 +80,70 @@ class PlayerResponseParseTest {
         assertEquals(2048L, format?.contentLength)
         assertEquals(48_000, format?.audioSampleRate)
     }
+
+    @Test
+    fun ignoresMuxedVideoWhenSelectingAudio() {
+        val response = json.decodeFromString<PlayerResponse>(
+            """
+            {
+              "playabilityStatus": { "status": "OK" },
+              "streamingData": {
+                "adaptiveFormats": [
+                  {
+                    "itag": 140,
+                    "mimeType": "audio/mp4",
+                    "bitrate": 131000,
+                    "audioQuality": "AUDIO_QUALITY_MEDIUM"
+                  }
+                ],
+                "formats": [
+                  {
+                    "itag": 18,
+                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                    "bitrate": 500000,
+                    "url": "https://example.com/itag18.mp4"
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(null, response.streamingData?.highestQualityFormat)
+        assertEquals(18, response.streamingData?.muxedFallbackFormat?.itag)
+        assertEquals(18, response.streamingData?.playableFormat?.itag)
+    }
+
+    @Test
+    fun prefersAudioUrlOverMuxedVideo() {
+        val response = json.decodeFromString<PlayerResponse>(
+            """
+            {
+              "playabilityStatus": { "status": "OK" },
+              "streamingData": {
+                "adaptiveFormats": [
+                  {
+                    "itag": 140,
+                    "mimeType": "audio/mp4",
+                    "bitrate": 131000,
+                    "audioQuality": "AUDIO_QUALITY_MEDIUM",
+                    "url": "https://example.com/audio.m4a"
+                  }
+                ],
+                "formats": [
+                  {
+                    "itag": 18,
+                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                    "bitrate": 500000,
+                    "url": "https://example.com/itag18.mp4"
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+
+        assertEquals(140, response.streamingData?.highestQualityFormat?.itag)
+        assertEquals("https://example.com/audio.m4a", response.streamingData?.playableFormat?.url)
+    }
 }
