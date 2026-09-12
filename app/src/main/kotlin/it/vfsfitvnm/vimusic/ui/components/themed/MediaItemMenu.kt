@@ -210,6 +210,7 @@ fun BaseMediaItemMenu(
     onRemoveFromQuickPicks: (() -> Unit)? = null,
 ) {
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
     MediaItemMenu(
         mediaItem = mediaItem,
@@ -241,9 +242,11 @@ fun BaseMediaItemMenu(
             val sendIntent = Intent().apply {
                 action = Intent.ACTION_SEND
                 type = "text/plain"
+                val title = mediaItem.mediaMetadata.title ?: ""
+                val artist = mediaItem.mediaMetadata.artist ?: ""
                 putExtra(
                     Intent.EXTRA_TEXT,
-                    "https://music.youtube.com/watch?v=${mediaItem.mediaId}"
+                    "$title\n$artist\nhttps://music.youtube.com/watch?v=${mediaItem.mediaId}\n\n${strings.sharedViaMimusic}"
                 )
             }
 
@@ -581,7 +584,7 @@ fun MediaItemMenu(
                         if (sleepTimerMillisLeft != null) {
                             ConfirmationDialog(
                                 text = strings.stopSleepTimer,
-                                cancelText = "No",
+                                cancelText = strings.no,
                                 confirmText = strings.stop,
                                 onDismiss = { isShowingSleepTimerDialog = false },
                                 onConfirm = {

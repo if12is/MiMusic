@@ -61,6 +61,7 @@ import it.vfsfitvnm.vimusic.utils.completed
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
+import it.vfsfitvnm.vimusic.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.runBlocking
@@ -76,6 +77,8 @@ fun LocalPlaylistSongs(
     val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
+    val strings = it.vfsfitvnm.vimusic.utils.LocalStrings.current
+    val context = androidx.compose.ui.platform.LocalContext.current
 
     var playlistWithSongs by persist<PlaylistWithSongs?>("localPlaylist/$playlistId/playlistWithSongs")
 
@@ -102,7 +105,7 @@ fun LocalPlaylistSongs(
 
     if (isRenaming) {
         TextFieldDialog(
-            hintText = "Enter the playlist name",
+            hintText = strings.enterPlaylistName,
             initialTextInput = playlistWithSongs?.playlist?.name ?: "",
             onDismiss = { isRenaming = false },
             onDone = { text ->
@@ -119,7 +122,7 @@ fun LocalPlaylistSongs(
 
     if (isDeleting) {
         ConfirmationDialog(
-            text = "Do you really want to delete this playlist?",
+            text = strings.deletePlaylistConfirm,
             onDismiss = { isDeleting = false },
             onConfirm = {
                 query {
@@ -149,12 +152,12 @@ fun LocalPlaylistSongs(
                 contentType = 0
             ) {
                 Header(
-                    title = playlistWithSongs?.playlist?.name ?: "Unknown",
+                    title = playlistWithSongs?.playlist?.name ?: strings.unknown,
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                 ) {
                     SecondaryTextButton(
-                        text = "Enqueue",
+                        text = strings.enqueue,
                         enabled = playlistWithSongs?.songs?.isNotEmpty() == true,
                         onClick = {
                             playlistWithSongs?.songs
@@ -162,6 +165,16 @@ fun LocalPlaylistSongs(
                                 ?.let { mediaItems ->
                                     binder?.player?.enqueue(mediaItems)
                                 }
+                        }
+                    )
+
+                    SecondaryTextButton(
+                        text = strings.downloadAll,
+                        enabled = playlistWithSongs?.songs?.isNotEmpty() == true,
+                        onClick = {
+                            val items = playlistWithSongs?.songs?.map(Song::asMediaItem).orEmpty()
+                            binder?.downloadAll(items)
+                            context.toast(strings.downloadStartedCount(items.size))
                         }
                     )
 
@@ -179,7 +192,7 @@ fun LocalPlaylistSongs(
                                     playlistWithSongs?.playlist?.browseId?.let { browseId ->
                                         MenuEntry(
                                             icon = R.drawable.sync,
-                                            text = "Sync",
+                                            text = strings.sync,
                                             onClick = {
                                                 menuState.hide()
                                                 transaction {

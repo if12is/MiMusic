@@ -19,6 +19,8 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import coil.compose.AsyncImage
+import it.vfsfitvnm.vimusic.ui.components.themed.DownloadBadge
+import it.vfsfitvnm.vimusic.ui.components.themed.DownloadBadge
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.shimmer
@@ -61,7 +63,10 @@ fun SongItem(
         authors = song.mediaMetadata.artist?.toString().orEmpty(),
         duration = song.mediaMetadata.extras?.getString("durationText"),
         thumbnailSizeDp = thumbnailSizeDp,
-        onThumbnailContent = onThumbnailContent,
+        onThumbnailContent = {
+            DownloadBadge(song.mediaId)
+            onThumbnailContent?.invoke(this)
+        },
         trailingContent = trailingContent,
         modifier = modifier,
     )
@@ -82,7 +87,10 @@ fun SongItem(
         authors = song.artistsText,
         duration = song.durationText,
         thumbnailSizeDp = thumbnailSizeDp,
-        onThumbnailContent = onThumbnailContent,
+        onThumbnailContent = {
+            DownloadBadge(song.id)
+            onThumbnailContent?.invoke(this)
+        },
         trailingContent = trailingContent,
         modifier = modifier,
     )

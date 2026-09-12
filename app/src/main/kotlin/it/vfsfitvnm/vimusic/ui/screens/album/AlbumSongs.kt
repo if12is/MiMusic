@@ -86,10 +86,17 @@ fun AlbumSongs(
                     Column(horizontalAlignment = Alignment.CenterHorizontally) {
                         headerContent {
                             SecondaryTextButton(
-                                text = "Enqueue",
+                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.enqueue,
                                 enabled = songs.isNotEmpty(),
                                 onClick = {
                                     binder?.player?.enqueue(songs.map(Song::asMediaItem))
+                                }
+                            )
+                            SecondaryTextButton(
+                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.downloadAll,
+                                enabled = songs.isNotEmpty(),
+                                onClick = {
+                                    binder?.downloadAll(songs.map(Song::asMediaItem))
                                 }
                             )
                         }

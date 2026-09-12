@@ -103,7 +103,7 @@ fun ArtistOverview(
                     headerContent {
                         youtubeArtistPage?.shuffleEndpoint?.let { endpoint ->
                             SecondaryTextButton(
-                                text = "Shuffle",
+                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.shuffle,
                                 onClick = {
                                     binder?.stopRadio()
                                     binder?.playRadio(endpoint)
@@ -132,7 +132,7 @@ fun ArtistOverview(
 
                             youtubeArtistPage.songsEndpoint?.let {
                                 BasicText(
-                                    text = "View all",
+                                    text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.viewAll,
                                     style = typography.xs.secondary,
                                     modifier = sectionTextModifier
                                         .clickable(onClick = onViewAllSongsClick),
@@ -185,7 +185,7 @@ fun ArtistOverview(
 
                             youtubeArtistPage.albumsEndpoint?.let {
                                 BasicText(
-                                    text = "View all",
+                                    text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.viewAll,
                                     style = typography.xs.secondary,
                                     modifier = sectionTextModifier
                                         .clickable(onClick = onViewAllAlbumsClick),
@@ -230,7 +230,7 @@ fun ArtistOverview(
 
                             youtubeArtistPage.singlesEndpoint?.let {
                                 BasicText(
-                                    text = "View all",
+                                    text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.viewAll,
                                     style = typography.xs.secondary,
                                     modifier = sectionTextModifier
                                         .clickable(onClick = onViewAllSinglesClick),

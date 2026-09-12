@@ -30,6 +30,7 @@ import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.coilDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.exoPlayerDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.toast
 
 @OptIn(ExperimentalCoilApi::class)
 @ExperimentalAnimationApi
@@ -115,6 +116,26 @@ fun CacheSettings() {
                 title = strings.maxSize,
                 selectedValue = exoPlayerDiskCacheMaxSize,
                 onValueSelected = { exoPlayerDiskCacheMaxSize = it }
+            )
+        }
+
+        binder?.downloadCache?.let { downloads ->
+            val downloadSize by remember {
+                derivedStateOf { downloads.cacheSpace }
+            }
+
+            SettingsGroupSpacer()
+            SettingsEntryGroupText(title = strings.downloadsCache)
+            SettingsDescription(
+                text = "${Formatter.formatShortFileSize(context, downloadSize)} · ${strings.downloadsDescription}"
+            )
+            SettingsEntry(
+                title = strings.clearDownloads,
+                text = strings.downloadsDescription,
+                onClick = {
+                    binder.clearDownloads()
+                    context.toast(strings.downloadsCleared)
+                }
             )
         }
     }
