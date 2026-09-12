@@ -134,7 +134,7 @@ fun HomeArtistList(
                 }
             }
 
-            items(items = items, key = Artist::id) { artist ->}
+            items(items = items, key = Artist::id) { artist ->
                 ArtistItem(
                     artist = artist,
                     thumbnailSizePx = thumbnailSizePx,

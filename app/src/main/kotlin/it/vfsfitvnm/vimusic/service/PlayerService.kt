@@ -950,11 +950,16 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val videoId = dataSpec.key ?: error("A key must be set")
 
-            if (
-                isRangeCached(downloadCache, videoId, dataSpec.position, chunkLength) ||
-                isRangeCached(cache, videoId, dataSpec.position, chunkLength) ||
-                isFullyDownloaded(videoId)
-            ) {
+            val requestedLength = dataSpec.length
+            val canServeFromCache = isFullyDownloaded(videoId) || (
+                requestedLength != C.LENGTH_UNSET.toLong() &&
+                    (
+                        isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
+                            isRangeCached(cache, videoId, dataSpec.position, requestedLength)
+                    )
+            )
+
+            if (canServeFromCache) {
                 dataSpec
             } else {
                 when (videoId) {
@@ -1048,9 +1053,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private fun createExtractorsFactory(): ExtractorsFactory {
         return ExtractorsFactory {
             arrayOf(
-                MatroskaExtractor(),
+                Mp4Extractor(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS),
                 FragmentedMp4Extractor(),
-                Mp4Extractor(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS)
+                MatroskaExtractor()
             )
         }
     }

@@ -146,4 +146,30 @@ class PlayerResponseParseTest {
         assertEquals(140, response.streamingData?.highestQualityFormat?.itag)
         assertEquals("https://example.com/audio.m4a", response.streamingData?.playableFormat?.url)
     }
+
+    @Test
+    fun playsQuranStyleMuxedProgressiveMp4() {
+        val response = json.decodeFromString<PlayerResponse>(
+            """
+            {
+              "playabilityStatus": { "status": "OK" },
+              "streamingData": {
+                "formats": [
+                  {
+                    "itag": 18,
+                    "mimeType": "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+                    "bitrate": 395000,
+                    "url": "https://example.com/quran-itag18.mp4"
+                  }
+                ]
+              }
+            }
+            """.trimIndent()
+        )
+
+        val format = response.streamingData?.playableFormat
+        assertEquals(18, format?.itag)
+        assertEquals(false, format?.isAudioOnly)
+        assertEquals("https://example.com/quran-itag18.mp4", format?.url)
+    }
 }

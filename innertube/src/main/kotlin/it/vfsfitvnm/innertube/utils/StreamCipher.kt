@@ -47,6 +47,7 @@ internal fun newPipeAudioStreams(videoId: String): List<ResolvedAudioStream> {
 
     // Quran recitations and many official videos only expose muxed progressive MP4.
     return info.videoStreams.mapNotNull { stream ->
+        if (stream.isVideoOnly) return@mapNotNull null
         stream.toResolvedAudio()
     }
 }

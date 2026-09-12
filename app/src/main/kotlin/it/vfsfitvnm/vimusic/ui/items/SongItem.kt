@@ -20,7 +20,6 @@ import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import coil.compose.AsyncImage
 import it.vfsfitvnm.vimusic.ui.components.themed.DownloadBadge
-import it.vfsfitvnm.vimusic.ui.components.themed.DownloadBadge
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.shimmer
