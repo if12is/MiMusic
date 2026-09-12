@@ -57,6 +57,7 @@ import it.vfsfitvnm.vimusic.ui.components.LocalMenuState
 import it.vfsfitvnm.vimusic.ui.components.rememberBottomSheetState
 import it.vfsfitvnm.vimusic.ui.components.themed.BaseMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.components.themed.IconButton
+import it.vfsfitvnm.vimusic.enums.NavigationStyle
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.collapsedPlayerProgressBar
@@ -64,7 +65,9 @@ import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.isLandscape
+import it.vfsfitvnm.vimusic.utils.navigationStyleKey
 import it.vfsfitvnm.vimusic.utils.positionAndDurationState
+import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.seamlessPlay
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
@@ -116,9 +119,14 @@ fun Player(
     val positionAndDuration by binder.player.positionAndDurationState()
 
     val windowInsets = WindowInsets.systemBars
+    val navigationStyle by rememberPreference(navigationStyleKey, NavigationStyle.Side)
+    val isGlassNavigation = navigationStyle == NavigationStyle.GlassBottom
 
     val horizontalBottomPaddingValues = windowInsets
         .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Bottom).asPaddingValues()
+    val horizontalPaddingValues = windowInsets
+        .only(WindowInsetsSides.Horizontal)
+        .asPaddingValues()
 
     OnGlobalRoute {
         layoutState.collapseSoft()
@@ -132,111 +140,52 @@ fun Player(
             binder.player.clearMediaItems()
         },
         collapsedContent = {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(12.dp),
-                verticalAlignment = Alignment.Top,
-                modifier = Modifier
-                    .background(colorPalette.background1)
-                    .fillMaxSize()
-                    .padding(horizontalBottomPaddingValues)
-                    .drawBehind {
-                        val duration = positionAndDuration.second.absoluteValue
-                        val progress = if (duration == 0L) {
-                            0f
-                        } else {
-                            (positionAndDuration.first.toFloat() / duration).coerceIn(0f, 1f)
-                        }
-
-                        drawLine(
-                            color = colorPalette.collapsedPlayerProgressBar,
-                            start = Offset(x = 0f, y = 1.dp.toPx()),
-                            end = Offset(x = size.width * progress, y = 1.dp.toPx()),
-                            strokeWidth = 2.dp.toPx()
-                        )
+            val collapsedRowModifier = Modifier
+                .background(colorPalette.background1)
+                .then(
+                    if (isGlassNavigation) {
+                        Modifier
+                            .fillMaxWidth()
+                            .height(Dimensions.collapsedPlayer)
+                            .padding(horizontalPaddingValues)
+                    } else {
+                        Modifier
+                            .fillMaxSize()
+                            .padding(horizontalBottomPaddingValues)
                     }
-            ) {
-                Spacer(
-                    modifier = Modifier
-                        .width(2.dp)
                 )
+                .drawBehind {
+                    val duration = positionAndDuration.second.absoluteValue
+                    val progress = if (duration == 0L) {
+                        0f
+                    } else {
+                        (positionAndDuration.first.toFloat() / duration).coerceIn(0f, 1f)
+                    }
 
-                Box(
-                    contentAlignment = Alignment.Center,
-                    modifier = Modifier
-                        .height(Dimensions.collapsedPlayer)
-                ) {
-                    AsyncImage(
-                        model = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.song.px),
-                        contentDescription = null,
-                        contentScale = ContentScale.Crop,
-                        modifier = Modifier
-                            .clip(thumbnailShape)
-                            .size(48.dp)
+                    drawLine(
+                        color = colorPalette.collapsedPlayerProgressBar,
+                        start = Offset(x = 0f, y = 1.dp.toPx()),
+                        end = Offset(x = size.width * progress, y = 1.dp.toPx()),
+                        strokeWidth = 2.dp.toPx()
                     )
                 }
 
-                Column(
-                    verticalArrangement = Arrangement.Center,
-                    modifier = Modifier
-                        .height(Dimensions.collapsedPlayer)
-                        .weight(1f)
-                ) {
-                    BasicText(
-                        text = mediaItem.mediaMetadata.title?.toString() ?: "",
-                        style = typography.xs.semiBold,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
+            if (isGlassNavigation) {
+                Column(modifier = Modifier.fillMaxSize()) {
+                    CollapsedMiniPlayer(
+                        mediaItem = mediaItem,
+                        shouldBePlaying = shouldBePlaying,
+                        binder = binder,
+                        modifier = collapsedRowModifier
                     )
-                    BasicText(
-                        text = mediaItem.mediaMetadata.artist?.toString() ?: "",
-                        style = typography.xs.semiBold.secondary,
-                        maxLines = 1,
-                        overflow = TextOverflow.Ellipsis,
-                    )
+                    Spacer(modifier = Modifier.weight(1f))
                 }
-
-                Spacer(
-                    modifier = Modifier
-                        .width(2.dp)
-                )
-
-                Row(
-                    horizontalArrangement = Arrangement.spacedBy(12.dp),
-                    verticalAlignment = Alignment.CenterVertically,
-                    modifier = Modifier
-                        .height(Dimensions.collapsedPlayer)
-                ) {
-                    IconButton(
-                        icon = if (shouldBePlaying) R.drawable.pause else R.drawable.play,
-                        color = colorPalette.text,
-                        onClick = {
-                            if (shouldBePlaying) {
-                                binder.player.pause()
-                            } else {
-                                if (binder.player.playbackState == Player.STATE_IDLE) {
-                                    binder.player.prepare()
-                                }
-                                binder.player.play()
-                            }
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .size(20.dp)
-                    )
-
-                    IconButton(
-                        icon = R.drawable.play_skip_forward,
-                        color = colorPalette.text,
-                        onClick = binder.player::forceSeekToNext,
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .size(20.dp)
-                    )
-                }
-
-                Spacer(
-                    modifier = Modifier
-                        .width(2.dp)
+            } else {
+                CollapsedMiniPlayer(
+                    mediaItem = mediaItem,
+                    shouldBePlaying = shouldBePlaying,
+                    binder = binder,
+                    modifier = collapsedRowModifier
                 )
             }
         }
@@ -388,6 +337,106 @@ fun Player(
             backgroundColorProvider = { colorPalette.background2 },
             modifier = Modifier
                 .align(Alignment.BottomCenter)
+        )
+    }
+}
+
+@Composable
+private fun CollapsedMiniPlayer(
+    mediaItem: MediaItem,
+    shouldBePlaying: Boolean,
+    binder: PlayerService.Binder,
+    modifier: Modifier = Modifier
+) {
+    val (colorPalette, typography, thumbnailShape) = LocalAppearance.current
+
+    Row(
+        horizontalArrangement = Arrangement.spacedBy(12.dp),
+        verticalAlignment = Alignment.Top,
+        modifier = modifier
+    ) {
+        Spacer(
+            modifier = Modifier
+                .width(2.dp)
+        )
+
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier
+                .height(Dimensions.collapsedPlayer)
+        ) {
+            AsyncImage(
+                model = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.song.px),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .clip(thumbnailShape)
+                    .size(48.dp)
+            )
+        }
+
+        Column(
+            verticalArrangement = Arrangement.Center,
+            modifier = Modifier
+                .height(Dimensions.collapsedPlayer)
+                .weight(1f)
+        ) {
+            BasicText(
+                text = mediaItem.mediaMetadata.title?.toString() ?: "",
+                style = typography.xs.semiBold,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+            BasicText(
+                text = mediaItem.mediaMetadata.artist?.toString() ?: "",
+                style = typography.xs.semiBold.secondary,
+                maxLines = 1,
+                overflow = TextOverflow.Ellipsis,
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .width(2.dp)
+        )
+
+        Row(
+            horizontalArrangement = Arrangement.spacedBy(12.dp),
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier
+                .height(Dimensions.collapsedPlayer)
+        ) {
+            IconButton(
+                icon = if (shouldBePlaying) R.drawable.pause else R.drawable.play,
+                color = colorPalette.text,
+                onClick = {
+                    if (shouldBePlaying) {
+                        binder.player.pause()
+                    } else {
+                        if (binder.player.playbackState == Player.STATE_IDLE) {
+                            binder.player.prepare()
+                        }
+                        binder.player.play()
+                    }
+                },
+                modifier = Modifier
+                    .padding(horizontal = 4.dp, vertical = 8.dp)
+                    .size(20.dp)
+            )
+
+            IconButton(
+                icon = R.drawable.play_skip_forward,
+                color = colorPalette.text,
+                onClick = binder.player::forceSeekToNext,
+                modifier = Modifier
+                    .padding(horizontal = 4.dp, vertical = 8.dp)
+                    .size(20.dp)
+            )
+        }
+
+        Spacer(
+            modifier = Modifier
+                .width(2.dp)
         )
     }
 }

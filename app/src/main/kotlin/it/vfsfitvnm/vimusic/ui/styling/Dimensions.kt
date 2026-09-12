@@ -21,6 +21,7 @@ object Dimensions {
     val glassNavigationTopGap = 8.dp
     val glassNavigationBarSpace =
         glassNavigationBarHeight + glassNavigationBottomGap + glassNavigationTopGap
+    val glassNavigationDockedHeight = glassNavigationBarHeight
 
     object thumbnails {
         val album = 128.dp

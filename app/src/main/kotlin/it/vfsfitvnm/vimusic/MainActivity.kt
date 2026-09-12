@@ -25,13 +25,13 @@ import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
 import androidx.compose.foundation.isSystemInDarkTheme
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
 import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
-import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
@@ -56,9 +56,7 @@ import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalDensity
 import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
-import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
-import androidx.compose.ui.unit.times
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
@@ -80,6 +78,9 @@ import it.vfsfitvnm.vimusic.service.PlayerService
 import it.vfsfitvnm.vimusic.ui.components.BottomSheetMenu
 import it.vfsfitvnm.vimusic.ui.components.LocalMenuState
 import it.vfsfitvnm.vimusic.ui.components.rememberBottomSheetState
+import it.vfsfitvnm.vimusic.ui.components.themed.GlassNavigationHost
+import it.vfsfitvnm.vimusic.ui.components.themed.LocalGlassNavigationHost
+import it.vfsfitvnm.vimusic.ui.components.themed.NavigationBar
 import it.vfsfitvnm.vimusic.ui.screens.albumRoute
 import it.vfsfitvnm.vimusic.ui.screens.artistRoute
 import it.vfsfitvnm.vimusic.ui.screens.home.HomeScreen
@@ -367,30 +368,42 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     NavigationStyle.Side
                 )
                 val isGlassNavigation = navigationStyle == NavigationStyle.GlassBottom
-                val glassNavigationSpace =
+                val glassNavigationHost = remember { GlassNavigationHost() }
+                val glassIdleSpace =
                     if (isGlassNavigation) Dimensions.glassNavigationBarSpace else 0.dp
+                val glassDockedSpace =
+                    if (isGlassNavigation) Dimensions.glassNavigationDockedHeight else 0.dp
+                val collapsedBound = Dimensions.collapsedPlayer + if (isGlassNavigation) {
+                    glassDockedSpace + bottomDp
+                } else {
+                    bottomDp
+                }
 
                 val playerBottomSheetState = rememberBottomSheetState(
                     dismissedBound = 0.dp,
-                    collapsedBound = Dimensions.collapsedPlayer + if (isGlassNavigation) {
-                        0.dp
-                    } else {
-                        bottomDp
-                    },
+                    collapsedBound = collapsedBound,
                     expandedBound = maxHeight,
                 )
 
                 val playerAwareWindowInsets by remember(
                     bottomDp,
-                    glassNavigationSpace,
+                    glassIdleSpace,
+                    glassDockedSpace,
+                    isGlassNavigation,
                     playerBottomSheetState.value
                 ) {
                     derivedStateOf {
-                        val playerReserved = playerBottomSheetState.value.coerceIn(
-                            0.dp,
-                            Dimensions.collapsedPlayer
-                        )
-                        val bottom = bottomDp + glassNavigationSpace + playerReserved
+                        val bottom = if (isGlassNavigation) {
+                            if (playerBottomSheetState.value <= 0.dp) {
+                                bottomDp + glassIdleSpace
+                            } else {
+                                Dimensions.collapsedPlayer + glassDockedSpace + bottomDp
+                            }
+                        } else {
+                            bottomDp + playerBottomSheetState.value.coerceAtMost(
+                                Dimensions.collapsedPlayer
+                            )
+                        }
 
                         windowsInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
@@ -422,7 +435,8 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
                     LocalAppLanguage provides appLanguage,
                     LocalStrings provides UiStrings(appLanguage),
-                    LocalLayoutDirection provides if (appLanguage.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
+                    LocalLayoutDirection provides if (appLanguage.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr,
+                    LocalGlassNavigationHost provides glassNavigationHost
                 ) {
                     HomeScreen(
                         onPlaylistUrl = { url ->
@@ -430,18 +444,23 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                         }
                     )
 
-                    val playerLift = (glassNavigationSpace + if (isGlassNavigation) {
-                        bottomDp
-                    } else {
-                        0.dp
-                    }) * (1f - playerBottomSheetState.progress.coerceIn(0f, 1f))
-
                     Player(
                         layoutState = playerBottomSheetState,
-                        modifier = Modifier
-                            .align(Alignment.BottomCenter)
-                            .padding(bottom = playerLift)
+                        modifier = Modifier.align(Alignment.BottomCenter)
                     )
+
+                    if (isGlassNavigation &&
+                        glassNavigationHost.isActive &&
+                        !playerBottomSheetState.isExpanded
+                    ) {
+                        Box(
+                            modifier = Modifier.align(Alignment.BottomCenter)
+                        ) {
+                            glassNavigationHost.NavigationBar(
+                                docked = !playerBottomSheetState.isDismissed
+                            )
+                        }
+                    }
 
                     BottomSheetMenu(
                         state = LocalMenuState.current,

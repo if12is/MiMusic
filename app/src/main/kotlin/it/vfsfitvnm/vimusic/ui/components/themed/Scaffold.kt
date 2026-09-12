@@ -13,8 +13,9 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.ui.Alignment
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
 import it.vfsfitvnm.vimusic.enums.NavigationStyle
@@ -39,6 +40,23 @@ fun Scaffold(
     val navigationStyle by rememberPreference(navigationStyleKey, NavigationStyle.Side)
 
     if (navigationStyle == NavigationStyle.GlassBottom) {
+        val host = LocalGlassNavigationHost.current
+        val registrationId = remember(host) { host.acquire() }
+
+        host.bind(
+            id = registrationId,
+            leadingIconId = topIconButtonId,
+            leadingIconDescription = strings.navigationAction,
+            onLeadingIconClick = onTopIconButtonClick,
+            tabIndex = tabIndex,
+            onTabIndexChanged = onTabChanged,
+            tabs = tabColumnContent
+        )
+
+        DisposableEffect(host, registrationId) {
+            onDispose { host.release(registrationId) }
+        }
+
         Box(
             modifier = modifier
                 .background(colorPalette.background0)
@@ -63,18 +81,6 @@ fun Scaffold(
                         slideOutOfContainer(slideDirection, animationSpec)
                 },
                 content = content
-            )
-
-            GlassyNavigationBar(
-                leadingIconId = topIconButtonId,
-                onLeadingIconClick = onTopIconButtonClick,
-                leadingIconDescription = strings.navigationAction,
-                tabIndex = tabIndex,
-                onTabIndexChanged = onTabChanged,
-                content = { item ->
-                    tabColumnContent(item)
-                },
-                modifier = Modifier.align(Alignment.BottomCenter)
             )
         }
     } else {
