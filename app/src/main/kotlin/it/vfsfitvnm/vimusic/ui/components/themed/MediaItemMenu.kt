@@ -62,6 +62,7 @@ import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.favoritesIcon
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.addNext
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.enqueue
@@ -83,6 +84,7 @@ fun InHistoryMediaItemMenu(
     modifier: Modifier = Modifier
 ) {
     val binder = LocalPlayerServiceBinder.current
+    val strings = LocalStrings.current
 
     var isHiding by remember {
         mutableStateOf(false)
@@ -90,7 +92,7 @@ fun InHistoryMediaItemMenu(
 
     if (isHiding) {
         ConfirmationDialog(
-            text = "Do you really want to hide this song? Its playback time and cache will be wiped.\nThis action is irreversible.",
+            text = strings.hideSongConfirm,
             onDismiss = { isHiding = false },
             onConfirm = {
                 onDismiss()
@@ -269,6 +271,7 @@ fun MediaItemMenu(
 ) {
     val (colorPalette) = LocalAppearance.current
     val density = LocalDensity.current
+    val strings = LocalStrings.current
 
     var isViewingPlaylists by remember {
         mutableStateOf(false)
@@ -331,7 +334,7 @@ fun MediaItemMenu(
 
             if (isCreatingNewPlaylist && onAddToPlaylist != null) {
                 TextFieldDialog(
-                    hintText = "Enter the playlist name",
+                    hintText = strings.enterPlaylistName,
                     onDismiss = { isCreatingNewPlaylist = false },
                     onDone = { text ->
                         onDismiss()
@@ -366,7 +369,7 @@ fun MediaItemMenu(
 
                     if (onAddToPlaylist != null) {
                         SecondaryTextButton(
-                            text = "New playlist",
+                            text = strings.newPlaylist,
                             onClick = { isCreatingNewPlaylist = true },
                             alternative = true
                         )
@@ -464,7 +467,7 @@ fun MediaItemMenu(
                 onStartRadio?.let { onStartRadio ->
                     MenuEntry(
                         icon = R.drawable.radio,
-                        text = "Start radio",
+                        text = strings.startRadio,
                         onClick = {
                             onDismiss()
                             onStartRadio()
@@ -475,7 +478,7 @@ fun MediaItemMenu(
                 onPlayNext?.let { onPlayNext ->
                     MenuEntry(
                         icon = R.drawable.play_skip_forward,
-                        text = "Play next",
+                        text = strings.playNext,
                         onClick = {
                             onDismiss()
                             onPlayNext()
@@ -486,7 +489,7 @@ fun MediaItemMenu(
                 onEnqueue?.let { onEnqueue ->
                     MenuEntry(
                         icon = R.drawable.enqueue,
-                        text = "Enqueue",
+                        text = strings.enqueue,
                         onClick = {
                             onDismiss()
                             onEnqueue()
@@ -497,7 +500,7 @@ fun MediaItemMenu(
                 onGoToEqualizer?.let { onGoToEqualizer ->
                     MenuEntry(
                         icon = R.drawable.equalizer,
-                        text = "Equalizer",
+                        text = strings.equalizer,
                         onClick = {
                             onDismiss()
                             onGoToEqualizer()
@@ -521,9 +524,9 @@ fun MediaItemMenu(
                     if (isShowingSleepTimerDialog) {
                         if (sleepTimerMillisLeft != null) {
                             ConfirmationDialog(
-                                text = "Do you want to stop the sleep timer?",
+                                text = strings.stopSleepTimer,
                                 cancelText = "No",
-                                confirmText = "Stop",
+                                confirmText = strings.stop,
                                 onDismiss = { isShowingSleepTimerDialog = false },
                                 onConfirm = {
                                     binder?.cancelSleepTimer()
@@ -539,7 +542,7 @@ fun MediaItemMenu(
                                 }
 
                                 BasicText(
-                                    text = "Set sleep timer",
+                                    text = strings.setSleepTimer,
                                     style = typography.s.semiBold,
                                     modifier = Modifier
                                         .padding(vertical = 8.dp, horizontal = 24.dp)
@@ -604,12 +607,12 @@ fun MediaItemMenu(
                                         .fillMaxWidth()
                                 ) {
                                     DialogTextButton(
-                                        text = "Cancel",
+                                        text = strings.cancel,
                                         onClick = { isShowingSleepTimerDialog = false }
                                     )
 
                                     DialogTextButton(
-                                        text = "Set",
+                                        text = strings.set,
                                         enabled = amount > 0,
                                         primary = true,
                                         onClick = {
@@ -624,12 +627,12 @@ fun MediaItemMenu(
 
                     MenuEntry(
                         icon = R.drawable.alarm,
-                        text = "Sleep timer",
+                        text = strings.sleepTimer,
                         onClick = { isShowingSleepTimerDialog = true },
                         trailingContent = sleepTimerMillisLeft?.let {
                             {
                                 BasicText(
-                                    text = "${formatAsDuration(it)} left",
+                                    text = strings.timeLeft(formatAsDuration(it)),
                                     style = typography.xxs.medium,
                                     modifier = modifier
                                         .background(
@@ -647,7 +650,7 @@ fun MediaItemMenu(
                 if (onAddToPlaylist != null) {
                     MenuEntry(
                         icon = R.drawable.playlist,
-                        text = "Add to playlist",
+                        text = strings.addToPlaylist,
                         onClick = { isViewingPlaylists = true },
                         trailingContent = {
                             Image(
@@ -667,7 +670,7 @@ fun MediaItemMenu(
                     albumInfo?.let { (albumId) ->
                         MenuEntry(
                             icon = R.drawable.disc,
-                            text = "Go to album",
+                            text = strings.goToAlbum,
                             onClick = {
                                 onDismiss()
                                 onGoToAlbum(albumId)
@@ -680,7 +683,7 @@ fun MediaItemMenu(
                     artistsInfo?.forEach { (authorId, authorName) ->
                         MenuEntry(
                             icon = R.drawable.person,
-                            text = "More from $authorName",
+                            text = strings.moreFrom(authorName),
                             onClick = {
                                 onDismiss()
                                 onGoToArtist(authorId)
@@ -692,7 +695,7 @@ fun MediaItemMenu(
                 onRemoveFromQueue?.let { onRemoveFromQueue ->
                     MenuEntry(
                         icon = R.drawable.trash,
-                        text = "Remove from queue",
+                        text = strings.removeFromQueue,
                         onClick = {
                             onDismiss()
                             onRemoveFromQueue()
@@ -703,7 +706,7 @@ fun MediaItemMenu(
                 onRemoveFromPlaylist?.let { onRemoveFromPlaylist ->
                     MenuEntry(
                         icon = R.drawable.trash,
-                        text = "Remove from playlist",
+                        text = strings.removeFromPlaylist,
                         onClick = {
                             onDismiss()
                             onRemoveFromPlaylist()
@@ -714,7 +717,7 @@ fun MediaItemMenu(
                 onHideFromDatabase?.let { onHideFromDatabase ->
                     MenuEntry(
                         icon = R.drawable.trash,
-                        text = "Hide",
+                        text = strings.hide,
                         onClick = onHideFromDatabase
                     )
                 }
@@ -722,7 +725,7 @@ fun MediaItemMenu(
                 onRemoveFromQuickPicks?.let {
                     MenuEntry(
                         icon = R.drawable.trash,
-                        text = "Hide from \"Quick picks\"",
+                        text = strings.hideFromQuickPicks,
                         onClick = {
                             onDismiss()
                             onRemoveFromQuickPicks()

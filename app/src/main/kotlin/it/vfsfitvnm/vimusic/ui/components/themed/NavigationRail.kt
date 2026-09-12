@@ -30,7 +30,9 @@ import androidx.compose.ui.draw.rotate
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.graphics.graphicsLayer
 import androidx.compose.ui.layout.layout
+import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
@@ -50,6 +52,7 @@ inline fun NavigationRail(
     modifier: Modifier = Modifier
 ) {
     val (colorPalette, typography) = LocalAppearance.current
+    val layoutDirection = LocalLayoutDirection.current
 
     val isLandscape = isLandscape
 
@@ -111,7 +114,8 @@ inline fun NavigationRail(
                             .vertical(enabled = !isLandscape)
                             .graphicsLayer {
                                 alpha = dothAlpha
-                                translationX = (1f - dothAlpha) * -48.dp.toPx()
+                                translationX = (1f - dothAlpha) * 48.dp.toPx() *
+                                    if (layoutDirection == LayoutDirection.Rtl) 1f else -1f
                                 rotationZ = if (isLandscape) 0f else -90f
                             }
                             .size(Dimensions.navigationRailIconOffset * 2)

@@ -49,6 +49,7 @@ import it.vfsfitvnm.vimusic.ui.items.PlaylistItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.playlistSortByKey
 import it.vfsfitvnm.vimusic.utils.playlistSortOrderKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -62,6 +63,7 @@ fun HomePlaylists(
     onSearchClick: () -> Unit,
 ) {
     val (colorPalette) = LocalAppearance.current
+    val strings = LocalStrings.current
 
     var isCreatingANewPlaylist by rememberSaveable {
         mutableStateOf(false)
@@ -69,7 +71,7 @@ fun HomePlaylists(
 
     if (isCreatingANewPlaylist) {
         TextFieldDialog(
-            hintText = "Enter the playlist name",
+            hintText = strings.enterPlaylistName,
             onDismiss = {
                 isCreatingANewPlaylist = false
             },
@@ -116,9 +118,9 @@ fun HomePlaylists(
                 .background(colorPalette.background0)
         ) {
             item(key = "header", contentType = 0, span = { GridItemSpan(maxLineSpan) }) {
-                Header(title = "Playlists") {
+                Header(title = strings.playlists) {
                     SecondaryTextButton(
-                        text = "New playlist",
+                        text = strings.newPlaylist,
                         onClick = { isCreatingANewPlaylist = true }
                     )
 
@@ -164,7 +166,7 @@ fun HomePlaylists(
                 PlaylistItem(
                     icon = R.drawable.heart,
                     colorTint = colorPalette.red,
-                    name = "Favorites",
+                    name = strings.favorites,
                     songCount = null,
                     thumbnailSizeDp = thumbnailSizeDp,
                     alternative = true,
@@ -178,7 +180,7 @@ fun HomePlaylists(
                 PlaylistItem(
                     icon = R.drawable.airplane,
                     colorTint = colorPalette.blue,
-                    name = "Offline",
+                    name = strings.offline,
                     songCount = null,
                     thumbnailSizeDp = thumbnailSizeDp,
                     alternative = true,

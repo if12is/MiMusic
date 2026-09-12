@@ -40,6 +40,7 @@ import it.vfsfitvnm.vimusic.ui.items.AlbumItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.albumSortByKey
 import it.vfsfitvnm.vimusic.utils.albumSortOrderKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -52,6 +53,7 @@ fun HomeAlbums(
     onSearchClick: () -> Unit,
 ) {
     val (colorPalette) = LocalAppearance.current
+    val strings = LocalStrings.current
 
     var sortBy by rememberPreference(albumSortByKey, AlbumSortBy.DateAdded)
     var sortOrder by rememberPreference(albumSortOrderKey, SortOrder.Descending)
@@ -85,7 +87,7 @@ fun HomeAlbums(
                 key = "header",
                 contentType = 0
             ) {
-                Header(title = "Albums") {
+                Header(title = strings.albums) {
                     HeaderIconButton(
                         icon = R.drawable.calendar,
                         color = if (sortBy == AlbumSortBy.Year) colorPalette.text else colorPalette.textDisabled,

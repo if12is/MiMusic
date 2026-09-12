@@ -39,6 +39,7 @@ import it.vfsfitvnm.vimusic.service.VideoIdMismatchException
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.currentWindow
 import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.thumbnail
@@ -56,6 +57,7 @@ fun Thumbnail(
 ) {
     val binder = LocalPlayerServiceBinder.current
     val player = binder?.player ?: return
+    val strings = LocalStrings.current
 
     val (thumbnailSizeDp, thumbnailSizePx) = Dimensions.thumbnails.player.song.let {
         it to (it - 64.dp).px
@@ -158,12 +160,12 @@ fun Thumbnail(
                 isDisplayed = error != null,
                 messageProvider = {
                     when (error?.cause?.cause) {
-                        is UnresolvedAddressException, is UnknownHostException -> "A network error has occurred"
-                        is PlayableFormatNotFoundException -> "Couldn't find a playable audio format"
-                        is UnplayableException -> "The original video source of this song has been deleted"
-                        is LoginRequiredException -> "This song cannot be played due to server restrictions"
-                        is VideoIdMismatchException -> "The returned video id doesn't match the requested one"
-                        else -> "An unknown playback error has occurred"
+                        is UnresolvedAddressException, is UnknownHostException -> strings.networkError
+                        is PlayableFormatNotFoundException -> strings.playableFormatNotFound
+                        is UnplayableException -> strings.unplayable
+                        is LoginRequiredException -> strings.loginRequired
+                        is VideoIdMismatchException -> strings.videoIdMismatch
+                        else -> strings.unknownPlaybackError
                     }
                 },
                 onDismiss = player::prepare

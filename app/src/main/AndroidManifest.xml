@@ -25,7 +25,7 @@
         android:icon="@mipmap/ic_launcher_round"
         android:label="${appName}"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="false"
+        android:supportsRtl="true"
         android:theme="@style/Theme.ViMusic.NoActionBar">
 
         <activity

@@ -78,7 +78,10 @@ import it.vfsfitvnm.vimusic.enums.ExoPlayerDiskCacheMaxSize
 import it.vfsfitvnm.vimusic.models.Event
 import it.vfsfitvnm.vimusic.models.QueuedMediaItem
 import it.vfsfitvnm.vimusic.query
+import it.vfsfitvnm.vimusic.ui.styling.UiStrings
 import it.vfsfitvnm.vimusic.utils.InvincibleService
+import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
+import it.vfsfitvnm.vimusic.utils.withAppLanguage
 import it.vfsfitvnm.vimusic.utils.RingBuffer
 import it.vfsfitvnm.vimusic.utils.TimerJob
 import it.vfsfitvnm.vimusic.utils.YouTubeRadio
@@ -169,6 +172,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         get() = NotificationId
 
     private lateinit var notificationActionReceiver: NotificationActionReceiver
+
+    private val strings: UiStrings
+        get() = UiStrings(preferredAppLanguage())
+
+    override fun attachBaseContext(base: Context) {
+        super.attachBaseContext(base.withAppLanguage())
+    }
 
     override fun onBind(intent: Intent?): AndroidBinder {
         super.onBind(intent)
@@ -685,13 +695,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     .setShowActionsInCompactView(0, 1, 2)
                     .setMediaSession(mediaSession.sessionToken)
             )
-            .addAction(R.drawable.play_skip_back, "Skip back", prevIntent)
+            .addAction(R.drawable.play_skip_back, strings.skipBack, prevIntent)
             .addAction(
                 if (player.shouldBePlaying) R.drawable.pause else R.drawable.play,
-                if (player.shouldBePlaying) "Pause" else "Play",
+                if (player.shouldBePlaying) strings.pause else strings.play,
                 if (player.shouldBePlaying) pauseIntent else playIntent
             )
-            .addAction(R.drawable.play_skip_forward, "Skip forward", nextIntent)
+            .addAction(R.drawable.play_skip_forward, strings.skipForward, nextIntent)
 
         bitmapProvider.load(mediaMetadata.artworkUri) { bitmap ->
             maybeShowSongCoverInLockScreen()
@@ -711,7 +721,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 createNotificationChannel(
                     NotificationChannel(
                         NotificationChannelId,
-                        "Now playing",
+                        strings.nowPlaying,
                         NotificationManager.IMPORTANCE_LOW
                     ).apply {
                         setSound(null, null)
@@ -725,7 +735,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 createNotificationChannel(
                     NotificationChannel(
                         SleepTimerNotificationChannelId,
-                        "Sleep timer",
+                        strings.sleepTimer,
                         NotificationManager.IMPORTANCE_LOW
                     ).apply {
                         setSound(null, null)
@@ -765,7 +775,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         val urlResult = runBlocking(Dispatchers.IO) {
                             Innertube.player(PlayerBody(videoId = videoId))
                         }?.mapCatching { body ->
-                            if (body.videoDetails?.videoId != videoId) {
+                            val returnedVideoId = body.videoDetails?.videoId
+                            if (returnedVideoId != null && returnedVideoId != videoId) {
                                 throw VideoIdMismatchException()
                             }
 
@@ -896,7 +907,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             timerJob = coroutineScope.timer(delayMillis) {
                 val notification = NotificationCompat
                     .Builder(this@PlayerService, SleepTimerNotificationChannelId)
-                    .setContentTitle("Sleep timer ended")
+                    .setContentTitle(strings.sleepTimerEnded)
                     .setPriority(NotificationCompat.PRIORITY_DEFAULT)
                     .setAutoCancel(true)
                     .setOnlyAlertOnce(true)

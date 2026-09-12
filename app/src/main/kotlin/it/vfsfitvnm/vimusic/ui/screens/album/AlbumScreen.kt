@@ -182,8 +182,8 @@ fun AlbumScreen(browseId: String) {
                 tabIndex = tabIndex,
                 onTabChanged = { tabIndex = it },
                 tabColumnContent = { Item ->
-                    Item(0, "Songs", R.drawable.musical_notes)
-                    Item(1, "Other versions", R.drawable.disc)
+                    Item(0, it.vfsfitvnm.vimusic.utils.LocalStrings.current.songs, R.drawable.musical_notes)
+                    Item(1, it.vfsfitvnm.vimusic.utils.LocalStrings.current.otherVersions, R.drawable.disc)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {

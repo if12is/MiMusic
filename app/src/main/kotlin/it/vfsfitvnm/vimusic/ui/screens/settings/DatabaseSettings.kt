@@ -28,6 +28,7 @@ import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.service.PlayerService
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.intent
 import it.vfsfitvnm.vimusic.utils.toast
 import java.io.FileInputStream
@@ -42,6 +43,7 @@ import kotlinx.coroutines.flow.distinctUntilChanged
 fun DatabaseSettings() {
     val context = LocalContext.current
     val (colorPalette) = LocalAppearance.current
+    val strings = LocalStrings.current
 
     val eventsCount by remember {
         Database.eventsCount().distinctUntilChanged()
@@ -94,16 +96,16 @@ fun DatabaseSettings() {
                     .asPaddingValues()
             )
     ) {
-        Header(title = "Database")
+        Header(title = strings.database)
 
-        SettingsEntryGroupText(title = "CLEANUP")
+        SettingsEntryGroupText(title = strings.cleanup)
 
         SettingsEntry(
-            title = "Reset quick picks",
+            title = strings.resetQuickPicks,
             text = if (eventsCount > 0) {
-                "Delete $eventsCount playback events"
+                strings.deletePlaybackEvents(eventsCount)
             } else {
-                "Quick picks are cleared"
+                strings.quickPicksCleared
             },
             isEnabled = eventsCount > 0,
             onClick = { query(Database::clearEvents) }
@@ -111,13 +113,13 @@ fun DatabaseSettings() {
 
         SettingsGroupSpacer()
 
-        SettingsEntryGroupText(title = "BACKUP")
+        SettingsEntryGroupText(title = strings.backup)
 
-        SettingsDescription(text = "Personal preferences (i.e. the theme mode) and the cache are excluded.")
+        SettingsDescription(text = strings.backupPreferencesNote)
 
         SettingsEntry(
-            title = "Backup",
-            text = "Export the database to the external storage",
+            title = strings.backupTitle,
+            text = strings.backupDescription,
             onClick = {
                 @SuppressLint("SimpleDateFormat")
                 val dateFormat = SimpleDateFormat("yyyyMMddHHmmss")
@@ -125,20 +127,20 @@ fun DatabaseSettings() {
                 try {
                     backupLauncher.launch("vimusic_${dateFormat.format(Date())}.db")
                 } catch (e: ActivityNotFoundException) {
-                    context.toast("Couldn't find an application to create documents")
+                    context.toast(strings.documentsCreateMissing)
                 }
             }
         )
 
         SettingsGroupSpacer()
 
-        SettingsEntryGroupText(title = "RESTORE")
+        SettingsEntryGroupText(title = strings.restore)
 
-        ImportantSettingsDescription(text = "Existing data will be overwritten.\n${context.applicationInfo.nonLocalizedLabel} will automatically close itself after restoring the database.")
+        ImportantSettingsDescription(text = strings.restoreOverwriteWarning(context.applicationInfo.nonLocalizedLabel.toString()))
 
         SettingsEntry(
-            title = "Restore",
-            text = "Import the database from the external storage",
+            title = strings.restoreTitle,
+            text = strings.restoreDescription,
             onClick = {
                 try {
                     restoreLauncher.launch(
@@ -149,7 +151,7 @@ fun DatabaseSettings() {
                         )
                     )
                 } catch (e: ActivityNotFoundException) {
-                    context.toast("Couldn't find an application to open documents")
+                    context.toast(strings.documentsOpenMissing)
                 }
             }
         )

@@ -64,6 +64,7 @@ import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.bodies.BrowseBody
 import it.vfsfitvnm.innertube.requests.playlistPage
 import it.vfsfitvnm.innertube.requests.song
+import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
 import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
@@ -79,10 +80,15 @@ import it.vfsfitvnm.vimusic.ui.screens.playlistRoute
 import it.vfsfitvnm.vimusic.ui.styling.Appearance
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.ui.styling.UiStrings
 import it.vfsfitvnm.vimusic.ui.styling.colorPaletteOf
 import it.vfsfitvnm.vimusic.ui.styling.dynamicColorPaletteOf
 import it.vfsfitvnm.vimusic.ui.styling.typographyOf
+import it.vfsfitvnm.vimusic.utils.LocalAppLanguage
+import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.appLanguageKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
+import it.vfsfitvnm.vimusic.utils.applyInnertubeLocale
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
@@ -91,9 +97,11 @@ import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.intent
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
+import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.useSystemFontKey
+import it.vfsfitvnm.vimusic.utils.withAppLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
@@ -117,6 +125,10 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
     private var binder by mutableStateOf<PlayerService.Binder?>(null)
 
     override lateinit var persistMap: PersistMap
+
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withAppLanguage())
+    }
 
     override fun onStart() {
         super.onStart()
@@ -148,7 +160,9 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     val thumbnailRoundness =
                         getEnum(thumbnailRoundnessKey, ThumbnailRoundness.Light)
 
-                    val useSystemFont = getBoolean(useSystemFontKey, false)
+                    val appLanguage = getEnum(appLanguageKey, AppLanguage.Arabic)
+                    applyInnertubeLocale(appLanguage)
+                    val useSystemFont = getBoolean(useSystemFontKey, true) || appLanguage.isRtl
                     val applyFontPadding = getBoolean(applyFontPaddingKey, false)
 
                     val colorPalette =
@@ -252,8 +266,21 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                                 )
                             }
 
+                            appLanguageKey -> {
+                                val appLanguage = sharedPreferences.getEnum(
+                                    appLanguageKey,
+                                    AppLanguage.Arabic
+                                )
+                                applyInnertubeLocale(appLanguage)
+                                recreate()
+                            }
+
                             useSystemFontKey, applyFontPaddingKey -> {
-                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, false)
+                                val appLanguage = sharedPreferences.getEnum(
+                                    appLanguageKey,
+                                    AppLanguage.Arabic
+                                )
+                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, true) || appLanguage.isRtl
                                 val applyFontPadding = sharedPreferences.getBoolean(applyFontPaddingKey, false)
 
                                 appearance = appearance.copy(
@@ -339,6 +366,10 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     }
                 }
 
+                val appLanguage = remember {
+                    preferences.getEnum(appLanguageKey, AppLanguage.Arabic)
+                }
+
                 CompositionLocalProvider(
                     LocalAppearance provides appearance,
                     LocalIndication provides rememberRipple(bounded = true),
@@ -346,7 +377,9 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     LocalShimmerTheme provides shimmerTheme,
                     LocalPlayerServiceBinder provides binder,
                     LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
-                    LocalLayoutDirection provides LayoutDirection.Ltr
+                    LocalAppLanguage provides appLanguage,
+                    LocalStrings provides UiStrings(appLanguage),
+                    LocalLayoutDirection provides if (appLanguage.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
                 ) {
                     HomeScreen(
                         onPlaylistUrl = { url ->
@@ -415,7 +448,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         intent.data = null
         this.intent = null
 
-        Toast.makeText(this, "Opening url...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, UiStrings(preferredAppLanguage()).openingUrl, Toast.LENGTH_SHORT).show()
 
         lifecycleScope.launch(Dispatchers.IO) {
             when (val path = uri.pathSegments.firstOrNull()) {

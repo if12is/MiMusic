@@ -32,6 +32,7 @@ import it.vfsfitvnm.vimusic.ui.screens.searchRoute
 import it.vfsfitvnm.vimusic.ui.screens.searchresult.SearchResultScreen
 import it.vfsfitvnm.vimusic.ui.screens.settings.SettingsScreen
 import it.vfsfitvnm.vimusic.ui.screens.settingsRoute
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.homeScreenTabIndexKey
 import it.vfsfitvnm.vimusic.utils.pauseSearchHistoryKey
 import it.vfsfitvnm.vimusic.utils.preferences
@@ -108,6 +109,7 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
         }
 
         host {
+            val strings = LocalStrings.current
             val (tabIndex, onTabChanged) = rememberPreference(
                 homeScreenTabIndexKey,
                 defaultValue = 0
@@ -119,11 +121,11 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
                 tabIndex = tabIndex,
                 onTabChanged = onTabChanged,
                 tabColumnContent = { Item ->
-                    Item(0, "Quick picks", R.drawable.sparkles)
-                    Item(1, "Songs", R.drawable.musical_notes)
-                    Item(2, "Playlists", R.drawable.playlist)
-                    Item(3, "Artists", R.drawable.person)
-                    Item(4, "Albums", R.drawable.disc)
+                    Item(0, strings.quickPicks, R.drawable.sparkles)
+                    Item(1, strings.songs, R.drawable.musical_notes)
+                    Item(2, strings.playlists, R.drawable.playlist)
+                    Item(3, strings.artists, R.drawable.person)
+                    Item(4, strings.albums, R.drawable.disc)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {

@@ -66,6 +66,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.SnapLayoutInfoProvider
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.center
@@ -88,6 +89,7 @@ fun QuickPicks(
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val windowInsets = LocalPlayerAwareWindowInsets.current
+    val strings = LocalStrings.current
 
     var trending by persist<Song?>("home/trending")
 
@@ -152,7 +154,7 @@ fun QuickPicks(
                 )
         ) {
             Header(
-                title = "Quick picks",
+                title = strings.quickPicks,
                 modifier = Modifier
                     .padding(endPaddingValues)
             )
@@ -248,7 +250,7 @@ fun QuickPicks(
 
                 related.albums?.let { albums ->
                     BasicText(
-                        text = "Related albums",
+                        text = strings.relatedAlbums,
                         style = typography.m.semiBold,
                         modifier = sectionTextModifier
                     )
@@ -272,7 +274,7 @@ fun QuickPicks(
 
                 related.artists?.let { artists ->
                     BasicText(
-                        text = "Similar artists",
+                        text = strings.similarArtists,
                         style = typography.m.semiBold,
                         modifier = sectionTextModifier
                     )
@@ -296,7 +298,7 @@ fun QuickPicks(
 
                 related.playlists?.let { playlists ->
                     BasicText(
-                        text = "Playlists you might like",
+                        text = strings.playlistsYouMightLike,
                         style = typography.m.semiBold,
                         modifier = Modifier
                             .padding(horizontal = 16.dp)
@@ -323,7 +325,7 @@ fun QuickPicks(
                 Unit
             } ?: relatedPageResult?.exceptionOrNull()?.let {
                 BasicText(
-                    text = "An error has occurred",
+                    text = strings.anErrorOccurred,
                     style = typography.s.secondary.center,
                     modifier = Modifier
                         .align(Alignment.CenterHorizontally)
