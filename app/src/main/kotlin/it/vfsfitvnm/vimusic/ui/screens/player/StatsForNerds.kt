@@ -76,7 +76,7 @@ fun StatsForNerds(
                         withContext(Dispatchers.IO) {
                             delay(2000)
                             Innertube.player(PlayerBody(videoId = mediaId))?.onSuccess { response ->
-                                response.streamingData?.highestQualityFormat?.let { format ->
+                                response.streamingData?.playableFormat?.let { format ->
                                     Database.insert(mediaItem)
                                     Database.insert(
                                         Format(

@@ -34,6 +34,8 @@ private val playerClients: List<Context>
 private val streamProxyUrls = listOf(
     "https://pipedapi.kavin.rocks/streams/",
     "https://pipedapi.adminforge.de/streams/",
+    "https://api.piped.yt/streams/",
+    "https://pipedapi.reallyaweso.me/streams/",
     "https://pipedapi.tokhmi.xyz/streams/",
     "https://api.piped.projectsegfau.lt/streams/",
     "https://inv.nadeko.net/api/v1/videos/",
@@ -141,23 +143,22 @@ private fun PlayerResponse.withAudioStreams(
     audioStreams: List<AudioStream>
 ): PlayerResponse {
     val existing = streamingData?.adaptiveFormats.orEmpty()
-    val merged = if (existing.isNotEmpty()) {
-        existing.map { adaptiveFormat ->
-            adaptiveFormat.copy(
-                url = audioStreams.find { stream ->
-                    stream.bitrate == adaptiveFormat.bitrate || stream.itag == adaptiveFormat.itag
-                }?.url ?: adaptiveFormat.url
-            )
+    val merged = audioStreams.mapIndexed { index, stream ->
+        val match = existing.find { format ->
+            (stream.itag != null && format.itag == stream.itag) ||
+                (stream.bitrate != null && format.bitrate == stream.bitrate)
         }
-    } else {
-        audioStreams.mapIndexed { index, stream ->
-            PlayerResponse.StreamingData.AdaptiveFormat(
-                itag = stream.itag ?: (140 + index),
-                mimeType = stream.mimeType ?: "audio/mp4",
-                bitrate = stream.bitrate,
-                url = stream.url
-            )
-        }
+
+        match?.copy(
+            url = stream.url,
+            mimeType = stream.mimeType ?: match.mimeType,
+            bitrate = stream.bitrate ?: match.bitrate
+        ) ?: PlayerResponse.StreamingData.AdaptiveFormat(
+            itag = stream.itag ?: (140 + index),
+            mimeType = stream.mimeType ?: "audio/mp4",
+            bitrate = stream.bitrate,
+            url = stream.url
+        )
     }
 
     return copy(
@@ -193,8 +194,16 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
             PlayerLog.append("using ${context.client.clientName} itag=${format?.itag} mime=${format?.mimeType}")
             return@runCatchingNonCancellable response
         }
+
+        val muxed = response.streamingData?.muxedFallbackFormat
+        if (muxed != null) {
+            PlayerLog.append(
+                "${context.client.clientName} skipped muxed-only itag=${muxed.itag} mime=${muxed.mimeType}"
+            )
+        }
     }
 
+    PlayerLog.append("no audio-only URL from InnerTube, trying proxies")
     val audioStreams = proxyAudioStreams(body.videoId)
     if (audioStreams.isNotEmpty()) {
         PlayerLog.append("using proxy streams=${audioStreams.size}")
@@ -204,6 +213,13 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
             streamingData = null,
             videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
         )).withAudioStreams(body.videoId, audioStreams)
+    }
+
+    val muxedResponse = lastResponse
+    val muxed = muxedResponse?.streamingData?.muxedFallbackFormat
+    if (muxedResponse != null && muxed?.url != null) {
+        PlayerLog.append("using muxed fallback itag=${muxed.itag} mime=${muxed.mimeType}")
+        return@runCatchingNonCancellable muxedResponse
     }
 
     val status = lastResponse?.playabilityStatus

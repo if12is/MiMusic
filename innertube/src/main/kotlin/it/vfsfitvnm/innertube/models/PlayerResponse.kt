@@ -38,18 +38,28 @@ data class PlayerResponse(
     ) {
         val highestQualityFormat: AdaptiveFormat?
             get() {
-                val candidates = (adaptiveFormats.orEmpty() + formats.orEmpty())
-                    .filter { !it.url.isNullOrBlank() }
-
-                return candidates.findLast { it.itag == 251 || it.itag == 140 }
-                    ?: candidates
-                        .filter { format ->
-                            format.mimeType.contains("audio", ignoreCase = true) ||
-                                format.audioQuality != null
-                        }
-                        .maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
-                    ?: candidates.maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
+                val audio = playableAudioFormats
+                return audio.find { it.itag == 251 }
+                    ?: audio.find { it.itag == 140 }
+                    ?: audio.maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
             }
+
+        val muxedFallbackFormat: AdaptiveFormat?
+            get() = (adaptiveFormats.orEmpty() + formats.orEmpty())
+                .filter { !it.url.isNullOrBlank() && !it.isAudioOnly }
+                .filter { format ->
+                    format.itag == 18 ||
+                        format.itag == 22 ||
+                        format.mimeType.contains("mp4", ignoreCase = true)
+                }
+                .minByOrNull { it.bitrate ?: Long.MAX_VALUE }
+
+        val playableAudioFormats: List<AdaptiveFormat>
+            get() = (adaptiveFormats.orEmpty() + formats.orEmpty())
+                .filter { !it.url.isNullOrBlank() && it.isAudioOnly }
+
+        val playableFormat: AdaptiveFormat?
+            get() = highestQualityFormat ?: muxedFallbackFormat
 
         @Serializable
         data class AdaptiveFormat(
@@ -70,7 +80,10 @@ data class PlayerResponse(
             val url: String? = null,
             val signatureCipher: String? = null,
             val cipher: String? = null
-        )
+        ) {
+            val isAudioOnly: Boolean
+                get() = mimeType.contains("audio", ignoreCase = true) || audioQuality != null
+        }
     }
 
     @Serializable

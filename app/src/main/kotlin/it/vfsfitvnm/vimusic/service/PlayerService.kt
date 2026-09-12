@@ -70,9 +70,11 @@ import androidx.media3.exoplayer.audio.SonicAudioProcessor
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.datasource.TransferListener
 import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mkv.MatroskaExtractor
 import androidx.media3.extractor.mp4.FragmentedMp4Extractor
+import androidx.media3.extractor.mp4.Mp4Extractor
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
@@ -849,17 +851,30 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         return length != C.LENGTH_UNSET.toLong() && downloadCache.isCached(mediaId, 0, length)
     }
 
-    private fun createHttpDataSourceFactory(): DefaultHttpDataSource.Factory {
-        return DefaultHttpDataSource.Factory()
+    private fun createHttpDataSourceFactory(): DataSource.Factory {
+        val browser = DefaultHttpDataSource.Factory()
             .setConnectTimeoutMs(16000)
             .setReadTimeoutMs(8000)
-            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36")
+            .setUserAgent(
+                "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36"
+            )
             .setDefaultRequestProperties(
                 mapOf(
                     "Origin" to "https://www.youtube.com",
                     "Referer" to "https://www.youtube.com/"
                 )
             )
+        val youtube = DefaultHttpDataSource.Factory()
+            .setConnectTimeoutMs(16000)
+            .setReadTimeoutMs(8000)
+            .setUserAgent("com.google.android.youtube/21.26.364 (Linux; U; Android 11) gzip")
+
+        return DataSource.Factory {
+            HostSwitchDataSource(
+                googlevideo = youtube.createDataSource(),
+                other = browser.createDataSource()
+            )
+        }
     }
 
     private fun createCacheDataSource(): DataSource.Factory {
@@ -901,7 +916,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             }
 
                             when (val status = body.playabilityStatus?.status) {
-                                "OK" -> body.streamingData?.highestQualityFormat?.let { format ->
+                                "OK" -> body.streamingData?.playableFormat?.let { format ->
                                     val mediaItem = runBlocking(Dispatchers.Main) {
                                         player.findNextMediaItemById(videoId)
                                     }
@@ -977,7 +992,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private fun createExtractorsFactory(): ExtractorsFactory {
         return ExtractorsFactory {
-            arrayOf(MatroskaExtractor(), FragmentedMp4Extractor())
+            arrayOf(MatroskaExtractor(), FragmentedMp4Extractor(), Mp4Extractor())
         }
     }
 
@@ -1125,7 +1140,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 val result = runCatching {
                     val response = Innertube.player(PlayerBody(videoId = mediaId))?.getOrThrow()
                         ?: error("unavailable")
-                    val format = response.streamingData?.highestQualityFormat
+                    val format = response.streamingData?.playableFormat
                         ?: throw PlayableFormatNotFoundException()
                     val url = format.url ?: throw PlayableFormatNotFoundException()
 
@@ -1257,6 +1272,39 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         fun isRangeCached(cache: Cache, key: String, position: Long, length: Long): Boolean {
             return cache.getCachedLength(key, position, length) > 0
         }
+    }
+}
+
+private class HostSwitchDataSource(
+    private val googlevideo: DataSource,
+    private val other: DataSource
+) : DataSource {
+    private var active: DataSource? = null
+
+    override fun addTransferListener(transferListener: TransferListener) {
+        googlevideo.addTransferListener(transferListener)
+        other.addTransferListener(transferListener)
+    }
+
+    override fun open(dataSpec: DataSpec): Long {
+        val host = dataSpec.uri.host.orEmpty()
+        active = if (host.contains("googlevideo", ignoreCase = true)) googlevideo else other
+        return active!!.open(dataSpec)
+    }
+
+    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
+        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT
+    }
+
+    override fun getUri(): Uri? = active?.uri
+
+    override fun getResponseHeaders(): Map<String, List<String>> {
+        return active?.responseHeaders ?: emptyMap()
+    }
+
+    override fun close() {
+        active?.close()
+        active = null
     }
 }
 
