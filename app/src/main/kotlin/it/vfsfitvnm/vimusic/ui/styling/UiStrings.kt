@@ -216,6 +216,11 @@ class UiStrings(private val language: AppLanguage) {
     val noItemsFound = t("No items found", "لا توجد عناصر")
     val anErrorOccurred = t("An error has occurred", "حدث خطأ")
     val anErrorOccurredDot = t("An error has occurred.", "حدث خطأ.")
+    val couldNotLoadHome = t(
+        "Couldn't load recommendations. Check your connection and try again.",
+        "تعذر تحميل التوصيات. تحقق من الاتصال ثم أعد المحاولة."
+    )
+    val retry = t("Retry", "إعادة المحاولة")
     val openingUrl = t("Opening url...", "جاري فتح الرابط...")
     val deletePlaylistConfirm = t("Do you really want to delete this playlist?", "هل تريد حقاً حذف قائمة التشغيل هذه؟")
     val hideSongConfirm = t(

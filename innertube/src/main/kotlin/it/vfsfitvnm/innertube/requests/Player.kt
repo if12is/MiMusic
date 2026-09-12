@@ -13,7 +13,13 @@ import it.vfsfitvnm.innertube.models.Context
 import it.vfsfitvnm.innertube.models.PlayerResponse
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
 import it.vfsfitvnm.innertube.utils.runCatchingNonCancellable
-import kotlinx.serialization.Serializable
+import kotlinx.serialization.json.JsonObject
+import kotlinx.serialization.json.contentOrNull
+import kotlinx.serialization.json.intOrNull
+import kotlinx.serialization.json.jsonArray
+import kotlinx.serialization.json.jsonObject
+import kotlinx.serialization.json.jsonPrimitive
+import kotlinx.serialization.json.longOrNull
 
 private val playerClients: List<Context>
     get() = listOf(
@@ -24,22 +30,22 @@ private val playerClients: List<Context>
         Context.DefaultAgeRestrictionBypass
     )
 
-private val pipedInstances = listOf(
-    "https://pipedapi.kavin.rocks",
-    "https://pipedapi.adminforge.de",
-    "https://pipedapi.tokhmi.xyz",
-    "https://api.piped.projectsegfau.lt"
+private val streamProxyUrls = listOf(
+    "https://pipedapi.kavin.rocks/streams/",
+    "https://pipedapi.adminforge.de/streams/",
+    "https://pipedapi.tokhmi.xyz/streams/",
+    "https://api.piped.projectsegfau.lt/streams/",
+    "https://inv.nadeko.net/api/v1/videos/",
+    "https://yewtu.be/api/v1/videos/",
+    "https://invidious.nerdvpn.de/api/v1/videos/",
+    "https://iv.ggtyler.dev/api/v1/videos/"
 )
 
-@Serializable
 private data class AudioStream(
     val url: String,
-    val bitrate: Long? = null
-)
-
-@Serializable
-private data class PipedResponse(
-    val audioStreams: List<AudioStream> = emptyList()
+    val bitrate: Long? = null,
+    val mimeType: String? = null,
+    val itag: Int? = null
 )
 
 private fun PlayerResponse.hasPlayableAudio(): Boolean =
@@ -75,13 +81,15 @@ private suspend fun Innertube.requestPlayer(body: PlayerBody, context: Context):
     }.body()
 }
 
-private suspend fun Innertube.pipedAudioStreams(videoId: String): List<AudioStream> {
-    for (instance in pipedInstances) {
+private suspend fun Innertube.proxyAudioStreams(videoId: String): List<AudioStream> {
+    for (baseUrl in streamProxyUrls) {
         val streams = runCatching {
-            client.get("$instance/streams/$videoId") {
-                contentType(ContentType.Application.Json)
-                header(HttpHeaders.UserAgent, "Mozilla/5.0")
-            }.body<PipedResponse>().audioStreams
+            parseProxyStreams(
+                client.get("$baseUrl$videoId") {
+                    contentType(ContentType.Application.Json)
+                    header(HttpHeaders.UserAgent, "Mozilla/5.0")
+                }.body()
+            )
         }.getOrNull()
 
         if (!streams.isNullOrEmpty()) {
@@ -90,6 +98,68 @@ private suspend fun Innertube.pipedAudioStreams(videoId: String): List<AudioStre
     }
 
     return emptyList()
+}
+
+private fun parseProxyStreams(root: JsonObject): List<AudioStream> {
+    val formats = root["audioStreams"]?.jsonArray
+        ?: root["adaptiveFormats"]?.jsonArray
+        ?: return emptyList()
+
+    return formats.mapNotNull { element ->
+        val item = runCatching { element.jsonObject }.getOrNull() ?: return@mapNotNull null
+        val url = item["url"]?.jsonPrimitive?.contentOrNull?.takeIf { it.isNotBlank() }
+            ?: return@mapNotNull null
+        val mimeType = item["mimeType"]?.jsonPrimitive?.contentOrNull
+            ?: item["type"]?.jsonPrimitive?.contentOrNull
+        val bitrate = item["bitrate"]?.jsonPrimitive?.longOrNull
+            ?: item["bitrate"]?.jsonPrimitive?.contentOrNull?.toLongOrNull()
+        val itag = item["itag"]?.jsonPrimitive?.intOrNull
+            ?: item["itag"]?.jsonPrimitive?.contentOrNull?.toIntOrNull()
+
+        val isAudio = mimeType?.contains("audio", ignoreCase = true) == true ||
+            item["audioQuality"] != null ||
+            root["audioStreams"] != null
+
+        if (!isAudio) return@mapNotNull null
+
+        AudioStream(
+            url = url,
+            bitrate = bitrate,
+            mimeType = mimeType,
+            itag = itag
+        )
+    }
+}
+
+private fun PlayerResponse.withAudioStreams(
+    videoId: String,
+    audioStreams: List<AudioStream>
+): PlayerResponse {
+    val existing = streamingData?.adaptiveFormats.orEmpty()
+    val merged = if (existing.isNotEmpty()) {
+        existing.map { adaptiveFormat ->
+            adaptiveFormat.copy(
+                url = audioStreams.find { stream ->
+                    stream.bitrate == adaptiveFormat.bitrate || stream.itag == adaptiveFormat.itag
+                }?.url ?: adaptiveFormat.url
+            )
+        }
+    } else {
+        audioStreams.mapIndexed { index, stream ->
+            PlayerResponse.StreamingData.AdaptiveFormat(
+                itag = stream.itag ?: (140 + index),
+                mimeType = stream.mimeType ?: "audio/mp4",
+                bitrate = stream.bitrate,
+                url = stream.url
+            )
+        }
+    }
+
+    return copy(
+        playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
+        streamingData = PlayerResponse.StreamingData(adaptiveFormats = merged),
+        videoDetails = videoDetails ?: PlayerResponse.VideoDetails(videoId = videoId)
+    )
 }
 
 suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
@@ -107,30 +177,15 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
         }
     }
 
-    val fallback = lastResponse
-    if (fallback?.playabilityStatus?.status == "OK") {
-        val audioStreams = pipedAudioStreams(body.videoId)
-        if (audioStreams.isNotEmpty()) {
-            return@runCatchingNonCancellable fallback.copy(
-                streamingData = fallback.streamingData?.copy(
-                    adaptiveFormats = fallback.streamingData.adaptiveFormats?.map { adaptiveFormat ->
-                        adaptiveFormat.copy(
-                            url = audioStreams.find { stream ->
-                                stream.bitrate == adaptiveFormat.bitrate
-                            }?.url ?: adaptiveFormat.url
-                        )
-                    } ?: audioStreams.mapIndexed { index, stream ->
-                        PlayerResponse.StreamingData.AdaptiveFormat(
-                            itag = 140 + index,
-                            mimeType = "audio/mp4",
-                            bitrate = stream.bitrate,
-                            url = stream.url
-                        )
-                    }
-                )
-            )
-        }
+    val audioStreams = proxyAudioStreams(body.videoId)
+    if (audioStreams.isNotEmpty()) {
+        return@runCatchingNonCancellable (lastResponse ?: PlayerResponse(
+            playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
+            playerConfig = null,
+            streamingData = null,
+            videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
+        )).withAudioStreams(body.videoId, audioStreams)
     }
 
-    fallback ?: error("Unable to resolve a playable stream")
+    lastResponse ?: error("Unable to resolve a playable stream")
 }

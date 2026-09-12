@@ -21,4 +21,5 @@ dependencies {
 
     testImplementation(testLibs.junit)
     testImplementation(libs.kotlin.coroutines)
+    testImplementation(libs.ktor.serialization.json)
 }

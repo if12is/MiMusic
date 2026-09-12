@@ -4,7 +4,10 @@ import io.ktor.utils.io.CancellationException
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.SectionListRenderer
 
-internal fun SectionListRenderer.findSectionByTitle(text: String): SectionListRenderer.Content? {
+internal fun SectionListRenderer.findSectionByTitle(vararg texts: String): SectionListRenderer.Content? {
+    val aliases = texts.filter { it.isNotBlank() }
+    if (aliases.isEmpty()) return null
+
     return contents?.find { content ->
         val title = content
             .musicCarouselShelfRenderer
@@ -15,23 +18,34 @@ internal fun SectionListRenderer.findSectionByTitle(text: String): SectionListRe
                 .musicShelfRenderer
                 ?.title
 
-        title
-            ?.runs
-            ?.firstOrNull()
-            ?.text == text
+        matchesAnyAlias(title?.runs?.firstOrNull()?.text, aliases)
     }
 }
 
-internal fun SectionListRenderer.findSectionByStrapline(text: String): SectionListRenderer.Content? {
+internal fun SectionListRenderer.findSectionByStrapline(vararg texts: String): SectionListRenderer.Content? {
+    val aliases = texts.filter { it.isNotBlank() }
+    if (aliases.isEmpty()) return null
+
     return contents?.find { content ->
-        content
+        val strapline = content
             .musicCarouselShelfRenderer
             ?.header
             ?.musicCarouselShelfBasicHeaderRenderer
             ?.strapline
             ?.runs
             ?.firstOrNull()
-            ?.text == text
+            ?.text
+
+        matchesAnyAlias(strapline, aliases)
+    }
+}
+
+internal fun matchesAnyAlias(value: String?, aliases: Collection<String>): Boolean {
+    val text = value?.trim().orEmpty()
+    if (text.isEmpty()) return false
+
+    return aliases.any { alias ->
+        text.equals(alias, ignoreCase = true) || text.contains(alias, ignoreCase = true)
     }
 }
 

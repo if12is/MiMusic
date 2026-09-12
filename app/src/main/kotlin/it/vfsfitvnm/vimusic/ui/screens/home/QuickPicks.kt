@@ -31,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -41,8 +42,8 @@ import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
-import it.vfsfitvnm.innertube.models.bodies.NextBody
-import it.vfsfitvnm.innertube.requests.relatedPage
+import it.vfsfitvnm.innertube.requests.DefaultLandingVideoId
+import it.vfsfitvnm.innertube.requests.landingPage
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
@@ -54,6 +55,7 @@ import it.vfsfitvnm.vimusic.ui.components.ShimmerHost
 import it.vfsfitvnm.vimusic.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.components.themed.NonQueuedMediaItemMenu
+import it.vfsfitvnm.vimusic.ui.components.themed.SecondaryTextButton
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
 import it.vfsfitvnm.vimusic.ui.items.AlbumItem
 import it.vfsfitvnm.vimusic.ui.items.AlbumItemPlaceholder
@@ -75,6 +77,8 @@ import it.vfsfitvnm.vimusic.utils.isLandscape
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.withTimeoutOrNull
+import java.util.concurrent.TimeoutException
 
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
@@ -93,15 +97,28 @@ fun QuickPicks(
 
     var trending by persist<Song?>("home/trending")
 
-    var relatedPageResult by persist<Result<Innertube.RelatedPage?>?>(tag = "home/relatedPageResult")
+    var relatedPageResult by persist<Result<Innertube.RelatedPage>>(tag = "home/relatedPageResult")
+    var reloadToken by remember { mutableStateOf(0) }
+
+    suspend fun loadLanding(videoId: String): Result<Innertube.RelatedPage> {
+        return withTimeoutOrNull(25_000) {
+            Innertube.landingPage(videoId) ?: error("cancelled")
+        } ?: Result.failure(TimeoutException("home"))
+    }
+
+    LaunchedEffect(reloadToken) {
+        if (relatedPageResult == null || reloadToken > 0) {
+            relatedPageResult = loadLanding(trending?.id ?: DefaultLandingVideoId)
+        }
+    }
 
     LaunchedEffect(Unit) {
         Database.trending().distinctUntilChanged().collect { song ->
-            if ((song == null && relatedPageResult == null) || trending?.id != song?.id) {
-                relatedPageResult =
-                    Innertube.relatedPage(NextBody(videoId = (song?.id ?: "J7p4bzqLvCw")))
-            }
+            val changed = trending?.id != song?.id
             trending = song
+            if (song != null && changed && relatedPageResult != null) {
+                relatedPageResult = loadLanding(song.id)
+            }
         }
     }
 
@@ -159,7 +176,7 @@ fun QuickPicks(
                     .padding(endPaddingValues)
             )
 
-            relatedPageResult?.getOrNull()?.let { related ->
+            relatedPageResult?.getOrNull()?.takeUnless { it.isEmpty }?.let { related ->
                 LazyHorizontalGrid(
                     state = quickPicksLazyGridState,
                     rows = GridCells.Fixed(4),
@@ -323,14 +340,27 @@ fun QuickPicks(
                 }
 
                 Unit
-            } ?: relatedPageResult?.exceptionOrNull()?.let {
-                BasicText(
-                    text = strings.anErrorOccurred,
-                    style = typography.s.secondary.center,
+            } ?: relatedPageResult?.let {
+                Column(
+                    horizontalAlignment = Alignment.CenterHorizontally,
                     modifier = Modifier
-                        .align(Alignment.CenterHorizontally)
+                        .fillMaxWidth()
                         .padding(all = 16.dp)
-                )
+                ) {
+                    BasicText(
+                        text = strings.couldNotLoadHome,
+                        style = typography.s.secondary.center
+                    )
+
+                    SecondaryTextButton(
+                        text = strings.retry,
+                        onClick = {
+                            relatedPageResult = null
+                            reloadToken += 1
+                        },
+                        modifier = Modifier.padding(top = 12.dp)
+                    )
+                }
             } ?: ShimmerHost {
                 repeat(4) {
                     SongItemPlaceholder(
