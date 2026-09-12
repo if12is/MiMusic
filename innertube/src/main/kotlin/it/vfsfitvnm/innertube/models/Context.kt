@@ -58,6 +58,19 @@ data class Context(
                 )
             )
 
+        val DefaultWebWatch: Context
+            get() = Context(
+                client = Client(
+                    clientName = "WEB",
+                    clientVersion = "2.20260707.00.00",
+                    platform = "DESKTOP",
+                    hl = hl,
+                    gl = gl,
+                    userAgent = USER_AGENT_WEB,
+                    host = "www.youtube.com"
+                )
+            )
+
         val DefaultAndroid: Context
             get() = Context(
                 client = Client(
