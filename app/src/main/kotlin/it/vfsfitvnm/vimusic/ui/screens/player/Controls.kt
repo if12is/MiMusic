@@ -20,6 +20,7 @@ import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -28,6 +29,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalLayoutDirection
+import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
@@ -149,26 +152,28 @@ fun Controls(
                 .height(8.dp)
         )
 
-        Row(
-            horizontalArrangement = Arrangement.SpaceBetween,
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            BasicText(
-                text = formatAsDuration(scrubbingPosition ?: position),
-                style = typography.xxs.semiBold,
-                maxLines = 1,
-                overflow = TextOverflow.Ellipsis,
-            )
-
-            if (duration != C.TIME_UNSET) {
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(
+                horizontalArrangement = Arrangement.SpaceBetween,
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .fillMaxWidth()
+            ) {
                 BasicText(
-                    text = formatAsDuration(duration),
+                    text = formatAsDuration(scrubbingPosition ?: position),
                     style = typography.xxs.semiBold,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
+
+                if (duration != C.TIME_UNSET) {
+                    BasicText(
+                        text = formatAsDuration(duration),
+                        style = typography.xxs.semiBold,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                    )
+                }
             }
         }
 
