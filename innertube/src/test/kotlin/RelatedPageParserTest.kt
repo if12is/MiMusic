@@ -9,6 +9,7 @@ import it.vfsfitvnm.innertube.models.Runs
 import it.vfsfitvnm.innertube.models.SectionListRenderer
 import it.vfsfitvnm.innertube.models.Thumbnail
 import it.vfsfitvnm.innertube.models.ThumbnailRenderer
+import it.vfsfitvnm.innertube.utils.lyricsBrowseId
 import it.vfsfitvnm.innertube.utils.relatedBrowseId
 import it.vfsfitvnm.innertube.utils.toRelatedPage
 import org.junit.Assert.assertEquals
@@ -17,6 +18,33 @@ import org.junit.Assert.assertTrue
 import org.junit.Test
 
 class RelatedPageParserTest {
+    @Test
+    fun findsArabicLyricsTabByTitle() {
+        val browseId = lyricsBrowseId(
+            listOf(
+                tab("التالي", browseId = null),
+                tab("كلمات الأغنية", browseId = "MPLYt_lyrics"),
+                tab("التعليقات", browseId = null),
+                tab("محتوى مشابه", browseId = "MPTRt_related")
+            )
+        )
+
+        assertEquals("MPLYt_lyrics", browseId)
+    }
+
+    @Test
+    fun ignoresNonLyricsTabAtLegacyIndex() {
+        val browseId = lyricsBrowseId(
+            listOf(
+                tab("التالي", browseId = null),
+                tab("التعليقات", browseId = "MPLy_comments"),
+                tab("محتوى مشابه", browseId = "MPTRt_related")
+            )
+        )
+
+        assertEquals(null, browseId)
+    }
+
     @Test
     fun findsRelatedTabAfterCommentsInArabic() {
         val browseId = relatedBrowseId(

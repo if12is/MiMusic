@@ -119,6 +119,8 @@ object KuGou {
     }
 
     private fun keyword(artist: String, title: String): String {
+        if (artist.isBlank() || artist.equals("null", ignoreCase = true)) return title
+
         val (newTitle, featuring) = title.extract(" (feat. ", ')')
 
         val newArtist = (if (featuring.isEmpty()) artist else "$artist, $featuring")
@@ -147,23 +149,10 @@ object KuGou {
     @JvmInline
     value class Lyrics(val value: String) : CharSequence by value {
         val sentences: List<Pair<Long, String>>
-            get() = mutableListOf(0L to "").apply {
-                for (line in value.trim().lines()) {
-                    try {
-                        val position = line.take(10).run {
-                            get(8).digitToInt() * 10L +
-                                    get(7).digitToInt() * 100 +
-                                    get(5).digitToInt() * 1000 +
-                                    get(4).digitToInt() * 10000 +
-                                    get(2).digitToInt() * 60 * 1000 +
-                                    get(1).digitToInt() * 600 * 1000
-                        }
+            get() = LrcParser.parse(value).map { it.timeMs to it.text }
 
-                        add(position to line.substring(10))
-                    } catch (_: Throwable) {
-                    }
-                }
-            }
+        val lines: List<LyricLine>
+            get() = LrcParser.parse(value)
 
         fun normalize(): Lyrics {
             var toDrop = 0
