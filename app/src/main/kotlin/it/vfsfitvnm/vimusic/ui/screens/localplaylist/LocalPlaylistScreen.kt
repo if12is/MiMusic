@@ -28,7 +28,7 @@ fun LocalPlaylistScreen(playlistId: Long) {
                 tabIndex = 0,
                 onTabChanged = { },
                 tabColumnContent = { Item ->
-                    Item(0, "Songs", R.drawable.musical_notes)
+                    Item(0, it.vfsfitvnm.vimusic.utils.LocalStrings.current.songs, R.drawable.musical_notes)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(currentTabIndex) {

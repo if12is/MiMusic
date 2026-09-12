@@ -49,6 +49,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.window.Dialog
 import androidx.compose.ui.window.DialogProperties
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.drawCircle
 import it.vfsfitvnm.vimusic.utils.medium
@@ -62,8 +63,8 @@ fun TextFieldDialog(
     onDismiss: () -> Unit,
     onDone: (String) -> Unit,
     modifier: Modifier = Modifier,
-    cancelText: String = "Cancel",
-    doneText: String = "Done",
+    cancelText: String? = null,
+    doneText: String? = null,
     initialTextInput: String = "",
     singleLine: Boolean = true,
     maxLines: Int = 1,
@@ -74,6 +75,9 @@ fun TextFieldDialog(
         FocusRequester()
     }
     val (colorPalette, typography) = LocalAppearance.current
+    val strings = LocalStrings.current
+    val resolvedCancelText = cancelText ?: strings.cancel
+    val resolvedDoneText = doneText ?: strings.done
 
     var textFieldValue by rememberSaveable(initialTextInput, stateSaver = TextFieldValue.Saver) {
         mutableStateOf(
@@ -138,13 +142,13 @@ fun TextFieldDialog(
                 .fillMaxWidth()
         ) {
             DialogTextButton(
-                text = cancelText,
+                text = resolvedCancelText,
                 onClick = onCancel
             )
 
             DialogTextButton(
                 primary = true,
-                text = doneText,
+                text = resolvedDoneText,
                 onClick = {
                     if (isTextInputValid(textFieldValue.text)) {
                         onDismiss()
@@ -167,11 +171,14 @@ fun ConfirmationDialog(
     onDismiss: () -> Unit,
     onConfirm: () -> Unit,
     modifier: Modifier = Modifier,
-    cancelText: String = "Cancel",
-    confirmText: String = "Confirm",
+    cancelText: String? = null,
+    confirmText: String? = null,
     onCancel: () -> Unit = onDismiss
 ) {
     val (_, typography) = LocalAppearance.current
+    val strings = LocalStrings.current
+    val resolvedCancelText = cancelText ?: strings.cancel
+    val resolvedConfirmText = confirmText ?: strings.confirm
 
     DefaultDialog(
         onDismiss = onDismiss,
@@ -190,12 +197,12 @@ fun ConfirmationDialog(
                 .fillMaxWidth()
         ) {
             DialogTextButton(
-                text = cancelText,
+                text = resolvedCancelText,
                 onClick = onCancel
             )
 
             DialogTextButton(
-                text = confirmText,
+                text = resolvedConfirmText,
                 primary = true,
                 onClick = {
                     onConfirm()
@@ -324,7 +331,7 @@ inline fun <T> ValueSelectorDialog(
                     .padding(end = 24.dp)
             ) {
                 DialogTextButton(
-                    text = "Cancel",
+                    text = LocalStrings.current.cancel,
                     onClick = onDismiss,
                     modifier = Modifier
                 )

@@ -11,7 +11,8 @@ data class PlayerResponse(
 ) {
     @Serializable
     data class PlayabilityStatus(
-        val status: String?
+        val status: String?,
+        val reason: String? = null
     )
 
     @Serializable
@@ -30,24 +31,39 @@ data class PlayerResponse(
 
     @Serializable
     data class StreamingData(
-        val adaptiveFormats: List<AdaptiveFormat>?
+        val adaptiveFormats: List<AdaptiveFormat>? = null,
+        val formats: List<AdaptiveFormat>? = null
     ) {
         val highestQualityFormat: AdaptiveFormat?
-            get() = adaptiveFormats?.findLast { it.itag == 251 || it.itag == 140 }
+            get() {
+                val candidates = (adaptiveFormats.orEmpty() + formats.orEmpty())
+                    .filter { !it.url.isNullOrBlank() }
+
+                return candidates.findLast { it.itag == 251 || it.itag == 140 }
+                    ?: candidates
+                        .filter { format ->
+                            format.mimeType.contains("audio", ignoreCase = true) ||
+                                format.audioQuality != null
+                        }
+                        .maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
+                    ?: candidates.maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
+            }
 
         @Serializable
         data class AdaptiveFormat(
             val itag: Int,
             val mimeType: String,
-            val bitrate: Long?,
-            val averageBitrate: Long?,
-            val contentLength: Long?,
-            val audioQuality: String?,
-            val approxDurationMs: Long?,
-            val lastModified: Long?,
-            val loudnessDb: Double?,
-            val audioSampleRate: Int?,
-            val url: String?,
+            val bitrate: Long? = null,
+            val averageBitrate: Long? = null,
+            val contentLength: Long? = null,
+            val audioQuality: String? = null,
+            val approxDurationMs: Long? = null,
+            val lastModified: Long? = null,
+            val loudnessDb: Double? = null,
+            val audioSampleRate: Int? = null,
+            val url: String? = null,
+            val signatureCipher: String? = null,
+            val cipher: String? = null
         )
     }
 

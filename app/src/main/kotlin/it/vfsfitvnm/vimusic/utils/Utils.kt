@@ -110,6 +110,9 @@ suspend fun Result<Innertube.PlaylistOrAlbumPage>.completed(): Result<Innertube.
 inline val isAtLeastAndroid6
     get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.M
 
+inline val isAtLeastAndroid7
+    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.N
+
 inline val isAtLeastAndroid8
     get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.O
 
@@ -118,3 +121,9 @@ inline val isAtLeastAndroid12
 
 inline val isAtLeastAndroid13
     get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.TIRAMISU
+
+inline val isAtLeastAndroid10
+    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.Q
+
+inline val isAtLeastAndroid14
+    get() = Build.VERSION.SDK_INT >= Build.VERSION_CODES.UPSIDE_DOWN_CAKE

@@ -22,6 +22,7 @@ import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.ui.components.themed.Scaffold
 import it.vfsfitvnm.vimusic.ui.screens.globalRoutes
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.secondary
 
 @ExperimentalFoundationApi
@@ -32,6 +33,7 @@ fun SearchScreen(
     onSearch: (String) -> Unit,
     onViewPlaylist: (String) -> Unit
 ) {
+    val strings = LocalStrings.current
     val saveableStateHolder = rememberSaveableStateHolder()
 
     val (tabIndex, onTabChanged) = rememberSaveable {
@@ -66,7 +68,7 @@ fun SearchScreen(
                             .align(Alignment.CenterEnd)
                     ) {
                         BasicText(
-                            text = "Enter a name",
+                            text = strings.enterAName,
                             maxLines = 1,
                             style = LocalAppearance.current.typography.xxl.secondary
                         )
@@ -82,8 +84,8 @@ fun SearchScreen(
                 tabIndex = tabIndex,
                 onTabChanged = onTabChanged,
                 tabColumnContent = { Item ->
-                    Item(0, "Online", R.drawable.globe)
-                    Item(1, "Library", R.drawable.library)
+                    Item(0, strings.online, R.drawable.globe)
+                    Item(1, strings.library, R.drawable.library)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(currentTabIndex) {

@@ -176,11 +176,11 @@ fun ArtistScreen(browseId: String) {
                 tabIndex = tabIndex,
                 onTabChanged = { tabIndex = it },
                 tabColumnContent = { Item ->
-                    Item(0, "Overview", R.drawable.sparkles)
-                    Item(1, "Songs", R.drawable.musical_notes)
-                    Item(2, "Albums", R.drawable.disc)
-                    Item(3, "Singles", R.drawable.disc)
-                    Item(4, "Library", R.drawable.library)
+                    Item(0, it.vfsfitvnm.vimusic.utils.LocalStrings.current.overview, R.drawable.sparkles)
+                    Item(1, it.vfsfitvnm.vimusic.utils.LocalStrings.current.songs, R.drawable.musical_notes)
+                    Item(2, it.vfsfitvnm.vimusic.utils.LocalStrings.current.albums, R.drawable.disc)
+                    Item(3, it.vfsfitvnm.vimusic.utils.LocalStrings.current.singles, R.drawable.disc)
+                    Item(4, it.vfsfitvnm.vimusic.utils.LocalStrings.current.library, R.drawable.library)
                 },
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {

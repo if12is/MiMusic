@@ -42,6 +42,7 @@ import it.vfsfitvnm.vimusic.ui.items.ArtistItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.artistSortByKey
 import it.vfsfitvnm.vimusic.utils.artistSortOrderKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -54,6 +55,7 @@ fun HomeArtistList(
     onSearchClick: () -> Unit,
 ) {
     val (colorPalette) = LocalAppearance.current
+    val strings = LocalStrings.current
 
     var sortBy by rememberPreference(artistSortByKey, ArtistSortBy.DateAdded)
     var sortOrder by rememberPreference(artistSortOrderKey, SortOrder.Descending)
@@ -94,7 +96,7 @@ fun HomeArtistList(
                 contentType = 0,
                 span = { GridItemSpan(maxLineSpan) }
             ) {
-                Header(title = "Artists") {
+                Header(title = strings.artists) {
                     HeaderIconButton(
                         icon = R.drawable.text,
                         color = if (sortBy == ArtistSortBy.Name) colorPalette.text else colorPalette.textDisabled,

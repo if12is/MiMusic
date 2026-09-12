@@ -5,14 +5,15 @@ plugins {
 }
 
 android {
-    compileSdk = 33
+    namespace = "it.vfsfitvnm.vimusic"
+    compileSdk = 35
 
     defaultConfig {
         applicationId = "it.vfsfitvnm.vimusic"
         minSdk = 21
-        targetSdk = 33
-        versionCode = 20
-        versionName = "0.5.4"
+        targetSdk = 34
+        versionCode = 21
+        versionName = "0.6.0"
     }
 
     splits {
@@ -22,18 +23,16 @@ android {
         }
     }
 
-    namespace = "it.vfsfitvnm.vimusic"
-
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
-            manifestPlaceholders["appName"] = "Debug"
+            manifestPlaceholders["appName"] = "MiMusic Debug"
         }
 
         release {
             isMinifyEnabled = true
             isShrinkResources = true
-            manifestPlaceholders["appName"] = "ViMusic"
+            manifestPlaceholders["appName"] = "MiMusic"
             signingConfig = signingConfigs.getByName("debug")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
@@ -45,12 +44,13 @@ android {
 
     buildFeatures {
         compose = true
+        buildConfig = true
     }
 
     compileOptions {
         isCoreLibraryDesugaringEnabled = true
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
     }
 
     composeOptions {
@@ -59,7 +59,7 @@ android {
 
     kotlinOptions {
         freeCompilerArgs += "-Xcontext-receivers"
-        jvmTarget = "1.8"
+        jvmTarget = "17"
     }
 }
 

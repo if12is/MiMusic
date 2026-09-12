@@ -50,6 +50,7 @@ import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.onOverlay
 import it.vfsfitvnm.vimusic.ui.styling.overlay
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.color
@@ -68,6 +69,7 @@ fun HomeSongs(
     val (colorPalette, typography, thumbnailShape) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
+    val strings = LocalStrings.current
 
     val thumbnailSizeDp = Dimensions.thumbnails.song
     val thumbnailSizePx = thumbnailSizeDp.px
@@ -102,7 +104,7 @@ fun HomeSongs(
                 key = "header",
                 contentType = 0
             ) {
-                Header(title = "Songs") {
+                Header(title = strings.songs) {
                     HeaderIconButton(
                         icon = R.drawable.trending,
                         color = if (sortBy == SongSortBy.PlayTime) colorPalette.text else colorPalette.textDisabled,

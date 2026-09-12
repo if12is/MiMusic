@@ -5,7 +5,9 @@
     <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
     <uses-permission android:name="android.permission.WAKE_LOCK" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
+    <uses-permission android:name="android.permission.FOREGROUND_SERVICE_MEDIA_PLAYBACK" />
     <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.REQUEST_INSTALL_PACKAGES" />
 
     <queries>
         <intent>
@@ -25,14 +27,14 @@
         android:icon="@mipmap/ic_launcher_round"
         android:label="${appName}"
         android:roundIcon="@mipmap/ic_launcher_round"
-        android:supportsRtl="false"
-        android:theme="@style/Theme.ViMusic.NoActionBar">
+        android:supportsRtl="true"
+        android:theme="@style/Theme.MiMusic.NoActionBar">
 
         <activity
             android:name=".MainActivity"
             android:exported="true"
             android:launchMode="singleTask"
-            android:theme="@style/Theme.ViMusic.NoActionBar"
+            android:theme="@style/Theme.MiMusic.NoActionBar"
             android:windowSoftInputMode="adjustResize">
 
             <intent-filter>
@@ -93,8 +95,18 @@
         <service
             android:name=".service.PlayerService"
             android:exported="false"
-            android:foregroundServiceType="mediaPlayback">
-        </service>
+            android:foregroundServiceType="mediaPlayback"
+            android:stopWithTask="false" />
+
+        <provider
+            android:name="androidx.core.content.FileProvider"
+            android:authorities="${applicationId}.provider"
+            android:exported="false"
+            android:grantUriPermissions="true">
+            <meta-data
+                android:name="android.support.FILE_PROVIDER_PATHS"
+                android:resource="@xml/file_paths" />
+        </provider>
 
         <service android:name=".service.PlayerMediaBrowserService"
             android:exported="true"

@@ -1,5 +1,10 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="ic_launcher_background">#4046bf</color>
+    <color name="ic_launcher_background">#1E3A8A</color>
     <color name="ic_launcher_foreground">#ffffff</color>
+    <color name="notification_glass_start">#E61B2148</color>
+    <color name="notification_glass_end">#E63D5AFE</color>
+    <color name="notification_text">#FFFFFFFF</color>
+    <color name="notification_text_secondary">#CCFFFFFF</color>
+    <color name="notification_accent">#3D5AFE</color>
 </resources>

@@ -26,6 +26,7 @@ import it.vfsfitvnm.vimusic.enums.CoilDiskCacheMaxSize
 import it.vfsfitvnm.vimusic.enums.ExoPlayerDiskCacheMaxSize
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.coilDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.exoPlayerDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -37,6 +38,7 @@ fun CacheSettings() {
     val context = LocalContext.current
     val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
+    val strings = LocalStrings.current
 
     var coilDiskCacheMaxSize by rememberPreference(
         coilDiskCacheMaxSizeKey,
@@ -58,9 +60,9 @@ fun CacheSettings() {
                     .asPaddingValues()
             )
     ) {
-        Header(title = "Cache")
+        Header(title = strings.cache)
 
-        SettingsDescription(text = "When the cache runs out of space, the resources that haven't been accessed for the longest time are cleared")
+        SettingsDescription(text = strings.cacheDescription)
 
         Coil.imageLoader(context).diskCache?.let { diskCache ->
             val diskCacheSize = remember(diskCache) {
@@ -69,7 +71,7 @@ fun CacheSettings() {
 
             SettingsGroupSpacer()
 
-            SettingsEntryGroupText(title = "IMAGE CACHE")
+            SettingsEntryGroupText(title = strings.imageCache)
 
             SettingsDescription(
                 text = "${
@@ -77,11 +79,11 @@ fun CacheSettings() {
                         context,
                         diskCacheSize
                     )
-                } used (${diskCacheSize * 100 / coilDiskCacheMaxSize.bytes.coerceAtLeast(1)}%)"
+                } ${strings.cacheDescriptionUsed} (${diskCacheSize * 100 / coilDiskCacheMaxSize.bytes.coerceAtLeast(1)}%)"
             )
 
             EnumValueSelectorSettingsEntry(
-                title = "Max size",
+                title = strings.maxSize,
                 selectedValue = coilDiskCacheMaxSize,
                 onValueSelected = { coilDiskCacheMaxSize = it }
             )
@@ -96,12 +98,12 @@ fun CacheSettings() {
 
             SettingsGroupSpacer()
 
-            SettingsEntryGroupText(title = "SONG CACHE")
+            SettingsEntryGroupText(title = strings.songCache)
 
             SettingsDescription(
                 text = buildString {
                     append(Formatter.formatShortFileSize(context, diskCacheSize))
-                    append(" used")
+                    append(" ${strings.cacheDescriptionUsed}")
                     when (val size = exoPlayerDiskCacheMaxSize) {
                         ExoPlayerDiskCacheMaxSize.Unlimited -> {}
                         else -> append(" (${diskCacheSize * 100 / size.bytes}%)")
@@ -110,7 +112,7 @@ fun CacheSettings() {
             )
 
             EnumValueSelectorSettingsEntry(
-                title = "Max size",
+                title = strings.maxSize,
                 selectedValue = exoPlayerDiskCacheMaxSize,
                 onValueSelected = { exoPlayerDiskCacheMaxSize = it }
             )

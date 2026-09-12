@@ -24,6 +24,7 @@ import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.persistentQueueKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -38,6 +39,7 @@ fun PlayerSettings() {
     val context = LocalContext.current
     val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
+    val strings = LocalStrings.current
 
     var persistentQueue by rememberPreference(persistentQueueKey, false)
     var resumePlaybackWhenDeviceConnected by rememberPreference(
@@ -61,13 +63,13 @@ fun PlayerSettings() {
                     .asPaddingValues()
             )
     ) {
-        Header(title = "Player & Audio")
+        Header(title = strings.playerAndAudio)
 
-        SettingsEntryGroupText(title = "PLAYER")
+        SettingsEntryGroupText(title = strings.playerGroup)
 
         SwitchSettingEntry(
-            title = "Persistent queue",
-            text = "Save and restore playing songs",
+            title = strings.persistentQueue,
+            text = strings.persistentQueueDescription,
             isChecked = persistentQueue,
             onCheckedChange = {
                 persistentQueue = it
@@ -76,8 +78,8 @@ fun PlayerSettings() {
 
         if (isAtLeastAndroid6) {
             SwitchSettingEntry(
-                title = "Resume playback",
-                text = "When a wired or bluetooth device is connected",
+                title = strings.resumePlayback,
+                text = strings.resumePlaybackDescription,
                 isChecked = resumePlaybackWhenDeviceConnected,
                 onCheckedChange = {
                     resumePlaybackWhenDeviceConnected = it
@@ -87,11 +89,11 @@ fun PlayerSettings() {
 
         SettingsGroupSpacer()
 
-        SettingsEntryGroupText(title = "AUDIO")
+        SettingsEntryGroupText(title = strings.audioGroup)
 
         SwitchSettingEntry(
-            title = "Skip silence",
-            text = "Skip silent parts during playback",
+            title = strings.skipSilence,
+            text = strings.skipSilenceDescription,
             isChecked = skipSilence,
             onCheckedChange = {
                 skipSilence = it
@@ -99,8 +101,8 @@ fun PlayerSettings() {
         )
 
         SwitchSettingEntry(
-            title = "Loudness normalization",
-            text = "Adjust the volume to a fixed level",
+            title = strings.loudnessNormalization,
+            text = strings.loudnessNormalizationDescription,
             isChecked = volumeNormalization,
             onCheckedChange = {
                 volumeNormalization = it
@@ -108,8 +110,8 @@ fun PlayerSettings() {
         )
 
         SettingsEntry(
-            title = "Equalizer",
-            text = "Interact with the system equalizer",
+            title = strings.equalizer,
+            text = strings.equalizerDescription,
             onClick = {
                 val intent = Intent(AudioEffect.ACTION_DISPLAY_AUDIO_EFFECT_CONTROL_PANEL).apply {
                     putExtra(AudioEffect.EXTRA_AUDIO_SESSION, binder?.player?.audioSessionId)
@@ -120,7 +122,7 @@ fun PlayerSettings() {
                 try {
                     activityResultLauncher.launch(intent)
                 } catch (e: ActivityNotFoundException) {
-                    context.toast("Couldn't find an application to equalize audio")
+                    context.toast(strings.equalizerMissing)
                 }
             }
         )

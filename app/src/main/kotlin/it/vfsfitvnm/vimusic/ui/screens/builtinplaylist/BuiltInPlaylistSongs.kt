@@ -38,6 +38,7 @@ import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
@@ -53,6 +54,7 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
     val (colorPalette) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
+    val strings = LocalStrings.current
 
     var songs by persistList<Song>("${builtInPlaylist.name}/songs")
 
@@ -66,9 +68,9 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                 .flowOn(Dispatchers.IO)
                 .map { songs ->
                     songs.filter { song ->
-                        song.contentLength?.let {
-                            binder?.cache?.isCached(song.song.id, 0, song.contentLength)
-                        } ?: false
+                        song.contentLength?.let { length ->
+                            binder?.isAvailableOffline(song.song.id, length) == true
+                        } ?: (binder?.isDownloaded(song.song.id) == true)
                     }.map(SongWithContentLength::song)
                 }
         }.collect { songs = it }
@@ -94,14 +96,14 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
             ) {
                 Header(
                     title = when (builtInPlaylist) {
-                        BuiltInPlaylist.Favorites -> "Favorites"
-                        BuiltInPlaylist.Offline -> "Offline"
+                        BuiltInPlaylist.Favorites -> strings.favorites
+                        BuiltInPlaylist.Offline -> strings.offline
                     },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
                 ) {
                     SecondaryTextButton(
-                        text = "Enqueue",
+                        text = strings.enqueue,
                         enabled = songs.isNotEmpty(),
                         onClick = {
                             binder?.player?.enqueue(songs.map(Song::asMediaItem))

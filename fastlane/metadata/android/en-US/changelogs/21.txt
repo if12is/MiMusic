@@ -1,0 +1,1 @@
+Initial MiMusic release: Arabic RTL default, playback fix, dependency update, GitHub releases and in-app updater, local song downloads, and a glossy lock-screen / Dynamic Island player.

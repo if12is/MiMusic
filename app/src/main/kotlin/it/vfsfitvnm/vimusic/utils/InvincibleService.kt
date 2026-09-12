@@ -75,7 +75,7 @@ abstract class InvincibleService : Service() {
                 Intent.ACTION_SCREEN_ON -> handler.post(this)
                 Intent.ACTION_SCREEN_OFF -> notification()?.let { notification ->
                     handler.removeCallbacks(this)
-                    startForeground(notificationId, notification)
+                    startMediaForeground(notificationId, notification)
                 }
             }
         }
@@ -85,10 +85,15 @@ abstract class InvincibleService : Service() {
             if (!isStarted) {
                 isStarted = true
                 handler.postDelayed(this, intervalMs)
-                registerReceiver(this, IntentFilter().apply {
+                val filter = IntentFilter().apply {
                     addAction(Intent.ACTION_SCREEN_ON)
                     addAction(Intent.ACTION_SCREEN_OFF)
-                })
+                }
+                if (isAtLeastAndroid13) {
+                    registerReceiver(this, filter, Context.RECEIVER_EXPORTED)
+                } else {
+                    registerReceiver(this, filter)
+                }
             }
         }
 
@@ -104,7 +109,7 @@ abstract class InvincibleService : Service() {
         override fun run() {
             if (shouldBeInvincible() && isAllowedToStartForegroundServices) {
                 notification()?.let { notification ->
-                    startForeground(notificationId, notification)
+                    startMediaForeground(notificationId, notification)
                     stopForeground(false)
                     handler.postDelayed(this, intervalMs)
                 }

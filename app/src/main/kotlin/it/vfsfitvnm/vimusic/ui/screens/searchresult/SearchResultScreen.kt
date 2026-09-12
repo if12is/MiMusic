@@ -41,6 +41,7 @@ import it.vfsfitvnm.vimusic.ui.screens.globalRoutes
 import it.vfsfitvnm.vimusic.ui.screens.playlistRoute
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.rememberPreference
@@ -51,6 +52,7 @@ import it.vfsfitvnm.vimusic.utils.searchResultScreenTabIndexKey
 @Composable
 fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
     val context = LocalContext.current
+    val strings = LocalStrings.current
     val saveableStateHolder = rememberSaveableStateHolder()
     val (tabIndex, onTabIndexChanges) = rememberPreference(searchResultScreenTabIndexKey, 0)
 
@@ -75,7 +77,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                 )
             }
 
-            val emptyItemsText = "No results found. Please try a different query or category"
+            val emptyItemsText = strings.noResults
 
             Scaffold(
                 topIconButtonId = R.drawable.chevron_back,
@@ -83,12 +85,12 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                 tabIndex = tabIndex,
                 onTabChanged = onTabIndexChanges,
                 tabColumnContent = { Item ->
-                    Item(0, "Songs", R.drawable.musical_notes)
-                    Item(1, "Albums", R.drawable.disc)
-                    Item(2, "Artists", R.drawable.person)
-                    Item(3, "Videos", R.drawable.film)
-                    Item(4, "Playlists", R.drawable.playlist)
-                    Item(5, "Featured", R.drawable.playlist)
+                    Item(0, strings.songs, R.drawable.musical_notes)
+                    Item(1, strings.albums, R.drawable.disc)
+                    Item(2, strings.artists, R.drawable.person)
+                    Item(3, strings.videos, R.drawable.film)
+                    Item(4, strings.playlists, R.drawable.playlist)
+                    Item(5, strings.featured, R.drawable.playlist)
                 }
             ) { tabIndex ->
                 saveableStateHolder.SaveableStateProvider(tabIndex) {

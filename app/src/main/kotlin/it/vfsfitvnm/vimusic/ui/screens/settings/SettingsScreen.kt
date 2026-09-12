@@ -29,6 +29,7 @@ import it.vfsfitvnm.vimusic.ui.components.themed.Switch
 import it.vfsfitvnm.vimusic.ui.components.themed.ValueSelectorDialog
 import it.vfsfitvnm.vimusic.ui.screens.globalRoutes
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
@@ -37,6 +38,7 @@ import it.vfsfitvnm.vimusic.utils.semiBold
 @ExperimentalAnimationApi
 @Composable
 fun SettingsScreen() {
+    val strings = LocalStrings.current
     val saveableStateHolder = rememberSaveableStateHolder()
 
     val (tabIndex, onTabChanged) = rememberSaveable {
@@ -53,12 +55,12 @@ fun SettingsScreen() {
                 tabIndex = tabIndex,
                 onTabChanged = onTabChanged,
                 tabColumnContent = { Item ->
-                    Item(0, "Appearance", R.drawable.color_palette)
-                    Item(1, "Player", R.drawable.play)
-                    Item(2, "Cache", R.drawable.server)
-                    Item(3, "Database", R.drawable.server)
-                    Item(4, "Other", R.drawable.shapes)
-                    Item(5, "About", R.drawable.information)
+                    Item(0, strings.appearance, R.drawable.color_palette)
+                    Item(1, strings.player, R.drawable.play)
+                    Item(2, strings.cache, R.drawable.server)
+                    Item(3, strings.database, R.drawable.server)
+                    Item(4, strings.other, R.drawable.shapes)
+                    Item(5, strings.about, R.drawable.information)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(currentTabIndex) {

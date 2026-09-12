@@ -19,11 +19,14 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
+import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
 import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.appLanguageKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
@@ -37,14 +40,16 @@ import it.vfsfitvnm.vimusic.utils.useSystemFontKey
 @Composable
 fun AppearanceSettings() {
     val (colorPalette) = LocalAppearance.current
+    val strings = LocalStrings.current
 
+    var appLanguage by rememberPreference(appLanguageKey, AppLanguage.Arabic)
     var colorPaletteName by rememberPreference(colorPaletteNameKey, ColorPaletteName.Dynamic)
     var colorPaletteMode by rememberPreference(colorPaletteModeKey, ColorPaletteMode.System)
     var thumbnailRoundness by rememberPreference(
         thumbnailRoundnessKey,
         ThumbnailRoundness.Light
     )
-    var useSystemFont by rememberPreference(useSystemFontKey, false)
+    var useSystemFont by rememberPreference(useSystemFontKey, true)
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
     var isShowingThumbnailInLockscreen by rememberPreference(
         isShowingThumbnailInLockscreenKey,
@@ -62,31 +67,47 @@ fun AppearanceSettings() {
                     .asPaddingValues()
             )
     ) {
-        Header(title = "Appearance")
+        Header(title = strings.appearance)
 
-        SettingsEntryGroupText(title = "COLORS")
+        SettingsEntryGroupText(title = strings.languageGroup)
 
         EnumValueSelectorSettingsEntry(
-            title = "Theme",
+            title = strings.languageTitle,
+            selectedValue = appLanguage,
+            onValueSelected = { appLanguage = it },
+            valueText = { it.nativeName }
+        )
+
+        SettingsDescription(text = strings.languageDescription)
+
+        SettingsGroupSpacer()
+
+        SettingsEntryGroupText(title = strings.colors)
+
+        EnumValueSelectorSettingsEntry(
+            title = strings.theme,
             selectedValue = colorPaletteName,
-            onValueSelected = { colorPaletteName = it }
+            onValueSelected = { colorPaletteName = it },
+            valueText = strings::colorPaletteName
         )
 
         EnumValueSelectorSettingsEntry(
-            title = "Theme mode",
+            title = strings.themeMode,
             selectedValue = colorPaletteMode,
             isEnabled = colorPaletteName != ColorPaletteName.PureBlack,
-            onValueSelected = { colorPaletteMode = it }
+            onValueSelected = { colorPaletteMode = it },
+            valueText = strings::colorPaletteMode
         )
 
         SettingsGroupSpacer()
 
-        SettingsEntryGroupText(title = "SHAPES")
+        SettingsEntryGroupText(title = strings.shapes)
 
         EnumValueSelectorSettingsEntry(
-            title = "Thumbnail roundness",
+            title = strings.thumbnailRoundness,
             selectedValue = thumbnailRoundness,
             onValueSelected = { thumbnailRoundness = it },
+            valueText = strings::thumbnailRoundnessName,
             trailingContent = {
                 Spacer(
                     modifier = Modifier
@@ -99,18 +120,18 @@ fun AppearanceSettings() {
 
         SettingsGroupSpacer()
 
-        SettingsEntryGroupText(title = "TEXT")
+        SettingsEntryGroupText(title = strings.textGroup)
 
         SwitchSettingEntry(
-            title = "Use system font",
-            text = "Use the font applied by the system",
+            title = strings.useSystemFont,
+            text = strings.useSystemFontDescription,
             isChecked = useSystemFont,
             onCheckedChange = { useSystemFont = it }
         )
 
         SwitchSettingEntry(
-            title = "Apply font padding",
-            text = "Add spacing around texts",
+            title = strings.applyFontPadding,
+            text = strings.applyFontPaddingDescription,
             isChecked = applyFontPadding,
             onCheckedChange = { applyFontPadding = it }
         )
@@ -118,11 +139,11 @@ fun AppearanceSettings() {
         if (!isAtLeastAndroid13) {
             SettingsGroupSpacer()
 
-            SettingsEntryGroupText(title = "LOCKSCREEN")
+            SettingsEntryGroupText(title = strings.lockscreen)
 
             SwitchSettingEntry(
-                title = "Show song cover",
-                text = "Use the playing song cover as the lockscreen wallpaper",
+                title = strings.showSongCover,
+                text = strings.showSongCoverDescription,
                 isChecked = isShowingThumbnailInLockscreen,
                 onCheckedChange = { isShowingThumbnailInLockscreen = it }
             )

@@ -1,14 +1,18 @@
 package it.vfsfitvnm.vimusic
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.IBinder
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -64,6 +68,7 @@ import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.bodies.BrowseBody
 import it.vfsfitvnm.innertube.requests.playlistPage
 import it.vfsfitvnm.innertube.requests.song
+import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
 import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
@@ -79,21 +84,31 @@ import it.vfsfitvnm.vimusic.ui.screens.playlistRoute
 import it.vfsfitvnm.vimusic.ui.styling.Appearance
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.ui.styling.UiStrings
 import it.vfsfitvnm.vimusic.ui.styling.colorPaletteOf
 import it.vfsfitvnm.vimusic.ui.styling.dynamicColorPaletteOf
 import it.vfsfitvnm.vimusic.ui.styling.typographyOf
+import it.vfsfitvnm.vimusic.utils.LocalAppLanguage
+import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.appLanguageKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
+import it.vfsfitvnm.vimusic.utils.applyInnertubeLocale
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.getEnum
+import it.vfsfitvnm.vimusic.utils.GitHubUpdater
 import it.vfsfitvnm.vimusic.utils.intent
+import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
+import it.vfsfitvnm.vimusic.utils.lastUpdateCheckMsKey
+import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.useSystemFontKey
+import it.vfsfitvnm.vimusic.utils.withAppLanguage
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.flow.filterNotNull
@@ -118,6 +133,10 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
 
     override lateinit var persistMap: PersistMap
 
+    override fun attachBaseContext(newBase: Context) {
+        super.attachBaseContext(newBase.withAppLanguage())
+    }
+
     override fun onStart() {
         super.onStart()
         bindService(intent<PlayerService>(), serviceConnection, Context.BIND_AUTO_CREATE)
@@ -131,6 +150,9 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         persistMap = lastCustomNonConfigurationInstance as? PersistMap ?: PersistMap()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        requestNotificationPermission()
+        maybeCheckForUpdates()
 
         val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
 
@@ -148,7 +170,9 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     val thumbnailRoundness =
                         getEnum(thumbnailRoundnessKey, ThumbnailRoundness.Light)
 
-                    val useSystemFont = getBoolean(useSystemFontKey, false)
+                    val appLanguage = getEnum(appLanguageKey, AppLanguage.Arabic)
+                    applyInnertubeLocale(appLanguage)
+                    val useSystemFont = getBoolean(useSystemFontKey, true) || appLanguage.isRtl
                     val applyFontPadding = getBoolean(applyFontPaddingKey, false)
 
                     val colorPalette =
@@ -252,8 +276,21 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                                 )
                             }
 
+                            appLanguageKey -> {
+                                val appLanguage = sharedPreferences.getEnum(
+                                    appLanguageKey,
+                                    AppLanguage.Arabic
+                                )
+                                applyInnertubeLocale(appLanguage)
+                                recreate()
+                            }
+
                             useSystemFontKey, applyFontPaddingKey -> {
-                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, false)
+                                val appLanguage = sharedPreferences.getEnum(
+                                    appLanguageKey,
+                                    AppLanguage.Arabic
+                                )
+                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, true) || appLanguage.isRtl
                                 val applyFontPadding = sharedPreferences.getBoolean(applyFontPaddingKey, false)
 
                                 appearance = appearance.copy(
@@ -339,6 +376,10 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     }
                 }
 
+                val appLanguage = remember {
+                    preferences.getEnum(appLanguageKey, AppLanguage.Arabic)
+                }
+
                 CompositionLocalProvider(
                     LocalAppearance provides appearance,
                     LocalIndication provides rememberRipple(bounded = true),
@@ -346,7 +387,9 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     LocalShimmerTheme provides shimmerTheme,
                     LocalPlayerServiceBinder provides binder,
                     LocalPlayerAwareWindowInsets provides playerAwareWindowInsets,
-                    LocalLayoutDirection provides LayoutDirection.Ltr
+                    LocalAppLanguage provides appLanguage,
+                    LocalStrings provides UiStrings(appLanguage),
+                    LocalLayoutDirection provides if (appLanguage.isRtl) LayoutDirection.Rtl else LayoutDirection.Ltr
                 ) {
                     HomeScreen(
                         onPlaylistUrl = { url ->
@@ -407,15 +450,15 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         onNewIntent(intent)
     }
 
-    override fun onNewIntent(intent: Intent?) {
+    override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
 
-        val uri = intent?.data ?: return
+        val uri = intent.data ?: return
 
         intent.data = null
         this.intent = null
 
-        Toast.makeText(this, "Opening url...", Toast.LENGTH_SHORT).show()
+        Toast.makeText(this, UiStrings(preferredAppLanguage()).openingUrl, Toast.LENGTH_SHORT).show()
 
         lifecycleScope.launch(Dispatchers.IO) {
             when (val path = uri.pathSegments.firstOrNull()) {
@@ -466,6 +509,39 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         }
 
         super.onDestroy()
+    }
+
+    private fun requestNotificationPermission() {
+        if (
+            isAtLeastAndroid13 &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
+    }
+
+    private fun maybeCheckForUpdates() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val lastCheckMs = preferences.getLong(lastUpdateCheckMsKey, 0L)
+            if (System.currentTimeMillis() - lastCheckMs < 24 * 60 * 60 * 1000L) {
+                return@launch
+            }
+
+            preferences.edit { putLong(lastUpdateCheckMsKey, System.currentTimeMillis()) }
+
+            val release = runCatching { GitHubUpdater.fetchLatestRelease() }.getOrNull()
+                ?: return@launch
+            if (!release.isNewer) return@launch
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    UiStrings(preferredAppLanguage()).updateAvailableText(release.versionName),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun setSystemBarAppearance(isDark: Boolean) {

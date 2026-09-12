@@ -1,7 +1,7 @@
 package it.vfsfitvnm.vimusic.ui.screens.player
 
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.AnimatedVisibility
 import androidx.compose.animation.ContentTransform
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -73,6 +73,7 @@ import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.onOverlay
 import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.medium
 import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
@@ -93,6 +94,7 @@ fun Queue(
     content: @Composable BoxScope.() -> Unit,
 ) {
     val (colorPalette, typography, thumbnailShape) = LocalAppearance.current
+    val strings = LocalStrings.current
 
     val windowInsets = WindowInsets.systemBars
 
@@ -331,7 +333,7 @@ fun Queue(
                     .height(64.dp)
             ) {
                 BasicText(
-                    text = "${windows.size} songs",
+                    text = strings.songsCount(windows.size),
                     style = typography.xxs.medium,
                     modifier = Modifier
                         .background(
@@ -361,14 +363,14 @@ fun Queue(
                         .animateContentSize()
                 ) {
                     BasicText(
-                        text = "Queue loop ",
+                        text = "${strings.queueLoop} ",
                         style = typography.xxs.medium,
                     )
 
                     AnimatedContent(
                         targetState = queueLoopEnabled,
                         transitionSpec = {
-                            val slideDirection = if (targetState) AnimatedContentScope.SlideDirection.Up else AnimatedContentScope.SlideDirection.Down
+                            val slideDirection = if (targetState) AnimatedContentTransitionScope.SlideDirection.Up else AnimatedContentTransitionScope.SlideDirection.Down
 
                             ContentTransform(
                                 targetContentEnter = slideIntoContainer(slideDirection) + fadeIn(),
