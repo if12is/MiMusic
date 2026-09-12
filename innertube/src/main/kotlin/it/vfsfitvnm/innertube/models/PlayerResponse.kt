@@ -6,10 +6,10 @@ import kotlinx.serialization.Serializable
 
 @Serializable
 data class PlayerResponse(
-    val playabilityStatus: PlayabilityStatus?,
-    val playerConfig: PlayerConfig?,
-    val streamingData: StreamingData?,
-    val videoDetails: VideoDetails?,
+    val playabilityStatus: PlayabilityStatus? = null,
+    val playerConfig: PlayerConfig? = null,
+    val streamingData: StreamingData? = null,
+    val videoDetails: VideoDetails? = null,
 ) {
     @Serializable
     data class PlayabilityStatus(
@@ -75,6 +75,6 @@ data class PlayerResponse(
 
     @Serializable
     data class VideoDetails(
-        val videoId: String?
+        val videoId: String? = null
     )
 }

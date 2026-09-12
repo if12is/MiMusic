@@ -1,14 +1,18 @@
 package it.vfsfitvnm.innertube
 
 import it.vfsfitvnm.innertube.models.PlayerResponse
+import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotNull
 import org.junit.Test
 
 class PlayerResponseParseTest {
+    @OptIn(ExperimentalSerializationApi::class)
     private val json = Json {
         ignoreUnknownKeys = true
+        encodeDefaults = true
+        isLenient = true
     }
 
     @Test

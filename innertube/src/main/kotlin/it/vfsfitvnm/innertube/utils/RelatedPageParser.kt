@@ -93,11 +93,11 @@ internal fun SectionListRenderer.toRelatedPage(): Innertube.RelatedPage {
     val discoveredAlbums = mutableListOf<Innertube.AlbumItem>()
     val discoveredArtists = mutableListOf<Innertube.ArtistItem>()
 
-    contents.orEmpty().forEach { content ->
-        val carousel = content.musicCarouselShelfRenderer ?: return@forEach
+    contents.orEmpty().forEach section@{ content ->
+        val carousel = content.musicCarouselShelfRenderer ?: return@section
         discoveredSongs += carousel.songItems()
-        carousel.contents.orEmpty().forEach { item ->
-            val renderer = item.musicTwoRowItemRenderer ?: return@forEach
+        carousel.contents.orEmpty().forEach item@{ item ->
+            val renderer = item.musicTwoRowItemRenderer ?: return@item
             when (renderer.pageType()) {
                 "MUSIC_PAGE_TYPE_ALBUM" -> Innertube.AlbumItem.from(renderer)?.let(discoveredAlbums::add)
                 "MUSIC_PAGE_TYPE_ARTIST" -> Innertube.ArtistItem.from(renderer)?.let(discoveredArtists::add)
