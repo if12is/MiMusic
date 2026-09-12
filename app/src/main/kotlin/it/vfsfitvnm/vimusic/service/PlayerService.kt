@@ -59,6 +59,7 @@ import androidx.media3.exoplayer.analytics.AnalyticsListener
 import androidx.media3.exoplayer.analytics.PlaybackStats
 import androidx.media3.exoplayer.analytics.PlaybackStatsListener
 import androidx.media3.exoplayer.audio.AudioRendererEventListener
+import androidx.media3.exoplayer.audio.AudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink
 import androidx.media3.exoplayer.audio.DefaultAudioSink.DefaultAudioProcessorChain
 import androidx.media3.exoplayer.audio.MediaCodecAudioRenderer
@@ -110,6 +111,7 @@ import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.resumePlaybackWhenDeviceConnectedKey
 import it.vfsfitvnm.vimusic.utils.shouldBePlaying
 import it.vfsfitvnm.vimusic.utils.skipSilenceKey
+import it.vfsfitvnm.vimusic.utils.startMediaForeground
 import it.vfsfitvnm.vimusic.utils.timer
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
@@ -491,7 +493,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                 isNotificationStarted = true
                 startForegroundService(this@PlayerService, intent<PlayerService>())
-                startMediaForeground(NotificationId, notification())
+                this@PlayerService.startMediaForeground(NotificationId, notification())
             }
         }
     }
@@ -782,7 +784,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private fun isFullyDownloaded(mediaId: String): Boolean {
         val length = ContentMetadata.getContentLength(downloadCache.getContentMetadata(mediaId))
-        return length != C.LENGTH_UNSET && downloadCache.isCached(mediaId, 0, length)
+        return length != C.LENGTH_UNSET.toLong() && downloadCache.isCached(mediaId, 0, length)
     }
 
     private fun createHttpDataSourceFactory(): DefaultHttpDataSource.Factory {
@@ -902,10 +904,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     private fun createRendersFactory(): RenderersFactory {
-        val audioSink = DefaultAudioSink.Builder(this)
+        val audioSink: androidx.media3.exoplayer.audio.AudioSink = DefaultAudioSink.Builder(this)
             .setEnableFloatOutput(false)
             .setEnableAudioTrackPlaybackParams(false)
-            .setOffloadMode(DefaultAudioSink.OFFLOAD_MODE_DISABLED)
             .setAudioProcessorChain(
                 DefaultAudioProcessorChain(
                     emptyArray(),
@@ -1039,7 +1040,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         fun download(mediaItem: MediaItem) {
             val mediaId = mediaItem.mediaId
-            if (mediaId in downloadJobs || isFullyDownloaded(mediaId)) return
+            if (downloadJobs.containsKey(mediaId) || isFullyDownloaded(mediaId)) return
 
             setDownloadStatus(mediaId, DownloadStatus.Downloading)
             downloadJobs[mediaId] = coroutineScope.launch {
@@ -1073,7 +1074,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         DataSpec.Builder()
                             .setUri(url)
                             .setKey(mediaId)
-                            .setLength(format.contentLength ?: C.LENGTH_UNSET)
+                            .setLength(format.contentLength ?: C.LENGTH_UNSET.toLong())
                             .build(),
                         null,
                         null
@@ -1082,7 +1083,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     val storedLength = format.contentLength
                         ?: ContentMetadata.getContentLength(
                             this@PlayerService.downloadCache.getContentMetadata(mediaId)
-                        ).takeIf { it != C.LENGTH_UNSET }
+                        ).takeIf { it != C.LENGTH_UNSET.toLong() }
 
                     if (storedLength != null && storedLength != format.contentLength) {
                         query {
