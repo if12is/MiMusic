@@ -76,8 +76,7 @@
             android:contentDescription="@null"
             android:padding="8dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/play"
-            android:tint="@color/notification_text" />
+            android:src="@drawable/play" />
 
         <ImageButton
             android:id="@+id/notification_next"
@@ -87,7 +86,6 @@
             android:contentDescription="@null"
             android:padding="10dp"
             android:scaleType="fitCenter"
-            android:src="@drawable/play_skip_forward"
-            android:tint="@color/notification_text" />
+            android:src="@drawable/play_skip_forward" />
     </LinearLayout>
 </LinearLayout>
