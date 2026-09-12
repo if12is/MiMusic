@@ -5,6 +5,14 @@ import it.vfsfitvnm.innertube.models.MusicCarouselShelfRenderer
 import it.vfsfitvnm.innertube.models.NextResponse
 import it.vfsfitvnm.innertube.models.SectionListRenderer
 
+private val lyricsTabTitles = listOf(
+    "lyrics",
+    "كلمات الأغنية",
+    "كلمات الاغنية",
+    "كلمات",
+    "lyric"
+)
+
 private val relatedTabTitles = listOf(
     "related",
     "محتوى مشابه",
@@ -40,6 +48,29 @@ private val albumStraplines = listOf(
     "المزيد من اعمال",
     "More from"
 )
+
+internal fun lyricsBrowseId(
+    tabs: List<NextResponse.Contents.SingleColumnMusicWatchNextResultsRenderer.TabbedRenderer.WatchNextTabbedResultsRenderer.Tab>?
+): String? {
+    if (tabs.isNullOrEmpty()) return null
+
+    tabs.forEach { tab ->
+        val renderer = tab.tabRenderer ?: return@forEach
+        val browseId = renderer.endpoint?.browseEndpoint?.browseId
+        if (browseId?.startsWith("MPLY") == true) {
+            return browseId
+        }
+
+        val title = renderer.title.orEmpty()
+        if (lyricsTabTitles.any { alias -> title.contains(alias, ignoreCase = true) } &&
+            !browseId.isNullOrBlank()
+        ) {
+            return browseId
+        }
+    }
+
+    return null
+}
 
 internal fun relatedBrowseId(
     tabs: List<NextResponse.Contents.SingleColumnMusicWatchNextResultsRenderer.TabbedRenderer.WatchNextTabbedResultsRenderer.Tab>?

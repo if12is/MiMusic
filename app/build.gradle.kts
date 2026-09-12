@@ -12,8 +12,8 @@ android {
         applicationId = "it.vfsfitvnm.vimusic"
         minSdk = 21
         targetSdk = 34
-        versionCode = 27
-        versionName = "0.6.6"
+        versionCode = 28
+        versionName = "0.6.7"
     }
 
     signingConfigs {
