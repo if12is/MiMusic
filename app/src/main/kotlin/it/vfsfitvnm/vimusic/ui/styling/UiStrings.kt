@@ -152,8 +152,8 @@ class UiStrings(private val language: AppLanguage) {
     val alreadyUnrestricted = t("Already unrestricted", "غير مقيّد بالفعل")
     val disableBackgroundRestrictions = t("Disable background restrictions", "تعطيل قيود الخلفية")
     val batterySettingsMissing = t(
-        "Couldn't find battery optimization settings, please whitelist ViMusic manually",
-        "تعذر العثور على إعدادات تحسين البطارية، يرجى السماح للتطبيق يدوياً"
+        "Couldn't find battery optimization settings, please whitelist MiMusic manually",
+        "تعذر العثور على إعدادات تحسين البطارية، يرجى السماح لتطبيق MiMusic يدوياً"
     )
     val invincibleService = t("Invincible service", "الخدمة الدائمة")
     val invincibleServiceDescription = t(

@@ -66,7 +66,7 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "ViMusic"
+rootProject.name = "MiMusic"
 include(":app")
 include(":compose-routing")
 include(":compose-reordering")

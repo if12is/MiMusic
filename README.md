@@ -1,57 +1,47 @@
 <div align="center">
     <img src="./app/src/main/ic_launcher-playstore.png" width="128" height="128" style="display: block; margin: 0 auto"/>
-    <h1>ViMusic</h1>
-    <p>An Android application for streaming music from YouTube Music</p>
+    <h1>MiMusic</h1>
+    <p>An Android YouTube Music client forked and maintained at <a href="https://github.com/if12is/MiMusic">if12is/MiMusic</a></p>
 </div>
 
 ---
 
-<p align="center">
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/1.jpg" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/2.jpg" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/3.jpg" width="30%" />
-
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/4.jpg" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/5.jpg" width="30%" />
-  <img src="./fastlane/metadata/android/en-US/images/phoneScreenshots/6.jpg" width="30%" />
-</p>
+MiMusic is a maintained fork of [ViMusic](https://github.com/vfsfitvnm/ViMusic). This repository is the source of truth for releases, issues, and updates.
 
 ## Features
-- Play (almost) any song or video from YouTube Music
-- Background playback
-- Cache audio chunks for offline playback
-- Search for songs, albums, artists videos and playlists
+- Play songs and videos from YouTube Music
+- Arabic RTL as the default language and layout, with English available in settings
+- Background playback with a glossy lock-screen / Dynamic Island media player
+- Download songs for offline playback
+- In-app updater that installs the latest GitHub release
+- Search for songs, albums, artists, videos, and playlists
 - Bookmark artists and albums
 - Import playlists
-- Fetch, display and edit songs lyrics or synchronized lyrics
-- Local playlist management
-- Reorder songs in playlist or queue
-- Light/Dark/Dynamic theme
-- Skip silence
-- Sleep timer
-- Audio normalization
+- Lyrics and synchronized lyrics
+- Local playlist management and queue reordering
+- Light / Dark / Dynamic theme
+- Skip silence, sleep timer, and loudness normalization
 - Android Auto
 - Persistent queue
-- Open YouTube/YouTube Music links (`watch`, `playlist`, `channel`)
-- ...
+- Open YouTube / YouTube Music links (`watch`, `playlist`, `channel`)
 
 ## Installation
 
+Install the latest APK from this fork:
+
 [<img src="https://github.com/machiav3lli/oandbackupx/blob/034b226cea5c1b30eb4f6a6f313e4dadcbb0ece4/badge_github.png"
     alt="Get it on GitHub"
-    height="80">](https://github.com/vfsfitvnm/ViMusic/releases/latest)
-[<img src="https://gitlab.com/IzzyOnDroid/repo/-/raw/master/assets/IzzyOnDroid.png"
-     alt="Get it on IzzyOnDroid"
-     height="80">](https://apt.izzysoft.de/fdroid/index/apk/it.vfsfitvnm.vimusic)
-[<img src="https://fdroid.gitlab.io/artwork/badge/get-it-on.png"
-     alt="Get it on F-Droid"
-     height="80">](https://f-droid.org/packages/it.vfsfitvnm.vimusic/)
+    height="80">](https://github.com/if12is/MiMusic/releases/latest)
+
+Release APKs are published automatically when a `v*` tag is pushed.
+
+## Dynamic Island and lock screen
+MiMusic keeps a media foreground service running while a song is loaded so Honor Magic Capsule / Dynamic Island (Honor 600 and similar Android skins) and the system lock-screen player can show album art, title, artist, and play controls.
 
 ## Acknowledgments
+- [**ViMusic**](https://github.com/vfsfitvnm/ViMusic) by vfsfitvnm, the original project this fork is based on
 - [**YouTube-Internal-Clients**](https://github.com/zerodytrash/YouTube-Internal-Clients): A python script that discovers hidden YouTube API clients. Just a research project.
 - [**ionicons**](https://github.com/ionic-team/ionicons): Premium hand-crafted icons built by Ionic, for Ionic apps and web apps everywhere.
-
-<a href="https://www.flaticon.com/authors/ilham-fitrotul-hayat" title="music icons">App icon based on icon created by Ilham Fitrotul Hayat - Flaticon</a>
 
 ## Disclaimer
 This project and its contents are not affiliated with, funded, authorized, endorsed by, or in any way associated with YouTube, Google LLC or any of its affiliates and subsidiaries.

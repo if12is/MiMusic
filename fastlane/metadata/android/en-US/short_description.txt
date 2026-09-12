@@ -1,1 +1,1 @@
-Seamlessly stream music from YouTube Music
+Stream and download YouTube Music with Arabic RTL, offline playback, and a lock-screen player

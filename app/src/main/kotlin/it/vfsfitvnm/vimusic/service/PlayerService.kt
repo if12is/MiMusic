@@ -27,6 +27,8 @@ import android.media.session.PlaybackState
 import android.net.Uri
 import android.os.Handler
 import android.text.format.DateUtils
+import android.widget.RemoteViews
+import androidx.palette.graphics.Palette
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.setValue
@@ -99,8 +101,10 @@ import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
 import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.intent
+import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid12
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
+import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid7
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
 import it.vfsfitvnm.vimusic.utils.isInvincibilityEnabledKey
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
@@ -491,9 +495,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 )
                 player.prepare()
 
+                val restoredNotification = notification() ?: return@runBlocking
                 isNotificationStarted = true
                 startForegroundService(this@PlayerService, intent<PlayerService>())
-                this@PlayerService.startMediaForeground(NotificationId, notification())
+                this@PlayerService.startMediaForeground(NotificationId, restoredNotification)
             }
         }
     }
@@ -529,7 +534,19 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val bitmap =
             if (isAtLeastAndroid13 || isShowingThumbnailInLockscreen) bitmapProvider.bitmap else null
 
-        metadataBuilder.putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+        metadataBuilder
+            .putText(MediaMetadata.METADATA_KEY_TITLE, player.mediaMetadata.title)
+            .putText(MediaMetadata.METADATA_KEY_ARTIST, player.mediaMetadata.artist)
+            .putText(MediaMetadata.METADATA_KEY_ALBUM, player.mediaMetadata.albumTitle)
+            .putText(MediaMetadata.METADATA_KEY_DISPLAY_TITLE, player.mediaMetadata.title)
+            .putText(MediaMetadata.METADATA_KEY_DISPLAY_SUBTITLE, player.mediaMetadata.artist)
+            .putBitmap(MediaMetadata.METADATA_KEY_ART, bitmap)
+            .putBitmap(MediaMetadata.METADATA_KEY_ALBUM_ART, bitmap)
+            .putBitmap(MediaMetadata.METADATA_KEY_DISPLAY_ICON, bitmap)
+
+        if (player.duration != C.TIME_UNSET) {
+            metadataBuilder.putLong(MediaMetadata.METADATA_KEY_DURATION, player.duration)
+        }
 
         if (isAtLeastAndroid13 && player.currentMediaItemIndex == 0) {
             metadataBuilder.putText(
@@ -640,20 +657,20 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 return
             }
 
-            if (player.shouldBePlaying && !isNotificationStarted) {
+            if (!isNotificationStarted) {
                 isNotificationStarted = true
                 startForegroundService(this@PlayerService, intent<PlayerService>())
                 startMediaForeground(NotificationId, notification)
+            } else {
+                notificationManager?.notify(NotificationId, notification)
+            }
+
+            if (player.shouldBePlaying) {
                 makeInvincible(false)
                 sendOpenEqualizerIntent()
             } else {
-                if (!player.shouldBePlaying) {
-                    isNotificationStarted = false
-                    stopForeground(false)
-                    makeInvincible(true)
-                    sendCloseEqualizerIntent()
-                }
-                notificationManager?.notify(NotificationId, notification)
+                makeInvincible(true)
+                sendCloseEqualizerIntent()
             }
         }
     }
@@ -689,12 +706,27 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     override fun notification(): Notification? {
         if (player.currentMediaItem == null) return null
 
+        val artwork = bitmapProvider.bitmap
+        val built = buildPlaybackNotification(artwork)
+
+        bitmapProvider.load(player.mediaMetadata.artworkUri) { bitmap ->
+            maybeShowSongCoverInLockScreen()
+            notificationManager?.notify(NotificationId, buildPlaybackNotification(bitmap))
+        }
+
+        return built
+    }
+
+    private fun buildPlaybackNotification(artwork: Bitmap?): Notification {
         val playIntent = Action.play.pendingIntent
         val pauseIntent = Action.pause.pendingIntent
         val nextIntent = Action.next.pendingIntent
         val prevIntent = Action.previous.pendingIntent
-
         val mediaMetadata = player.mediaMetadata
+        val playing = player.shouldBePlaying
+        val accent = artwork
+            ?.let { Palette.from(it).generate().getVibrantColor(0xFF3D5AFE.toInt()) }
+            ?: 0xFF3D5AFE.toInt()
 
         val builder = if (isAtLeastAndroid8) {
             Notification.Builder(applicationContext, NotificationChannelId)
@@ -704,13 +736,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             .setContentTitle(mediaMetadata.title)
             .setContentText(mediaMetadata.artist)
             .setSubText(player.playerError?.message)
-            .setLargeIcon(bitmapProvider.bitmap)
+            .setLargeIcon(artwork)
             .setAutoCancel(false)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
-            .setSmallIcon(player.playerError?.let { R.drawable.alert_circle }
-                ?: R.drawable.app_icon)
-            .setOngoing(false)
+            .setSmallIcon(player.playerError?.let { R.drawable.alert_circle } ?: R.drawable.app_icon)
+            .setOngoing(true)
+            .setColor(accent)
             .setContentIntent(activityPendingIntent<MainActivity>(
                 flags = PendingIntent.FLAG_UPDATE_CURRENT
             ) {
@@ -726,18 +758,48 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             )
             .addAction(R.drawable.play_skip_back, strings.skipBack, prevIntent)
             .addAction(
-                if (player.shouldBePlaying) R.drawable.pause else R.drawable.play,
-                if (player.shouldBePlaying) strings.pause else strings.play,
-                if (player.shouldBePlaying) pauseIntent else playIntent
+                if (playing) R.drawable.pause else R.drawable.play,
+                if (playing) strings.pause else strings.play,
+                if (playing) pauseIntent else playIntent
             )
             .addAction(R.drawable.play_skip_forward, strings.skipForward, nextIntent)
 
-        bitmapProvider.load(mediaMetadata.artworkUri) { bitmap ->
-            maybeShowSongCoverInLockScreen()
-            notificationManager?.notify(NotificationId, builder.setLargeIcon(bitmap).build())
+        if (isAtLeastAndroid8) {
+            builder.setColorized(true)
         }
 
-        return builder.build()
+        if (isAtLeastAndroid12) {
+            builder.setForegroundServiceBehavior(Notification.FOREGROUND_SERVICE_IMMEDIATE)
+        }
+
+        if (isAtLeastAndroid7) {
+            val card = RemoteViews(packageName, R.layout.notification_player_card).apply {
+                if (artwork != null) {
+                    setImageViewBitmap(R.id.notification_artwork, artwork)
+                }
+                setTextViewText(R.id.notification_title, mediaMetadata.title ?: "")
+                setTextViewText(R.id.notification_artist, mediaMetadata.artist ?: "")
+                setImageViewResource(
+                    R.id.notification_play,
+                    if (playing) R.drawable.pause else R.drawable.play
+                )
+                setInt(R.id.notification_play, "setColorFilter", Color.WHITE)
+                setInt(R.id.notification_prev, "setColorFilter", Color.WHITE)
+                setInt(R.id.notification_next, "setColorFilter", Color.WHITE)
+                setOnClickPendingIntent(
+                    R.id.notification_play,
+                    if (playing) pauseIntent else playIntent
+                )
+                setOnClickPendingIntent(R.id.notification_prev, prevIntent)
+                setOnClickPendingIntent(R.id.notification_next, nextIntent)
+            }
+            builder.setCustomBigContentView(card)
+        }
+
+        val notification = builder.build()
+        notification.extras.putBoolean("android.media.isPlayingMedia", playing)
+        notification.extras.putString("android.substName", "MiMusic")
+        return notification
     }
 
     private fun createNotificationChannel() {
@@ -904,7 +966,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     private fun createRendersFactory(): RenderersFactory {
-        val audioSink: androidx.media3.exoplayer.audio.AudioSink = DefaultAudioSink.Builder(this)
+        val audioSink: AudioSink = DefaultAudioSink.Builder(this)
             .setEnableFloatOutput(false)
             .setEnableAudioTrackPlaybackParams(false)
             .setAudioProcessorChain(

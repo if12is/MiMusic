@@ -26,7 +26,7 @@ android {
     buildTypes {
         debug {
             applicationIdSuffix = ".debug"
-            manifestPlaceholders["appName"] = "Debug"
+            manifestPlaceholders["appName"] = "MiMusic Debug"
         }
 
         release {
