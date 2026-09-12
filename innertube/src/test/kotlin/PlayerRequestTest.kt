@@ -2,7 +2,6 @@ package it.vfsfitvnm.innertube
 
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
 import it.vfsfitvnm.innertube.requests.player
-import kotlinx.coroutines.runBlocking
 import org.junit.Assert.assertNotNull
 import org.junit.Assert.assertTrue
 import org.junit.Test
@@ -11,7 +10,7 @@ import java.net.URL
 
 class PlayerRequestTest {
     @Test
-    fun playerReturnsDownloadableAudioUrl() = runBlocking {
+    fun playerReturnsDownloadableAudioUrl() = LiveNetworkTest.runOrSkip {
         val response = Innertube.player(PlayerBody(videoId = "dQw4w9WgXcQ"))
             ?.getOrThrow()
 
