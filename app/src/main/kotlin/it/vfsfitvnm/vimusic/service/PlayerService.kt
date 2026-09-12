@@ -43,10 +43,13 @@ import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.database.StandaloneDatabaseProvider
 import androidx.media3.datasource.DataSource
+import androidx.media3.datasource.DataSpec
 import androidx.media3.datasource.DefaultHttpDataSource
 import androidx.media3.datasource.ResolvingDataSource
 import androidx.media3.datasource.cache.Cache
 import androidx.media3.datasource.cache.CacheDataSource
+import androidx.media3.datasource.cache.CacheWriter
+import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
@@ -76,6 +79,7 @@ import it.vfsfitvnm.vimusic.MainActivity
 import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.enums.ExoPlayerDiskCacheMaxSize
 import it.vfsfitvnm.vimusic.models.Event
+import it.vfsfitvnm.vimusic.models.Format
 import it.vfsfitvnm.vimusic.models.QueuedMediaItem
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.ui.styling.UiStrings
@@ -114,18 +118,24 @@ import kotlin.system.exitProcess
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
+import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.cancellable
 import kotlinx.coroutines.flow.collectLatest
+import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.flow.map
+import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
+import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("DEPRECATION")
 class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListener.Callback,
     SharedPreferences.OnSharedPreferenceChangeListener {
     private lateinit var mediaSession: MediaSession
     private lateinit var cache: SimpleCache
+    private lateinit var downloadCache: SimpleCache
     private lateinit var player: ExoPlayer
 
     private val stateBuilder = PlaybackState.Builder()
@@ -152,6 +162,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private lateinit var bitmapProvider: BitmapProvider
 
     private val coroutineScope = CoroutineScope(Dispatchers.IO) + Job()
+    private val downloadJobs = ConcurrentHashMap<String, Job>()
+    private val downloadStatuses = MutableStateFlow<Map<String, DownloadStatus>>(emptyMap())
 
     private var volumeNormalizationJob: Job? = null
 
@@ -227,7 +239,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             filesDir.resolve("coil").deleteRecursively()
         }
-        cache = SimpleCache(directory, cacheEvictor, StandaloneDatabaseProvider(this))
+        val databaseProvider = StandaloneDatabaseProvider(this)
+        cache = SimpleCache(directory, cacheEvictor, databaseProvider)
+        downloadCache = SimpleCache(
+            filesDir.resolve("downloads").apply { mkdirs() },
+            NoOpCacheEvictor(),
+            databaseProvider
+        )
 
         player = ExoPlayer.Builder(this, createRendersFactory(), createMediaSourceFactory())
             .setHandleAudioBecomingNoisy(true)
@@ -269,15 +287,20 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             addAction(Action.previous.value)
         }
 
-        registerReceiver(notificationActionReceiver, filter)
+        if (isAtLeastAndroid13) {
+            registerReceiver(notificationActionReceiver, filter, Context.RECEIVER_NOT_EXPORTED)
+        } else {
+            registerReceiver(notificationActionReceiver, filter)
+        }
 
         maybeResumePlaybackWhenDeviceConnected()
     }
 
     override fun onTaskRemoved(rootIntent: Intent?) {
-        if (!player.shouldBePlaying) {
-            broadCastPendingIntent<NotificationDismissReceiver>().send()
+        if (player.shouldBePlaying) {
+            return
         }
+        broadCastPendingIntent<NotificationDismissReceiver>().send()
         super.onTaskRemoved(rootIntent)
     }
 
@@ -285,6 +308,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         maybeSavePlayerQueue()
 
         preferences.unregisterOnSharedPreferenceChangeListener(this)
+
+        downloadJobs.values.forEach { it.cancel() }
+        downloadJobs.clear()
 
         player.removeListener(this)
         player.stop()
@@ -295,6 +321,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         mediaSession.isActive = false
         mediaSession.release()
         cache.release()
+        downloadCache.release()
 
         loudnessEnhancer?.release()
 
@@ -464,7 +491,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                 isNotificationStarted = true
                 startForegroundService(this@PlayerService, intent<PlayerService>())
-                startForeground(NotificationId, notification())
+                startMediaForeground(NotificationId, notification())
             }
         }
     }
@@ -614,7 +641,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (player.shouldBePlaying && !isNotificationStarted) {
                 isNotificationStarted = true
                 startForegroundService(this@PlayerService, intent<PlayerService>())
-                startForeground(NotificationId, notification)
+                startMediaForeground(NotificationId, notification)
                 makeInvincible(false)
                 sendOpenEqualizerIntent()
             } else {
@@ -629,7 +656,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
-    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String) {
+    override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
         when (key) {
             persistentQueueKey -> isPersistentQueueEnabled =
                 sharedPreferences.getBoolean(key, isPersistentQueueEnabled)
@@ -747,15 +774,34 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
-    private fun createCacheDataSource(): DataSource.Factory {
-        return CacheDataSource.Factory().setCache(cache).apply {
-            setUpstreamDataSourceFactory(
-                DefaultHttpDataSource.Factory()
-                    .setConnectTimeoutMs(16000)
-                    .setReadTimeoutMs(8000)
-                    .setUserAgent("Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
-            )
+    private fun setDownloadStatus(mediaId: String, status: DownloadStatus) {
+        downloadStatuses.update { current ->
+            if (status == DownloadStatus.None) current - mediaId else current + (mediaId to status)
         }
+    }
+
+    private fun isFullyDownloaded(mediaId: String): Boolean {
+        val length = ContentMetadata.getContentLength(downloadCache.getContentMetadata(mediaId))
+        return length != C.LENGTH_UNSET && downloadCache.isCached(mediaId, 0, length)
+    }
+
+    private fun createHttpDataSourceFactory(): DefaultHttpDataSource.Factory {
+        return DefaultHttpDataSource.Factory()
+            .setConnectTimeoutMs(16000)
+            .setReadTimeoutMs(8000)
+            .setUserAgent("Mozilla/5.0 (Windows NT 10.0; rv:91.0) Gecko/20100101 Firefox/91.0")
+    }
+
+    private fun createCacheDataSource(): DataSource.Factory {
+        val downloadSourceFactory = CacheDataSource.Factory()
+            .setCache(downloadCache)
+            .setUpstreamDataSourceFactory(createHttpDataSourceFactory())
+            .setCacheWriteDataSinkFactory(null)
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+
+        return CacheDataSource.Factory()
+            .setCache(cache)
+            .setUpstreamDataSourceFactory(downloadSourceFactory)
     }
 
     private fun createDataSourceFactory(): DataSource.Factory {
@@ -765,7 +811,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
             val videoId = dataSpec.key ?: error("A key must be set")
 
-            if (cache.isCached(videoId, dataSpec.position, chunkLength)) {
+            if (
+                isRangeCached(downloadCache, videoId, dataSpec.position, chunkLength) ||
+                isRangeCached(cache, videoId, dataSpec.position, chunkLength)
+            ) {
                 dataSpec
             } else {
                 when (videoId) {
@@ -853,14 +902,20 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     private fun createRendersFactory(): RenderersFactory {
-        val audioSink = DefaultAudioSink.Builder()
+        val audioSink = DefaultAudioSink.Builder(this)
             .setEnableFloatOutput(false)
             .setEnableAudioTrackPlaybackParams(false)
             .setOffloadMode(DefaultAudioSink.OFFLOAD_MODE_DISABLED)
             .setAudioProcessorChain(
                 DefaultAudioProcessorChain(
                     emptyArray(),
-                    SilenceSkippingAudioProcessor(2_000_000, 20_000, 256),
+                    SilenceSkippingAudioProcessor(
+                        /* minimumSilenceDurationUs = */ 2_000_000L,
+                        /* silenceRetentionRatio = */ 0.05f,
+                        /* maxSilenceToKeepDurationUs = */ 2_000_000L,
+                        /* minVolumeToKeepPercentageWhenMuting = */ 0,
+                        /* silenceThresholdLevel = */ 256
+                    ),
                     SonicAudioProcessor()
                 )
             )
@@ -885,6 +940,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         val cache: Cache
             get() = this@PlayerService.cache
+
+        val downloadCache: Cache
+            get() = this@PlayerService.downloadCache
 
         val mediaSession
             get() = this@PlayerService.mediaSession
@@ -960,6 +1018,107 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             radioJob?.cancel()
             radio = null
         }
+
+        fun isDownloaded(mediaId: String): Boolean = isFullyDownloaded(mediaId)
+
+        fun isAvailableOffline(mediaId: String, contentLength: Long): Boolean {
+            return isFullyDownloaded(mediaId) || cache.isCached(mediaId, 0, contentLength)
+        }
+
+        fun downloadStatus(mediaId: String): DownloadStatus {
+            return downloadStatuses.value[mediaId]
+                ?: if (isFullyDownloaded(mediaId)) DownloadStatus.Completed else DownloadStatus.None
+        }
+
+        fun downloadStatusFlow(mediaId: String) = downloadStatuses
+            .map { statuses ->
+                statuses[mediaId]
+                    ?: if (isFullyDownloaded(mediaId)) DownloadStatus.Completed else DownloadStatus.None
+            }
+            .distinctUntilChanged()
+
+        fun download(mediaItem: MediaItem) {
+            val mediaId = mediaItem.mediaId
+            if (mediaId in downloadJobs || isFullyDownloaded(mediaId)) return
+
+            setDownloadStatus(mediaId, DownloadStatus.Downloading)
+            downloadJobs[mediaId] = coroutineScope.launch {
+                val result = runCatching {
+                    val response = Innertube.player(PlayerBody(videoId = mediaId))?.getOrThrow()
+                        ?: error("unavailable")
+                    val format = response.streamingData?.highestQualityFormat
+                        ?: throw PlayableFormatNotFoundException()
+                    val url = format.url ?: throw PlayableFormatNotFoundException()
+
+                    query {
+                        Database.insert(mediaItem)
+                        Database.insert(
+                            Format(
+                                songId = mediaId,
+                                itag = format.itag,
+                                mimeType = format.mimeType,
+                                bitrate = format.bitrate,
+                                loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
+                                contentLength = format.contentLength,
+                                lastModified = format.lastModified
+                            )
+                        )
+                    }
+
+                    CacheWriter(
+                        CacheDataSource.Factory()
+                            .setCache(this@PlayerService.downloadCache)
+                            .setUpstreamDataSourceFactory(createHttpDataSourceFactory())
+                            .createDataSource(),
+                        DataSpec.Builder()
+                            .setUri(url)
+                            .setKey(mediaId)
+                            .setLength(format.contentLength ?: C.LENGTH_UNSET)
+                            .build(),
+                        null,
+                        null
+                    ).cache()
+
+                    val storedLength = format.contentLength
+                        ?: ContentMetadata.getContentLength(
+                            this@PlayerService.downloadCache.getContentMetadata(mediaId)
+                        ).takeIf { it != C.LENGTH_UNSET }
+
+                    if (storedLength != null && storedLength != format.contentLength) {
+                        query {
+                            Database.insert(
+                                Format(
+                                    songId = mediaId,
+                                    itag = format.itag,
+                                    mimeType = format.mimeType,
+                                    bitrate = format.bitrate,
+                                    loudnessDb = response.playerConfig?.audioConfig?.normalizedLoudnessDb,
+                                    contentLength = storedLength,
+                                    lastModified = format.lastModified
+                                )
+                            )
+                        }
+                    }
+                }
+
+                downloadJobs.remove(mediaId)
+                setDownloadStatus(
+                    mediaId,
+                    if (result.isSuccess && isFullyDownloaded(mediaId)) {
+                        DownloadStatus.Completed
+                    } else {
+                        result.exceptionOrNull()?.printStackTrace()
+                        DownloadStatus.Failed
+                    }
+                )
+            }
+        }
+
+        fun removeDownload(mediaId: String) {
+            downloadJobs.remove(mediaId)?.cancel()
+            this@PlayerService.downloadCache.removeResource(mediaId)
+            setDownloadStatus(mediaId, DownloadStatus.None)
+        }
     }
 
     private class SessionCallback(private val player: Player) : MediaSession.Callback() {
@@ -1015,5 +1174,16 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         const val SleepTimerNotificationId = 1002
         const val SleepTimerNotificationChannelId = "sleep_timer_channel_id"
+
+        fun isRangeCached(cache: Cache, key: String, position: Long, length: Long): Boolean {
+            return cache.getCachedLength(key, position, length) > 0
+        }
     }
+}
+
+enum class DownloadStatus {
+    None,
+    Downloading,
+    Completed,
+    Failed
 }

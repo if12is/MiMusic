@@ -1,14 +1,18 @@
 package it.vfsfitvnm.vimusic
 
+import android.Manifest
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.content.ServiceConnection
 import android.content.SharedPreferences
+import android.content.pm.PackageManager
 import android.graphics.Bitmap
 import android.os.Bundle
 import android.os.IBinder
 import android.widget.Toast
+import androidx.core.content.ContextCompat
+import androidx.core.content.edit
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -94,9 +98,12 @@ import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.getEnum
+import it.vfsfitvnm.vimusic.utils.GitHubUpdater
 import it.vfsfitvnm.vimusic.utils.intent
+import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
+import it.vfsfitvnm.vimusic.utils.lastUpdateCheckMsKey
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
@@ -143,6 +150,9 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         persistMap = lastCustomNonConfigurationInstance as? PersistMap ?: PersistMap()
 
         WindowCompat.setDecorFitsSystemWindows(window, false)
+
+        requestNotificationPermission()
+        maybeCheckForUpdates()
 
         val launchedFromNotification = intent?.extras?.getBoolean("expandPlayerBottomSheet") == true
 
@@ -499,6 +509,39 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         }
 
         super.onDestroy()
+    }
+
+    private fun requestNotificationPermission() {
+        if (
+            isAtLeastAndroid13 &&
+            ContextCompat.checkSelfPermission(this, Manifest.permission.POST_NOTIFICATIONS) !=
+            PackageManager.PERMISSION_GRANTED
+        ) {
+            requestPermissions(arrayOf(Manifest.permission.POST_NOTIFICATIONS), 1001)
+        }
+    }
+
+    private fun maybeCheckForUpdates() {
+        lifecycleScope.launch(Dispatchers.IO) {
+            val lastCheckMs = preferences.getLong(lastUpdateCheckMsKey, 0L)
+            if (System.currentTimeMillis() - lastCheckMs < 24 * 60 * 60 * 1000L) {
+                return@launch
+            }
+
+            preferences.edit { putLong(lastUpdateCheckMsKey, System.currentTimeMillis()) }
+
+            val release = runCatching { GitHubUpdater.fetchLatestRelease() }.getOrNull()
+                ?: return@launch
+            if (!release.isNewer) return@launch
+
+            withContext(Dispatchers.Main) {
+                Toast.makeText(
+                    this@MainActivity,
+                    UiStrings(preferredAppLanguage()).updateAvailableText(release.versionName),
+                    Toast.LENGTH_LONG
+                ).show()
+            }
+        }
     }
 
     private fun setSystemBarAppearance(isDark: Boolean) {

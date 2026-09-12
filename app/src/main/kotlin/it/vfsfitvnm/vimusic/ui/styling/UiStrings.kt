@@ -272,6 +272,31 @@ class UiStrings(private val language: AppLanguage) {
     val play = t("Play", "تشغيل")
     val pause = t("Pause", "إيقاف مؤقت")
 
+    val download = t("Download", "تنزيل")
+    val downloading = t("Downloading…", "جاري التنزيل…")
+    val downloaded = t("Downloaded", "تم التنزيل")
+    val removeDownload = t("Remove download", "إزالة التنزيل")
+    val downloadStarted = t("Download started", "بدأ التنزيل")
+    val downloadCompleted = t("Song downloaded for offline playback", "تم تنزيل الأغنية للتشغيل دون اتصال")
+    val downloadFailed = t("Couldn't download this song", "تعذر تنزيل هذه الأغنية")
+    val downloadRemoved = t("Download removed", "تمت إزالة التنزيل")
+
+    val updates = t("UPDATES", "التحديثات")
+    val checkForUpdates = t("Check for updates", "التحقق من التحديثات")
+    val checkForUpdatesDescription = t(
+        "Download the latest GitHub release when a newer version is available",
+        "تنزيل أحدث إصدار من GitHub عند توفر نسخة أحدث"
+    )
+    val updateAvailable = t("Update available", "يتوفر تحديث")
+    fun updateAvailableText(version: String) = t(
+        "Version $version is available. Download and install it now?",
+        "الإصدار $version متاح. هل تريد تنزيله وتثبيته الآن؟"
+    )
+    val upToDate = t("You are using the latest version", "أنت تستخدم أحدث إصدار")
+    val updateCheckFailed = t("Couldn't check for updates", "تعذر التحقق من التحديثات")
+    val downloadingUpdate = t("Downloading update…", "جاري تنزيل التحديث…")
+    val installUpdate = t("Install", "تثبيت")
+
     fun colorPaletteName(value: ColorPaletteName) = when (value) {
         ColorPaletteName.Default -> themeDefault
         ColorPaletteName.Dynamic -> themeDynamic

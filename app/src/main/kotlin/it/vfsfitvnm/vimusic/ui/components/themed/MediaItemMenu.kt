@@ -3,11 +3,11 @@ package it.vfsfitvnm.vimusic.ui.components.themed
 import android.content.Intent
 import androidx.activity.compose.BackHandler
 import androidx.compose.animation.AnimatedContent
-import androidx.compose.animation.AnimatedContentScope
+import androidx.compose.animation.AnimatedContentTransitionScope
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.animateContentSize
 import androidx.compose.animation.core.tween
-import androidx.compose.animation.with
+import androidx.compose.animation.togetherWith
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -54,6 +54,7 @@ import it.vfsfitvnm.vimusic.models.Playlist
 import it.vfsfitvnm.vimusic.models.Song
 import it.vfsfitvnm.vimusic.models.SongPlaylistMap
 import it.vfsfitvnm.vimusic.query
+import it.vfsfitvnm.vimusic.service.DownloadStatus
 import it.vfsfitvnm.vimusic.transaction
 import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.screens.albumRoute
@@ -71,6 +72,7 @@ import it.vfsfitvnm.vimusic.utils.formatAsDuration
 import it.vfsfitvnm.vimusic.utils.medium
 import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.thumbnail
+import it.vfsfitvnm.vimusic.utils.toast
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
@@ -99,6 +101,7 @@ fun InHistoryMediaItemMenu(
                 query {
                     // Not sure we can to this here
                     binder?.cache?.removeResource(song.id)
+                    binder?.removeDownload(song.id)
                     Database.incrementTotalPlayTimeMs(song.id, -song.totalPlayTimeMs)
                 }
             }
@@ -272,6 +275,11 @@ fun MediaItemMenu(
     val (colorPalette) = LocalAppearance.current
     val density = LocalDensity.current
     val strings = LocalStrings.current
+    val context = LocalContext.current
+    val binder = LocalPlayerServiceBinder.current
+    val downloadStatus by remember(mediaItem.mediaId, binder) {
+        binder?.downloadStatusFlow(mediaItem.mediaId) ?: flowOf(DownloadStatus.None)
+    }.collectAsState(initial = binder?.downloadStatus(mediaItem.mediaId) ?: DownloadStatus.None)
 
     var isViewingPlaylists by remember {
         mutableStateOf(false)
@@ -317,9 +325,9 @@ fun MediaItemMenu(
         transitionSpec = {
             val animationSpec = tween<IntOffset>(400)
             val slideDirection =
-                if (targetState) AnimatedContentScope.SlideDirection.Left else AnimatedContentScope.SlideDirection.Right
+                if (targetState) AnimatedContentTransitionScope.SlideDirection.Left else AnimatedContentTransitionScope.SlideDirection.Right
 
-            slideIntoContainer(slideDirection, animationSpec) with
+            slideIntoContainer(slideDirection, animationSpec) togetherWith
                     slideOutOfContainer(slideDirection, animationSpec)
         }
     ) { currentIsViewingPlaylists ->
@@ -496,6 +504,38 @@ fun MediaItemMenu(
                         }
                     )
                 }
+
+                MenuEntry(
+                    icon = R.drawable.download,
+                    text = when (downloadStatus) {
+                        DownloadStatus.Downloading -> strings.downloading
+                        DownloadStatus.Completed -> strings.removeDownload
+                        DownloadStatus.Failed -> strings.download
+                        DownloadStatus.None -> strings.download
+                    },
+                    secondaryText = when (downloadStatus) {
+                        DownloadStatus.Failed -> strings.downloadFailed
+                        DownloadStatus.Completed -> strings.downloaded
+                        else -> null
+                    },
+                    enabled = downloadStatus != DownloadStatus.Downloading,
+                    onClick = {
+                        when (downloadStatus) {
+                            DownloadStatus.Completed -> {
+                                binder?.removeDownload(mediaItem.mediaId)
+                                context.toast(strings.downloadRemoved)
+                                onDismiss()
+                            }
+
+                            DownloadStatus.Downloading -> Unit
+
+                            else -> {
+                                binder?.download(mediaItem)
+                                context.toast(strings.downloadStarted)
+                            }
+                        }
+                    }
+                )
 
                 onGoToEqualizer?.let { onGoToEqualizer ->
                     MenuEntry(
