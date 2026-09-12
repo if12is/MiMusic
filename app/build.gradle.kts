@@ -12,8 +12,17 @@ android {
         applicationId = "it.vfsfitvnm.vimusic"
         minSdk = 21
         targetSdk = 34
-        versionCode = 22
-        versionName = "0.6.1"
+        versionCode = 23
+        versionName = "0.6.2"
+    }
+
+    signingConfigs {
+        create("release") {
+            storeFile = file("keystore/mimusic-release.jks")
+            storePassword = "mimusic-release"
+            keyAlias = "mimusic"
+            keyPassword = "mimusic-release"
+        }
     }
 
     splits {
@@ -33,7 +42,7 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             manifestPlaceholders["appName"] = "MiMusic"
-            signingConfig = signingConfigs.getByName("debug")
+            signingConfig = signingConfigs.getByName("release")
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }

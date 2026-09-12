@@ -26,9 +26,14 @@ import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.ui.components.themed.ConfirmationDialog
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import android.content.ClipData
+import android.content.ClipboardManager
+import android.content.Context
 import it.vfsfitvnm.vimusic.utils.GitHubRelease
 import it.vfsfitvnm.vimusic.utils.GitHubUpdater
 import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
+import it.vfsfitvnm.vimusic.utils.UpdateInstallResult
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.toast
 import kotlinx.coroutines.Dispatchers
@@ -73,8 +78,16 @@ fun About() {
                 if (apk == null) {
                     statusText = strings.updateCheckFailed
                 } else {
-                    statusText = null
-                    GitHubUpdater.installApk(context, apk)
+                    statusText = when (val result = GitHubUpdater.installApk(context, apk)) {
+                        UpdateInstallResult.Started -> null
+                        UpdateInstallResult.SignatureMismatch -> strings.updateSignatureMismatch
+                        UpdateInstallResult.PackageMismatch -> strings.updatePackageMismatch
+                        is UpdateInstallResult.Failed -> result.message
+                            ?: strings.updateInstallFailed
+                    }
+                    if (statusText != null) {
+                        context.toast(statusText!!)
+                    }
                 }
             }
         }
@@ -159,6 +172,26 @@ fun About() {
         )
 
         SettingsGroupSpacer()
+
+        SettingsEntry(
+            title = strings.playbackLog,
+            text = strings.playbackLogDescription,
+            onClick = {
+                val log = PlaybackLogStore.snapshot()
+                if (log.isBlank()) {
+                    context.toast(strings.playbackLogEmpty)
+                } else {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("MiMusic playback log", log))
+                    context.toast(strings.playbackLogCopied)
+                    runCatching {
+                        context.startActivity(
+                            PlaybackLogStore.shareIntent().addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    }
+                }
+            }
+        )
 
         SettingsEntryGroupText(title = strings.troubleshooting)
 
