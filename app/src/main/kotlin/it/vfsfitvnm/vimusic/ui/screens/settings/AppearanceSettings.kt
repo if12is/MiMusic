@@ -107,7 +107,7 @@ fun AppearanceSettings() {
             title = strings.thumbnailRoundness,
             selectedValue = thumbnailRoundness,
             onValueSelected = { thumbnailRoundness = it },
-            valueText = strings::thumbnailRoundness,
+            valueText = strings::thumbnailRoundnessName,
             trailingContent = {
                 Spacer(
                     modifier = Modifier

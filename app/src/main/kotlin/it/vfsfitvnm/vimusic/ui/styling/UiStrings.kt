@@ -284,7 +284,7 @@ class UiStrings(private val language: AppLanguage) {
         ColorPaletteMode.System -> themeSystem
     }
 
-    fun thumbnailRoundness(value: ThumbnailRoundness) = when (value) {
+    fun thumbnailRoundnessName(value: ThumbnailRoundness) = when (value) {
         ThumbnailRoundness.None -> roundnessNone
         ThumbnailRoundness.Light -> roundnessLight
         ThumbnailRoundness.Medium -> roundnessMedium
