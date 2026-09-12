@@ -90,7 +90,7 @@ abstract class InvincibleService : Service() {
                     addAction(Intent.ACTION_SCREEN_OFF)
                 }
                 if (isAtLeastAndroid13) {
-                    registerReceiver(this, filter, Context.RECEIVER_NOT_EXPORTED)
+                    registerReceiver(this, filter, Context.RECEIVER_EXPORTED)
                 } else {
                     registerReceiver(this, filter)
                 }
