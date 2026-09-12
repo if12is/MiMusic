@@ -1,11 +1,10 @@
-@file:Suppress("INVISIBLE_MEMBER", "INVISIBLE_REFERENCE")
-
 package it.vfsfitvnm.compose.reordering
 
 import androidx.compose.foundation.gestures.FlingBehavior
 import androidx.compose.foundation.gestures.ScrollableDefaults
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.PaddingValues
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListScope
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment
@@ -25,16 +24,15 @@ fun ReorderingLazyColumn(
     userScrollEnabled: Boolean = true,
     content: LazyListScope.() -> Unit
 ) {
-    ReorderingLazyList(
+    LazyColumn(
         modifier = modifier,
-        reorderingState = reorderingState,
+        state = reorderingState.lazyListState,
         contentPadding = contentPadding,
-        flingBehavior = flingBehavior,
-        horizontalAlignment = horizontalAlignment,
-        verticalArrangement = verticalArrangement,
-        isVertical = true,
         reverseLayout = reverseLayout,
-        userScrollEnabled = userScrollEnabled,
+        verticalArrangement = verticalArrangement,
+        horizontalAlignment = horizontalAlignment,
+        flingBehavior = flingBehavior,
+        userScrollEnabled = userScrollEnabled && !reorderingState.isDragging,
         content = content
     )
 }
