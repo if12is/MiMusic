@@ -31,6 +31,7 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.add
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.material.ripple.LocalRippleTheme
 import androidx.compose.material.ripple.RippleAlpha
@@ -57,6 +58,7 @@ import androidx.compose.ui.platform.LocalLayoutDirection
 import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.unit.coerceIn
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.unit.times
 import androidx.core.view.WindowCompat
 import androidx.lifecycle.lifecycleScope
 import androidx.media3.common.MediaItem
@@ -72,6 +74,7 @@ import it.vfsfitvnm.innertube.requests.song
 import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
+import it.vfsfitvnm.vimusic.enums.NavigationStyle
 import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
 import it.vfsfitvnm.vimusic.service.PlayerService
 import it.vfsfitvnm.vimusic.ui.components.BottomSheetMenu
@@ -105,6 +108,7 @@ import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
 import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
+import it.vfsfitvnm.vimusic.utils.navigationStyleKey
 import it.vfsfitvnm.vimusic.utils.lastUpdateCheckMsKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
@@ -358,16 +362,35 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                 val density = LocalDensity.current
                 val windowsInsets = WindowInsets.systemBars
                 val bottomDp = with(density) { windowsInsets.getBottom(density).toDp() }
+                val navigationStyle by rememberPreference(
+                    navigationStyleKey,
+                    NavigationStyle.Side
+                )
+                val isGlassNavigation = navigationStyle == NavigationStyle.GlassBottom
+                val glassNavigationSpace =
+                    if (isGlassNavigation) Dimensions.glassNavigationBarSpace else 0.dp
 
                 val playerBottomSheetState = rememberBottomSheetState(
                     dismissedBound = 0.dp,
-                    collapsedBound = Dimensions.collapsedPlayer + bottomDp,
+                    collapsedBound = Dimensions.collapsedPlayer + if (isGlassNavigation) {
+                        0.dp
+                    } else {
+                        bottomDp
+                    },
                     expandedBound = maxHeight,
                 )
 
-                val playerAwareWindowInsets by remember(bottomDp, playerBottomSheetState.value) {
+                val playerAwareWindowInsets by remember(
+                    bottomDp,
+                    glassNavigationSpace,
+                    playerBottomSheetState.value
+                ) {
                     derivedStateOf {
-                        val bottom = playerBottomSheetState.value.coerceIn(bottomDp, playerBottomSheetState.collapsedBound)
+                        val playerReserved = playerBottomSheetState.value.coerceIn(
+                            0.dp,
+                            Dimensions.collapsedPlayer
+                        )
+                        val bottom = bottomDp + glassNavigationSpace + playerReserved
 
                         windowsInsets
                             .only(WindowInsetsSides.Horizontal + WindowInsetsSides.Top)
@@ -407,10 +430,17 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                         }
                     )
 
+                    val playerLift = (glassNavigationSpace + if (isGlassNavigation) {
+                        bottomDp
+                    } else {
+                        0.dp
+                    }) * (1f - playerBottomSheetState.progress.coerceIn(0f, 1f))
+
                     Player(
                         layoutState = playerBottomSheetState,
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
+                            .padding(bottom = playerLift)
                     )
 
                     BottomSheetMenu(

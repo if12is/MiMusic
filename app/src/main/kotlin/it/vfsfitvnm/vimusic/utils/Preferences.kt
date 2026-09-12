@@ -41,6 +41,7 @@ const val pauseSearchHistoryKey = "pauseSearchHistory"
 const val lastUpdateCheckMsKey = "lastUpdateCheckMs"
 const val playbackSpeedKey = "playbackSpeed"
 const val keepScreenOnKey = "keepScreenOn"
+const val navigationStyleKey = "navigationStyle"
 
 inline fun <reified T : Enum<T>> SharedPreferences.getEnum(
     key: String,

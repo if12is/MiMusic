@@ -22,6 +22,7 @@ import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
+import it.vfsfitvnm.vimusic.enums.NavigationStyle
 import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
@@ -33,6 +34,7 @@ import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.navigationStyleKey
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.useSystemFontKey
 
@@ -48,6 +50,10 @@ fun AppearanceSettings() {
     var thumbnailRoundness by rememberPreference(
         thumbnailRoundnessKey,
         ThumbnailRoundness.Light
+    )
+    var navigationStyle by rememberPreference(
+        navigationStyleKey,
+        NavigationStyle.Side
     )
     var useSystemFont by rememberPreference(useSystemFontKey, false)
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
@@ -98,6 +104,19 @@ fun AppearanceSettings() {
             onValueSelected = { colorPaletteMode = it },
             valueText = strings::colorPaletteMode
         )
+
+        SettingsGroupSpacer()
+
+        SettingsEntryGroupText(title = strings.navigationGroup)
+
+        EnumValueSelectorSettingsEntry(
+            title = strings.navigationStyle,
+            selectedValue = navigationStyle,
+            onValueSelected = { navigationStyle = it },
+            valueText = strings::navigationStyleName
+        )
+
+        SettingsDescription(text = strings.navigationStyleDescription)
 
         SettingsGroupSpacer()
 

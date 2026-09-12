@@ -7,6 +7,7 @@ import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
 import it.vfsfitvnm.vimusic.enums.PlaylistSortBy
 import it.vfsfitvnm.vimusic.enums.SongSortBy
+import it.vfsfitvnm.vimusic.enums.NavigationStyle
 import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
 
 class UiStrings(private val language: AppLanguage) {
@@ -46,6 +47,15 @@ class UiStrings(private val language: AppLanguage) {
 
     val colors = t("COLORS", "الألوان")
     val shapes = t("SHAPES", "الأشكال")
+    val navigationGroup = t("NAVIGATION", "التنقل")
+    val navigationStyle = t("Menu style", "شكل القائمة")
+    val navigationStyleDescription = t(
+        "Keep the side menu or use a glassy bar at the bottom",
+        "أبقِ القائمة الجانبية أو استخدم شريطاً زجاجياً في الأسفل"
+    )
+    val navigationStyleSide = t("Side menu", "قائمة جانبية")
+    val navigationStyleGlass = t("Glassy bottom bar", "شريط سفلي زجاجي")
+    val navigationAction = t("Menu action", "إجراء القائمة")
     val textGroup = t("TEXT", "النص")
     val lockscreen = t("LOCKSCREEN", "شاشة القفل")
     val playerGroup = t("PLAYER", "المشغّل")
@@ -332,6 +342,11 @@ class UiStrings(private val language: AppLanguage) {
         ColorPaletteMode.Light -> themeLight
         ColorPaletteMode.Dark -> themeDark
         ColorPaletteMode.System -> themeSystem
+    }
+
+    fun navigationStyleName(value: NavigationStyle) = when (value) {
+        NavigationStyle.Side -> navigationStyleSide
+        NavigationStyle.GlassBottom -> navigationStyleGlass
     }
 
     fun thumbnailRoundnessName(value: ThumbnailRoundness) = when (value) {
