@@ -21,6 +21,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
@@ -64,14 +65,17 @@ import it.vfsfitvnm.vimusic.utils.completed
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
-import it.vfsfitvnm.vimusic.utils.parseM3uVideoIds
+import it.vfsfitvnm.vimusic.utils.parsePlaylistFile
 import it.vfsfitvnm.vimusic.utils.readTextFromUri
+import it.vfsfitvnm.vimusic.utils.resolveImportedTracks
 import it.vfsfitvnm.vimusic.utils.smartShuffled
+import it.vfsfitvnm.vimusic.utils.songsToCsv
 import it.vfsfitvnm.vimusic.utils.songsToM3u
 import it.vfsfitvnm.vimusic.utils.toast
 import it.vfsfitvnm.vimusic.utils.writeTextToUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
@@ -87,6 +91,7 @@ fun LocalPlaylistSongs(
     val menuState = LocalMenuState.current
     val strings = it.vfsfitvnm.vimusic.utils.LocalStrings.current
     val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     var playlistWithSongs by persist<PlaylistWithSongs?>("localPlaylist/$playlistId/playlistWithSongs")
 
@@ -99,33 +104,42 @@ fun LocalPlaylistSongs(
         }
     }
 
-    val importM3uLauncher = rememberLauncherForActivityResult(
+    val exportCsvLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        playlistWithSongs?.songs?.let { songs ->
+            context.writeTextToUri(uri, songsToCsv(songs))
+        }
+    }
+
+    val importPlaylistLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.OpenDocument()
     ) { uri ->
         uri ?: return@rememberLauncherForActivityResult
-        val ids = parseM3uVideoIds(context.readTextFromUri(uri))
-        if (ids.isEmpty()) return@rememberLauncherForActivityResult
-        val start = playlistWithSongs?.songs?.size ?: 0
-        query {
-            ids.forEach { id ->
-                Database.insert(
-                    Song(
-                        id = id,
-                        title = id,
-                        durationText = null,
-                        thumbnailUrl = null
-                    )
+        coroutineScope.launch {
+            context.toast(strings.importingPlaylist)
+            val songs = withContext(Dispatchers.IO) {
+                resolveImportedTracks(parsePlaylistFile(context.readTextFromUri(uri)))
+            }
+            if (songs.isEmpty()) {
+                context.toast(strings.importEmpty)
+                return@launch
+            }
+            val start = playlistWithSongs?.songs?.size ?: 0
+            query {
+                songs.forEach { song -> Database.insert(song) }
+                Database.insertSongPlaylistMaps(
+                    songs.mapIndexed { index, song ->
+                        SongPlaylistMap(
+                            songId = song.id,
+                            playlistId = playlistId,
+                            position = start + index
+                        )
+                    }
                 )
             }
-            Database.insertSongPlaylistMaps(
-                ids.mapIndexed { index, id ->
-                    SongPlaylistMap(
-                        songId = id,
-                        playlistId = playlistId,
-                        position = start + index
-                    )
-                }
-            )
+            context.toast(strings.importFinished(songs.size))
         }
     }
 
@@ -289,12 +303,29 @@ fun LocalPlaylistSongs(
                                     )
 
                                     MenuEntry(
+                                        icon = R.drawable.share_social,
+                                        text = strings.exportCsv,
+                                        onClick = {
+                                            menuState.hide()
+                                            exportCsvLauncher.launch(
+                                                "${playlistWithSongs?.playlist?.name ?: "playlist"}.csv"
+                                            )
+                                        }
+                                    )
+
+                                    MenuEntry(
                                         icon = R.drawable.download,
                                         text = strings.importM3u,
                                         onClick = {
                                             menuState.hide()
-                                            importM3uLauncher.launch(
-                                                arrayOf("audio/*", "text/*", "*/*")
+                                            importPlaylistLauncher.launch(
+                                                arrayOf(
+                                                    "audio/*",
+                                                    "text/*",
+                                                    "text/csv",
+                                                    "text/comma-separated-values",
+                                                    "*/*"
+                                                )
                                             )
                                         }
                                     )

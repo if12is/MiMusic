@@ -460,7 +460,18 @@ class UiStrings(private val language: AppLanguage) {
     val similarSongs = t("Similar songs", "أغانٍ مشابهة")
     val editMetadata = t("Edit title", "تعديل العنوان")
     val exportM3u = t("Export M3U", "تصدير M3U")
-    val importM3u = t("Import M3U", "استيراد M3U")
+    val importM3u = t("Import M3U / CSV", "استيراد M3U / CSV")
+    val exportCsv = t("Export CSV", "تصدير CSV")
+    val importPlaylistFile = t("Import playlist file", "استيراد قائمة من ملف")
+    val importPlaylistHint = t(
+        "YouTube Music, Spotify, or Anghami M3U/CSV",
+        "يوتيوب ميوزك أو سبوتيفاي أو أنغامي بصيغة M3U أو CSV"
+    )
+    val importFinished: (Int) -> String = { count ->
+        t("Imported $count songs", "تم استيراد $count أغنية")
+    }
+    val importEmpty = t("No songs found in this file", "لا توجد أغاني في هذا الملف")
+    val importingPlaylist = t("Importing playlist…", "جاري استيراد القائمة…")
     val exportFile = t("Save file", "حفظ الملف")
     val continueRecitation = t("Continue recitation", "متابعة التلاوة")
     val shareCard = t("Share card", "مشاركة كارت")
