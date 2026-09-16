@@ -75,6 +75,12 @@ val DefaultLightColorPalette = ColorPalette(
     isDark = false
 )
 
+val PureBlackColorPalette = DefaultDarkColorPalette.copy(
+    background0 = Color.Black,
+    background1 = Color.Black,
+    background2 = Color.Black
+)
+
 val GoldColorPalette = ColorPalette(
     background0 = Color(0xff14110c),
     background1 = Color(0xff1c1810),

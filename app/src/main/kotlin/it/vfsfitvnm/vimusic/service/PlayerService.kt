@@ -689,7 +689,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (player.shouldBePlaying) {
                 makeInvincible(false)
                 sendOpenEqualizerIntent()
-                audioFx.apply(player.audioSessionId)
+                audioFx.apply(this@PlayerService.player.audioSessionId)
             } else {
                 makeInvincible(true)
                 sendCloseEqualizerIntent()
@@ -1415,6 +1415,15 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             downloadJobs.remove(mediaId)?.cancel()
             this@PlayerService.downloadCache.removeResource(mediaId)
             setDownloadStatus(mediaId, DownloadStatus.None)
+        }
+
+        fun clearDownloads() {
+            downloadJobs.values.forEach { it.cancel() }
+            downloadJobs.clear()
+            this@PlayerService.downloadCache.keys.toList().forEach { key ->
+                this@PlayerService.downloadCache.removeResource(key)
+            }
+            downloadStatuses.value = emptyMap()
         }
     }
 
