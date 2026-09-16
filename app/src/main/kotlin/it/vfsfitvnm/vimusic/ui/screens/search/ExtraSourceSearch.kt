@@ -8,14 +8,19 @@ import androidx.compose.foundation.layout.WindowInsetsSides
 import androidx.compose.foundation.layout.asPaddingValues
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.only
+import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.lazy.rememberLazyListState
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.text.BasicTextField
+import androidx.compose.foundation.text.KeyboardActions
 import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
@@ -23,79 +28,76 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persistList
-import it.vfsfitvnm.innertube.models.NavigationEndpoint
-import it.vfsfitvnm.vimusic.Database
+import it.vfsfitvnm.innertube.utils.ExtraTrack
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
-import it.vfsfitvnm.vimusic.models.Song
-import it.vfsfitvnm.vimusic.ui.components.LocalMenuState
 import it.vfsfitvnm.vimusic.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
-import it.vfsfitvnm.vimusic.ui.components.themed.InHistoryMediaItemMenu
 import it.vfsfitvnm.vimusic.ui.components.themed.SecondaryTextButton
 import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
-import it.vfsfitvnm.vimusic.ui.styling.px
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.align
-import it.vfsfitvnm.vimusic.utils.asLocalMediaItem
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.forcePlay
-import it.vfsfitvnm.vimusic.utils.matchesLooseArabic
 import it.vfsfitvnm.vimusic.utils.medium
-import it.vfsfitvnm.vimusic.utils.queryDeviceSongs
+import it.vfsfitvnm.vimusic.utils.parsePodcastFeedUrls
+import it.vfsfitvnm.vimusic.utils.podcastFeedsKey
+import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.searchExtraSources
+import it.vfsfitvnm.vimusic.utils.secondary
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
-fun LocalSongSearch(
+fun ExtraSourceSearch(
     textFieldValue: TextFieldValue,
     onTextFieldValueChanged: (TextFieldValue) -> Unit,
     decorationBox: @Composable (@Composable () -> Unit) -> Unit
 ) {
     val (colorPalette, typography) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
-    val menuState = LocalMenuState.current
     val context = LocalContext.current
+    val strings = LocalStrings.current
 
-    var items by persistList<Song>("search/local/songs")
+    var items by persistList<ExtraTrack>("search/extra/tracks")
+    var error by remember { mutableStateOf<String?>(null) }
+    var loading by remember { mutableStateOf(false) }
 
     LaunchedEffect(textFieldValue.text) {
-        if (textFieldValue.text.length > 1) {
-            Database.allPlayedSongs().collect { songs ->
-                val device = withContext(Dispatchers.IO) {
-                    runCatching { context.queryDeviceSongs() }.getOrDefault(emptyList())
-                }
-                items = (songs + device)
-                    .distinctBy { it.id }
-                    .filter { song ->
-                        song.title.matchesLooseArabic(textFieldValue.text) ||
-                            song.artistsText.orEmpty().matchesLooseArabic(textFieldValue.text)
-                    }
+        kotlinx.coroutines.delay(280)
+        loading = true
+        error = null
+        val result = withContext(Dispatchers.IO) {
+            runCatching {
+                val feeds = parsePodcastFeedUrls(
+                    context.preferences.getString(podcastFeedsKey, "").orEmpty()
+                )
+                searchExtraSources(textFieldValue.text, feeds, context.preferences)
             }
         }
+        loading = false
+        result.onSuccess { items = it }
+            .onFailure { error = it.message }
     }
 
     val thumbnailSizeDp = Dimensions.thumbnails.song
-    val thumbnailSizePx = thumbnailSizeDp.px
-
     val lazyListState = rememberLazyListState()
 
     Box {
         LazyColumn(
             state = lazyListState,
             contentPadding = LocalPlayerAwareWindowInsets.current
-                .only(WindowInsetsSides.Vertical + WindowInsetsSides.End).asPaddingValues(),
-            modifier = Modifier
-                .fillMaxSize()
+                .only(WindowInsetsSides.Vertical + WindowInsetsSides.End)
+                .asPaddingValues(),
+            modifier = Modifier.fillMaxSize()
         ) {
-            item(
-                key = "header",
-                contentType = 0
-            ) {
+            item(key = "header", contentType = 0) {
                 Header(
                     titleContent = {
                         BasicTextField(
@@ -104,7 +106,8 @@ fun LocalSongSearch(
                             textStyle = typography.xxl.medium.align(TextAlign.End),
                             singleLine = true,
                             maxLines = 1,
-                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Done),
+                            keyboardOptions = KeyboardOptions(imeAction = ImeAction.Search),
+                            keyboardActions = KeyboardActions(onSearch = { }),
                             cursorBrush = SolidColor(colorPalette.text),
                             decorationBox = decorationBox
                         )
@@ -112,7 +115,7 @@ fun LocalSongSearch(
                     actionsContent = {
                         if (textFieldValue.text.isNotEmpty()) {
                             SecondaryTextButton(
-                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.clear,
+                                text = strings.clear,
                                 onClick = { onTextFieldValueChanged(TextFieldValue()) }
                             )
                         }
@@ -120,39 +123,37 @@ fun LocalSongSearch(
                 )
             }
 
-            items(
-                items = items,
-                key = Song::id,
-            ) { song ->
+            if (error != null) {
+                item(key = "error") {
+                    BasicText(
+                        text = strings.anErrorOccurred,
+                        style = typography.s.secondary,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            } else if (!loading && items.isEmpty()) {
+                item(key = "empty") {
+                    BasicText(
+                        text = strings.extraSourcesHint,
+                        style = typography.s.secondary,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                }
+            }
+
+            items(items, key = ExtraTrack::mediaId) { track ->
                 SongItem(
-                    song = song,
-                    thumbnailSizePx = thumbnailSizePx,
+                    thumbnailUrl = track.thumbnailUrl,
+                    title = track.title,
+                    authors = listOfNotNull(track.artist, track.source).joinToString(" · "),
+                    duration = track.durationText,
                     thumbnailSizeDp = thumbnailSizeDp,
                     modifier = Modifier
                         .combinedClickable(
-                            onLongClick = {
-                                menuState.display {
-                                    InHistoryMediaItemMenu(
-                                        song = song,
-                                        onDismiss = menuState::hide
-                                    )
-                                }
-                            },
+                            onLongClick = {},
                             onClick = {
-                                val mediaItem = if (song.id.startsWith("local:")) {
-                                    song.asLocalMediaItem()
-                                } else {
-                                    song.asMediaItem
-                                }
                                 binder?.stopRadio()
-                                binder?.player?.forcePlay(mediaItem)
-                                if (!song.id.startsWith("local:") &&
-                                    !it.vfsfitvnm.innertube.utils.ExtraMediaIds.isExternal(song.id)
-                                ) {
-                                    binder?.setupRadio(
-                                        NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
-                                    )
-                                }
+                                binder?.player?.forcePlay(track.asMediaItem())
                             }
                         )
                         .animateItemPlacement()

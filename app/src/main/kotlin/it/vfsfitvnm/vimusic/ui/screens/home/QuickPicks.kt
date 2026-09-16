@@ -29,10 +29,12 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
@@ -44,8 +46,14 @@ import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.compose.persist.persistList
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
+import it.vfsfitvnm.innertube.models.bodies.NextBody
+import it.vfsfitvnm.innertube.models.bodies.SearchBody
 import it.vfsfitvnm.innertube.requests.DefaultLandingVideoId
 import it.vfsfitvnm.innertube.requests.landingPage
+import it.vfsfitvnm.innertube.requests.relatedPage
+import it.vfsfitvnm.innertube.requests.searchPage
+import it.vfsfitvnm.innertube.utils.ExtraMediaIds
+import it.vfsfitvnm.innertube.utils.from
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
@@ -78,14 +86,24 @@ import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.forcePlay
+import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.isLandscape
+import it.vfsfitvnm.vimusic.utils.isLikelyQuran
 import it.vfsfitvnm.vimusic.utils.khatmaMediaIdKey
 import it.vfsfitvnm.vimusic.utils.khatmaPositionKey
+import it.vfsfitvnm.vimusic.utils.lastPlayedMediaIdKey
+import it.vfsfitvnm.vimusic.utils.lastPlayedPositionKey
+import it.vfsfitvnm.vimusic.utils.orderedHomeMoods
+import it.vfsfitvnm.vimusic.utils.HomeMood
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import java.util.Calendar
 import java.util.concurrent.TimeoutException
 
 @ExperimentalFoundationApi
@@ -111,6 +129,16 @@ fun QuickPicks(
     var khatmaSong by remember { mutableStateOf<Song?>(null) }
     val khatmaId = remember { context.preferences.getString(khatmaMediaIdKey, null) }
     val khatmaPosition = remember { context.preferences.getLong(khatmaPositionKey, 0L) }
+    var lastPlayedId by remember {
+        mutableStateOf(context.preferences.getString(lastPlayedMediaIdKey, null))
+    }
+    var lastPlayedPosition by remember {
+        mutableStateOf(context.preferences.getLong(lastPlayedPositionKey, 0L))
+    }
+    var lastPlayedSong by remember { mutableStateOf<Song?>(null) }
+    var becausePage by persist<Result<Innertube.RelatedPage>>("home/becauseYouListened")
+    val scope = rememberCoroutineScope()
+    val clock = remember { Calendar.getInstance() }
 
     var relatedPageResult by persist<Result<Innertube.RelatedPage>>(tag = "home/relatedPageResult")
     var reloadToken by remember { mutableStateOf(0) }
@@ -135,6 +163,43 @@ fun QuickPicks(
     LaunchedEffect(khatmaId) {
         if (!khatmaId.isNullOrEmpty()) {
             Database.song(khatmaId).collect { khatmaSong = it }
+        }
+    }
+
+    DisposableEffect(Unit) {
+        val listener = android.content.SharedPreferences.OnSharedPreferenceChangeListener { prefs, key ->
+            if (key == lastPlayedMediaIdKey) {
+                lastPlayedId = prefs.getString(lastPlayedMediaIdKey, null)
+            }
+            if (key == lastPlayedPositionKey) {
+                lastPlayedPosition = prefs.getLong(lastPlayedPositionKey, 0L)
+            }
+        }
+        context.preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose {
+            context.preferences.unregisterOnSharedPreferenceChangeListener(listener)
+        }
+    }
+
+    LaunchedEffect(lastPlayedId) {
+        if (!lastPlayedId.isNullOrEmpty()) {
+            Database.song(lastPlayedId).collect { lastPlayedSong = it }
+        } else {
+            lastPlayedSong = null
+        }
+    }
+
+    val becauseSeed = recentlyPlayed.firstOrNull { song ->
+        !song.id.startsWith("local:") &&
+            !ExtraMediaIds.isExternal(song.id) &&
+            !isLikelyQuran(song.title, song.artistsText)
+    }
+
+    LaunchedEffect(becauseSeed?.id) {
+        val seed = becauseSeed ?: return@LaunchedEffect
+        becausePage = runCatching {
+            Innertube.relatedPage(NextBody(videoId = seed.id))?.getOrThrow()
+                ?: error("empty")
         }
     }
 
@@ -241,6 +306,31 @@ fun QuickPicks(
                 )
             }
 
+            lastPlayedSong
+                ?.takeIf { song ->
+                    lastPlayedPosition >= 20_000L &&
+                        song.id != khatmaId
+                }
+                ?.let { song ->
+                    BasicText(
+                        text = strings.continueListening,
+                        style = typography.m.semiBold,
+                        modifier = sectionTextModifier
+                    )
+                    SongItem(
+                        song = song,
+                        thumbnailSizePx = songThumbnailSizePx,
+                        thumbnailSizeDp = songThumbnailSizeDp,
+                        modifier = Modifier
+                            .padding(endPaddingValues)
+                            .clickable {
+                                binder?.stopRadio()
+                                binder?.player?.forcePlay(song.asMediaItem)
+                                binder?.player?.seekTo(lastPlayedPosition)
+                            }
+                    )
+                }
+
             trending?.let { song ->
                 BasicText(
                     text = strings.songOfTheDay,
@@ -273,29 +363,57 @@ fun QuickPicks(
                 )
             }
 
-            val moods = listOf(
-                strings.moodCalm to "موسيقى هادئة",
-                strings.moodEnergetic to "أغاني حماسية",
-                strings.moodTarab to "طرب عربي",
-                strings.moodShaabi to "شعبي مصري",
-                strings.moodQuran to "تلاوة قرآن",
-                strings.moodFocus to "موسيقى للعمل"
+            val moods = orderedHomeMoods(
+                listOf(
+                    HomeMood(strings.moodCalm, "موسيقى هادئة"),
+                    HomeMood(strings.moodEnergetic, "أغاني حماسية"),
+                    HomeMood(strings.moodTarab, "طرب عربي"),
+                    HomeMood(strings.moodShaabi, "شعبي مصري"),
+                    HomeMood(strings.moodQuran, "تلاوة قرآن"),
+                    HomeMood(strings.moodFocus, "موسيقى للعمل")
+                ),
+                clock
             )
+            val hour = clock.get(Calendar.HOUR_OF_DAY)
+            val moodTitle = when {
+                clock.get(Calendar.DAY_OF_WEEK) == Calendar.FRIDAY -> strings.fridayMoods
+                hour in 5 until 11 -> strings.morningMoods
+                hour in 18 until 24 || hour < 5 -> strings.eveningMoods
+                else -> strings.moods
+            }
 
             BasicText(
-                text = strings.moods,
+                text = moodTitle,
                 style = typography.m.semiBold,
                 modifier = sectionTextModifier
             )
 
             LazyRow(contentPadding = endPaddingValues) {
-                items(moods, key = { it.first }) { (label, query) ->
+                items(moods, key = { it.query }) { mood ->
                     BasicText(
-                        text = label,
+                        text = mood.label,
                         style = typography.xs.semiBold.color(colorPalette.text),
                         modifier = Modifier
                             .padding(end = 8.dp)
-                            .clickable { onMoodClick(query) }
+                            .clickable {
+                                scope.launch {
+                                    val songs = withContext(Dispatchers.IO) {
+                                        Innertube.searchPage(
+                                            body = SearchBody(
+                                                query = mood.query,
+                                                params = Innertube.SearchFilter.Song.value
+                                            ),
+                                            fromMusicShelfRendererContent = Innertube.SongItem.Companion::from
+                                        )?.getOrNull()?.items.orEmpty()
+                                    }.take(20).map { it.asMediaItem }
+                                    if (songs.isNotEmpty()) {
+                                        binder?.stopRadio()
+                                        binder?.player?.forcePlayFromBeginning(songs)
+                                    } else {
+                                        onMoodClick(mood.query)
+                                    }
+                                }
+                            }
                             .background(colorPalette.background2, androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     )
@@ -332,6 +450,46 @@ fun QuickPicks(
                                     }
                                 )
                         )
+                    }
+                }
+            }
+
+            becauseSeed?.let { seed ->
+                val relatedSongs = becausePage?.getOrNull()?.songs.orEmpty()
+                    .filter { it.key != seed.id }
+                    .take(12)
+                if (relatedSongs.isNotEmpty()) {
+                    BasicText(
+                        text = strings.becauseYouListened(seed.artistsText ?: seed.title),
+                        style = typography.m.semiBold,
+                        modifier = sectionTextModifier
+                    )
+                    LazyRow(contentPadding = endPaddingValues) {
+                        items(relatedSongs, key = Innertube.SongItem::key) { song ->
+                            SongItem(
+                                song = song,
+                                thumbnailSizePx = songThumbnailSizePx,
+                                thumbnailSizeDp = songThumbnailSizeDp,
+                                modifier = Modifier
+                                    .width(itemInHorizontalGridWidth)
+                                    .combinedClickable(
+                                        onLongClick = {
+                                            menuState.display {
+                                                NonQueuedMediaItemMenu(
+                                                    onDismiss = menuState::hide,
+                                                    mediaItem = song.asMediaItem
+                                                )
+                                            }
+                                        },
+                                        onClick = {
+                                            binder?.stopRadio()
+                                            binder?.player?.forcePlayFromBeginning(
+                                                relatedSongs.map { it.asMediaItem }
+                                            )
+                                        }
+                                    )
+                            )
+                        }
                     }
                 }
             }

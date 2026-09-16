@@ -72,15 +72,17 @@ import androidx.media3.exoplayer.audio.SonicAudioProcessor
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
 import androidx.media3.datasource.TransferListener
+import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.ExtractorsFactory
-import androidx.media3.extractor.mkv.MatroskaExtractor
-import androidx.media3.extractor.mp4.FragmentedMp4Extractor
 import androidx.media3.extractor.mp4.Mp4Extractor
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
 import it.vfsfitvnm.innertube.requests.player
+import it.vfsfitvnm.innertube.utils.ExtraMediaIds
+import it.vfsfitvnm.innertube.utils.soundCloudStreamUrl
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.MainActivity
 import it.vfsfitvnm.vimusic.R
@@ -123,6 +125,10 @@ import it.vfsfitvnm.vimusic.utils.isOnUnmeteredNetwork
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
 import it.vfsfitvnm.vimusic.utils.khatmaMediaIdKey
 import it.vfsfitvnm.vimusic.utils.khatmaPositionKey
+import it.vfsfitvnm.vimusic.utils.lastPlayedMediaIdKey
+import it.vfsfitvnm.vimusic.utils.lastPlayedPositionKey
+import it.vfsfitvnm.vimusic.utils.Jellyfin
+import it.vfsfitvnm.vimusic.utils.ListenBrainz
 import it.vfsfitvnm.vimusic.utils.mediaItems
 import it.vfsfitvnm.vimusic.utils.offlineModeKey
 import it.vfsfitvnm.vimusic.utils.persistentQueueKey
@@ -137,6 +143,7 @@ import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.startMediaForeground
 import it.vfsfitvnm.vimusic.utils.timer
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
+import it.vfsfitvnm.vimusic.utils.videoLyricsKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
 import it.vfsfitvnm.vimusic.utils.wifiOnlyDownloadKey
 import kotlin.math.roundToInt
@@ -154,6 +161,7 @@ import kotlinx.coroutines.flow.update
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.plus
 import kotlinx.coroutines.runBlocking
+import android.os.SystemClock
 import java.util.concurrent.ConcurrentHashMap
 
 @Suppress("DEPRECATION")
@@ -206,6 +214,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private var loopEndMs = C.TIME_UNSET
 
     private val binder = Binder()
+    private var lastResumeSaveMs = 0L
 
     private var isNotificationStarted = false
 
@@ -289,6 +298,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             .setUsePlatformDiagnostics(false)
             .build()
 
+        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+
         player.repeatMode = when {
             preferences.getBoolean(trackLoopEnabledKey, false) -> Player.REPEAT_MODE_ONE
             preferences.getBoolean(queueLoopEnabledKey, true) -> Player.REPEAT_MODE_ALL
@@ -336,6 +347,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     override fun onDestroy() {
         maybeSavePlayerQueue()
+        maybeSaveResumePoint(force = true)
 
         preferences.unregisterOnSharedPreferenceChangeListener(this)
 
@@ -397,6 +409,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     )
                 } catch (_: SQLException) {
                 }
+            }
+            val scrobbleItem = mediaItem
+            coroutineScope.launch {
+                runCatching { ListenBrainz.submit(preferences, scrobbleItem, totalPlayTimeMs) }
             }
         }
     }
@@ -714,7 +730,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             maybeCrossfade()
             maybeEnforceAbLoop()
-            maybeSaveKhatma()
+            maybeSaveResumePoint()
         }
     }
 
@@ -741,6 +757,18 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         if (player.currentPosition >= loopEndMs) {
             player.seekTo(loopStartMs)
         }
+    }
+
+    private fun maybeSaveResumePoint(force: Boolean = false) {
+        val mediaItem = player.currentMediaItem ?: return
+        val now = SystemClock.elapsedRealtime()
+        if (!force && now - lastResumeSaveMs < 5000L) return
+        lastResumeSaveMs = now
+        preferences.edit()
+            .putString(lastPlayedMediaIdKey, mediaItem.mediaId)
+            .putLong(lastPlayedPositionKey, player.currentPosition)
+            .apply()
+        maybeSaveKhatma()
     }
 
     private fun maybeSaveKhatma() {
@@ -961,7 +989,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
 
         val format = response.streamingData?.formatFor(
-            preferences.getEnum(audioQualityKey, AudioQuality.Auto)
+            preferences.getEnum(audioQualityKey, AudioQuality.Auto),
+            preferMuxed = preferences.getBoolean(videoLyricsKey, true)
         ) ?: throw PlayableFormatNotFoundException()
         if (format.url.isNullOrBlank()) throw PlayableFormatNotFoundException()
 
@@ -1044,7 +1073,28 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 uri.scheme == "content" ||
                 uri.scheme == "file"
             ) {
+                coroutineScope.launch(Dispatchers.Main) { binder.isCurrentVideo = false }
                 return@Factory dataSpec
+            }
+
+            val extra = ExtraMediaIds.decode(videoId)
+            if (extra != null) {
+                return@Factory when (videoId) {
+                    ringBuffer.getOrNull(0)?.videoId -> applyResolvedUri(dataSpec, ringBuffer.getOrNull(0)!!, chunkLength)
+                    ringBuffer.getOrNull(1)?.videoId -> applyResolvedUri(dataSpec, ringBuffer.getOrNull(1)!!, chunkLength)
+                    else -> {
+                        val url = when (extra.first) {
+                            ExtraMediaIds.SOUNDCLOUD_PREFIX -> soundCloudStreamUrl(extra.second)
+                            ExtraMediaIds.PODCAST_PREFIX -> extra.second
+                            ExtraMediaIds.JELLYFIN_PREFIX -> Jellyfin.streamUrl(preferences, extra.second)
+                            else -> throw UnplayableException()
+                        }
+                        coroutineScope.launch(Dispatchers.Main) { binder.isCurrentVideo = false }
+                        val resolved = ResolvedUri(videoId, url.toUri(), true)
+                        ringBuffer.append(resolved)
+                        applyResolvedUri(dataSpec, resolved, chunkLength)
+                    }
+                }
             }
 
             val requestedLength = dataSpec.length
@@ -1076,7 +1126,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
                             when (val status = body.playabilityStatus?.status) {
                                 "OK" -> body.streamingData?.formatFor(
-                                    preferences.getEnum(audioQualityKey, AudioQuality.Auto)
+                                    preferences.getEnum(audioQualityKey, AudioQuality.Auto),
+                                    preferMuxed = preferences.getBoolean(videoLyricsKey, true)
                                 )?.let { format ->
                                     val mediaItem = runBlocking(Dispatchers.Main) {
                                         player.findNextMediaItemById(videoId)
@@ -1128,6 +1179,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                         }
 
                         urlResult?.getOrThrow()?.let { (url, progressiveMuxed) ->
+                            coroutineScope.launch(Dispatchers.Main) {
+                                binder.isCurrentVideo = progressiveMuxed
+                            }
                             val resolved = ResolvedUri(videoId, url.toUri(), progressiveMuxed)
                             ringBuffer.append(resolved)
                             applyResolvedUri(dataSpec, resolved, chunkLength)
@@ -1153,13 +1207,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     private fun createExtractorsFactory(): ExtractorsFactory {
-        return ExtractorsFactory {
-            arrayOf(
-                Mp4Extractor(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS),
-                FragmentedMp4Extractor(),
-                MatroskaExtractor()
-            )
-        }
+        return DefaultExtractorsFactory()
+            .setMp4ExtractorFlags(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS)
     }
 
     private fun createRendersFactory(): RenderersFactory {
@@ -1183,6 +1232,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->
             arrayOf(
+                MediaCodecVideoRenderer(this, MediaCodecSelector.DEFAULT),
                 MediaCodecAudioRenderer(
                     this,
                     MediaCodecSelector.DEFAULT,
@@ -1206,6 +1256,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         val mediaSession
             get() = this@PlayerService.mediaSession
+
+        var isCurrentVideo by mutableStateOf(false)
+            internal set
 
         val sleepTimerMillisLeft: StateFlow<Long?>?
             get() = timerJob?.millisLeft
@@ -1252,6 +1305,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             startRadio(endpoint = endpoint, justAdd = false)
 
         private fun startRadio(endpoint: NavigationEndpoint.Endpoint.Watch?, justAdd: Boolean) {
+            val videoId = endpoint?.videoId
+            if (videoId != null && ExtraMediaIds.isExternal(videoId)) return
             radioJob?.cancel()
             radio = null
             YouTubeRadio(
@@ -1353,7 +1408,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         fun download(mediaItem: MediaItem) {
             val mediaId = mediaItem.mediaId
-            if (mediaId.startsWith("local:")) return
+            if (mediaId.startsWith("local:") || ExtraMediaIds.isExternal(mediaId)) return
             if (downloadJobs.containsKey(mediaId) || isFullyDownloaded(mediaId)) return
             if (preferences.getBoolean(wifiOnlyDownloadKey, false) && !isOnUnmeteredNetwork()) {
                 setDownloadStatus(mediaId, DownloadStatus.Failed)

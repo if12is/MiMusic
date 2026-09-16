@@ -309,7 +309,11 @@ private fun SettingsSearch(onOpenTab: (Int) -> Unit) {
             Entry(strings.chargingOnlyDownload, 1),
             Entry(strings.dataUsage, 4),
             Entry(strings.crashLog, 5),
-            Entry(strings.about, 5)
+            Entry(strings.about, 5),
+            Entry(strings.listenBrainz, 4),
+            Entry(strings.extraSources, 4),
+            Entry(strings.jellyfin, 4),
+            Entry(strings.videoLyrics, 1)
         )
     }
 

@@ -219,6 +219,14 @@ fun PlayerSettings() {
             onCheckedChange = { pipOnLeave = it }
         )
 
+        var videoLyrics by rememberPreference(it.vfsfitvnm.vimusic.utils.videoLyricsKey, true)
+        SwitchSettingEntry(
+            title = strings.videoLyrics,
+            text = strings.videoLyricsDescription,
+            isChecked = videoLyrics,
+            onCheckedChange = { videoLyrics = it }
+        )
+
         SettingsEntry(
             title = strings.equalizer,
             text = strings.equalizerDescription,

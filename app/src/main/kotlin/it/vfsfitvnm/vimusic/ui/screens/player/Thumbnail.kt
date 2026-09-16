@@ -23,6 +23,7 @@ import androidx.compose.foundation.gestures.detectVerticalDragGestures
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.aspectRatio
 import androidx.compose.foundation.layout.fillMaxSize
+import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.size
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +39,9 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.viewinterop.AndroidView
+import android.view.TextureView
+import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
@@ -151,6 +155,28 @@ fun Thumbnail(
                 ),
                 contentDescription = null,
                 contentScale = ContentScale.Crop,
+                modifier = Modifier.fillMaxSize()
+            )
+
+            val showVideo = binder.isCurrentVideo
+            if (showVideo) {
+                AndroidView(
+                    factory = { context ->
+                        TextureView(context)
+                    },
+                    update = { view ->
+                        player.setVideoTextureView(view)
+                        player.videoScalingMode =
+                            C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+                    },
+                    onRelease = { view ->
+                        player.clearVideoTextureView(view)
+                    },
+                    modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            Box(
                 modifier = Modifier
                     .pointerInput(Unit) {
                         detectTapGestures(
@@ -186,12 +212,24 @@ fun Thumbnail(
 
             val visualizerEnabled by rememberPreference(visualizerEnabledKey, false)
             val lowPowerMode by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
-            if (visualizerEnabled && !lowPowerMode && !isShowingLyrics) {
+            if (visualizerEnabled && !lowPowerMode && !isShowingLyrics && !showVideo) {
                 LightVisualizer(
                     color = LocalAppearance.current.colorPalette.accent,
                     modifier = Modifier
                         .align(Alignment.BottomCenter)
                         .fillMaxSize()
+                )
+            }
+
+            if (showVideo && !isShowingLyrics && error == null) {
+                VideoLyricsCaption(
+                    mediaId = currentWindow.mediaItem.mediaId,
+                    mediaMetadata = currentWindow.mediaItem.mediaMetadata,
+                    durationProvider = player::getDuration,
+                    ensureSongInserted = { Database.insert(currentWindow.mediaItem) },
+                    modifier = Modifier
+                        .align(Alignment.BottomCenter)
+                        .fillMaxWidth()
                 )
             }
 

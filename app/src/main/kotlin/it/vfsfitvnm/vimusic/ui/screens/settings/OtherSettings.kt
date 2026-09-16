@@ -26,6 +26,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -34,7 +35,9 @@ import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.service.PlayerMediaBrowserService
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
+import it.vfsfitvnm.vimusic.ui.components.themed.TextFieldDialog
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.Jellyfin
 import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid12
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
@@ -42,11 +45,21 @@ import it.vfsfitvnm.vimusic.utils.isIgnoringBatteryOptimizations
 import it.vfsfitvnm.vimusic.utils.isInvincibilityEnabledKey
 import it.vfsfitvnm.vimusic.utils.appLockKey
 import it.vfsfitvnm.vimusic.utils.hideFromRecentsKey
+import it.vfsfitvnm.vimusic.utils.jellyfinPasswordKey
+import it.vfsfitvnm.vimusic.utils.jellyfinServerKey
+import it.vfsfitvnm.vimusic.utils.jellyfinUserKey
+import it.vfsfitvnm.vimusic.utils.listenBrainzEnabledKey
+import it.vfsfitvnm.vimusic.utils.listenBrainzTokenKey
 import it.vfsfitvnm.vimusic.utils.mobileDataBytes
 import it.vfsfitvnm.vimusic.utils.pauseSearchHistoryKey
+import it.vfsfitvnm.vimusic.utils.podcastFeedsKey
+import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.toast
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @SuppressLint("BatteryLife")
 @ExperimentalAnimationApi
@@ -90,6 +103,18 @@ fun OtherSettings() {
     var pauseSearchHistory by rememberPreference(pauseSearchHistoryKey, false)
     var appLock by rememberPreference(appLockKey, false)
     var hideFromRecents by rememberPreference(hideFromRecentsKey, false)
+    var listenBrainzEnabled by rememberPreference(listenBrainzEnabledKey, false)
+    var listenBrainzToken by rememberPreference(listenBrainzTokenKey, "")
+    var podcastFeeds by rememberPreference(podcastFeedsKey, "")
+    var jellyfinServer by rememberPreference(jellyfinServerKey, "")
+    var jellyfinUser by rememberPreference(jellyfinUserKey, "")
+    var jellyfinPassword by rememberPreference(jellyfinPasswordKey, "")
+    var editingToken by remember { mutableStateOf(false) }
+    var editingFeeds by remember { mutableStateOf(false) }
+    var editingServer by remember { mutableStateOf(false) }
+    var editingUser by remember { mutableStateOf(false) }
+    var editingPassword by remember { mutableStateOf(false) }
+    val scope = rememberCoroutineScope()
 
     val queriesCount by remember {
         Database.queriesCount().distinctUntilChanged()
@@ -107,6 +132,127 @@ fun OtherSettings() {
             )
     ) {
         Header(title = strings.other)
+
+        SettingsEntryGroupText(title = strings.extraSources)
+
+        SwitchSettingEntry(
+            title = strings.listenBrainz,
+            text = strings.listenBrainzDescription,
+            isChecked = listenBrainzEnabled,
+            onCheckedChange = { listenBrainzEnabled = it }
+        )
+
+        SettingsEntry(
+            title = strings.listenBrainzToken,
+            text = if (listenBrainzToken.isBlank()) strings.listenBrainzTokenHint else "••••••••",
+            onClick = { editingToken = true }
+        )
+
+        SettingsEntry(
+            title = strings.podcastFeeds,
+            text = if (podcastFeeds.isBlank()) strings.podcastFeedsHint else podcastFeeds.lineSequence().count { it.isNotBlank() }.toString(),
+            onClick = { editingFeeds = true }
+        )
+
+        SettingsEntry(
+            title = strings.jellyfinServer,
+            text = jellyfinServer.ifBlank { strings.jellyfin },
+            onClick = { editingServer = true }
+        )
+
+        SettingsEntry(
+            title = strings.jellyfinUser,
+            text = jellyfinUser.ifBlank { strings.jellyfinUser },
+            onClick = { editingUser = true }
+        )
+
+        SettingsEntry(
+            title = strings.jellyfinPassword,
+            text = if (jellyfinPassword.isBlank()) strings.jellyfinPassword else "••••••••",
+            onClick = { editingPassword = true }
+        )
+
+        SettingsEntry(
+            title = strings.jellyfinConnect,
+            text = if (Jellyfin.isConnected(context.preferences)) strings.jellyfinConnected else strings.jellyfin,
+            onClick = {
+                scope.launch {
+                    val ok = withContext(Dispatchers.IO) {
+                        runCatching { Jellyfin.connect(context.preferences) }.getOrDefault(false)
+                    }
+                    context.toast(if (ok) strings.jellyfinConnected else strings.jellyfinConnectFailed)
+                }
+            }
+        )
+
+        if (editingToken) {
+            TextFieldDialog(
+                hintText = strings.listenBrainzTokenHint,
+                initialTextInput = listenBrainzToken,
+                onDismiss = { editingToken = false },
+                onDone = {
+                    listenBrainzToken = it.trim()
+                    editingToken = false
+                },
+                isTextInputValid = { true }
+            )
+        }
+
+        if (editingFeeds) {
+            TextFieldDialog(
+                hintText = strings.podcastFeedsHint,
+                initialTextInput = podcastFeeds,
+                singleLine = false,
+                maxLines = 8,
+                onDismiss = { editingFeeds = false },
+                onDone = {
+                    podcastFeeds = it
+                    editingFeeds = false
+                },
+                isTextInputValid = { true }
+            )
+        }
+
+        if (editingServer) {
+            TextFieldDialog(
+                hintText = "http://192.168.1.10:8096",
+                initialTextInput = jellyfinServer,
+                onDismiss = { editingServer = false },
+                onDone = {
+                    jellyfinServer = it.trim()
+                    editingServer = false
+                },
+                isTextInputValid = { true }
+            )
+        }
+
+        if (editingUser) {
+            TextFieldDialog(
+                hintText = strings.jellyfinUser,
+                initialTextInput = jellyfinUser,
+                onDismiss = { editingUser = false },
+                onDone = {
+                    jellyfinUser = it.trim()
+                    editingUser = false
+                },
+                isTextInputValid = { true }
+            )
+        }
+
+        if (editingPassword) {
+            TextFieldDialog(
+                hintText = strings.jellyfinPassword,
+                initialTextInput = jellyfinPassword,
+                onDismiss = { editingPassword = false },
+                onDone = {
+                    jellyfinPassword = it
+                    editingPassword = false
+                },
+                isTextInputValid = { true }
+            )
+        }
+
+        SettingsGroupSpacer()
 
         SwitchSettingEntry(
             title = strings.appLock,

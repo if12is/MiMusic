@@ -534,6 +534,49 @@ class UiStrings(private val language: AppLanguage) {
     val themeSpotify = t("Spotify green", "أخضر سبوتيفاي")
     val themeYouTube = t("YouTube dark", "يوتيوب داكن")
     val enterPictureInPicture = t("Pop-out player", "مشغّل عائم")
+    val extraSources = t("Extra sources", "مصادر زيادة")
+    val extraSourcesHint = t(
+        "Search SoundCloud, subscribed podcasts, and Jellyfin. Add feeds and a server in Other settings.",
+        "ابحث في ساوندكلاود والبودكاست وجيليفين. أضف الخلاصات والسيرفر من الإعدادات الأخرى."
+    )
+    val extraSourcesDescription = t(
+        "SoundCloud, podcast RSS feeds, and a Jellyfin server",
+        "ساوندكلاود وخلاصات بودكاست وسيرفر جيليفين"
+    )
+    val listenBrainz = t("ListenBrainz", "ListenBrainz")
+    val listenBrainzDescription = t(
+        "Scrobble songs you play to your ListenBrainz profile",
+        "أرسل ما تستمع إليه إلى حساب ListenBrainz"
+    )
+    val listenBrainzToken = t("ListenBrainz token", "رمز ListenBrainz")
+    val listenBrainzTokenHint = t(
+        "Paste the user token from listenbrainz.org/settings",
+        "الصق الرمز من listenbrainz.org/settings"
+    )
+    val podcastFeeds = t("Podcast feeds", "خلاصات البودكاست")
+    val podcastFeedsHint = t(
+        "One RSS URL per line",
+        "رابط RSS في كل سطر"
+    )
+    val jellyfin = t("Jellyfin", "جيليفين")
+    val jellyfinServer = t("Jellyfin server", "سيرفر جيليفين")
+    val jellyfinUser = t("Jellyfin username", "اسم مستخدم جيليفين")
+    val jellyfinPassword = t("Jellyfin password", "كلمة مرور جيليفين")
+    val jellyfinConnect = t("Connect Jellyfin", "الاتصال بجيليفين")
+    val jellyfinConnected = t("Jellyfin connected", "تم الاتصال بجيليفين")
+    val jellyfinConnectFailed = t("Couldn't connect to Jellyfin", "تعذر الاتصال بجيليفين")
+    val videoLyrics = t("Lyrics on video", "كلمات على الفيديو")
+    val videoLyricsDescription = t(
+        "Play the video when available and show the current lyric line on it",
+        "شغّل الفيديو عند توفره واعرض السطر الحالي من الكلمات عليه"
+    )
+    val becauseYouListened = { name: String ->
+        t("Because you listened to $name", "لأنك سمعت $name")
+    }
+    val fridayMoods = t("Friday moods", "مزاج الجمعة")
+    val morningMoods = t("Morning moods", "مزاج الصباح")
+    val eveningMoods = t("Evening moods", "مزاج الليل")
+    val sources = t("Sources", "المصادر")
 
     fun audioQualityName(value: it.vfsfitvnm.vimusic.enums.AudioQuality) = when (value) {
         it.vfsfitvnm.vimusic.enums.AudioQuality.Auto -> audioQualityAuto

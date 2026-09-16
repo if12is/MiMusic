@@ -11,7 +11,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.util.zip.GZIPInputStream
 
-internal object NewPipeSupport {
+object NewPipeSupport {
     private val lock = Any()
 
     @Volatile
