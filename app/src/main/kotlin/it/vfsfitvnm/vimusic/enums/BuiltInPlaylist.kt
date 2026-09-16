@@ -5,5 +5,7 @@ enum class BuiltInPlaylist {
     Offline,
     History,
     Top,
-    Device
+    Device,
+    ThisWeek,
+    ShortFavorites
 }

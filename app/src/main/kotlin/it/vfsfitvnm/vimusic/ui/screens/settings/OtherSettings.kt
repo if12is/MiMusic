@@ -7,6 +7,7 @@ import android.content.Intent
 import android.content.pm.PackageManager
 import android.net.Uri
 import android.provider.Settings
+import android.text.format.Formatter
 import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
@@ -41,6 +42,7 @@ import it.vfsfitvnm.vimusic.utils.isIgnoringBatteryOptimizations
 import it.vfsfitvnm.vimusic.utils.isInvincibilityEnabledKey
 import it.vfsfitvnm.vimusic.utils.appLockKey
 import it.vfsfitvnm.vimusic.utils.hideFromRecentsKey
+import it.vfsfitvnm.vimusic.utils.mobileDataBytes
 import it.vfsfitvnm.vimusic.utils.pauseSearchHistoryKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.toast
@@ -118,6 +120,11 @@ fun OtherSettings() {
             text = strings.hideRecentsDescription,
             isChecked = hideFromRecents,
             onCheckedChange = { hideFromRecents = it }
+        )
+
+        val dataBytes = remember { context.mobileDataBytes() }
+        SettingsDescription(
+            text = "${strings.dataUsage}: ${Formatter.formatShortFileSize(context, dataBytes)}"
         )
 
         SettingsGroupSpacer()

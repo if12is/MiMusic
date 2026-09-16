@@ -341,6 +341,24 @@ interface Database {
     @RewriteQueriesToDropUnusedColumns
     fun mostPlayed(): Flow<List<Song>>
 
+    @Transaction
+    @Query("SELECT Song.* FROM Event JOIN Song ON Song.id = songId WHERE timestamp >= :since GROUP BY songId ORDER BY SUM(playTime) DESC LIMIT 50")
+    @RewriteQueriesToDropUnusedColumns
+    fun playedSince(since: Long): Flow<List<Song>>
+
+    @Transaction
+    @Query(
+        """
+        SELECT * FROM Song WHERE
+            title LIKE '%قرآن%' OR title LIKE '%Quran%' OR title LIKE '%quran%' OR
+            title LIKE '%تلاوة%' OR title LIKE '%سورة%' OR title LIKE '%القرآن%' OR
+            artistsText LIKE '%قرآن%' OR artistsText LIKE '%قارئ%' OR artistsText LIKE '%Quran%'
+        ORDER BY totalPlayTimeMs DESC
+        """
+    )
+    @RewriteQueriesToDropUnusedColumns
+    fun quranSongs(): Flow<List<Song>>
+
     @Query("SELECT COUNT (*) FROM Event")
     fun eventsCount(): Flow<Int>
 

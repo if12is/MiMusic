@@ -337,6 +337,8 @@ class UiStrings(private val language: AppLanguage) {
         ColorPaletteName.Dynamic -> themeDynamic
         ColorPaletteName.PureBlack -> themePureBlack
         ColorPaletteName.Gold -> goldTheme
+        ColorPaletteName.Spotify -> themeSpotify
+        ColorPaletteName.YouTube -> themeYouTube
     }
 
     fun colorPaletteMode(value: ColorPaletteMode) = when (value) {
@@ -484,6 +486,54 @@ class UiStrings(private val language: AppLanguage) {
     )
     val gotIt = t("Got it", "حسنًا")
     val eqPreset = t("Equalizer preset", "إعداد المعادل")
+    val search = t("Search", "بحث")
+    val thisWeek = t("Played this week", "استُمع إليه هذا الأسبوع")
+    val shortFavorites = t("Short favorites", "مفضّل قصير")
+    val quranMishary = t("Mishary", "مشاري")
+    val quranMinshawi = t("Minshawi", "المنشاوي")
+    val quranHosary = t("Al-Husary", "الحصري")
+    val quranSudais = t("As-Sudais", "السديس")
+    val continueListening = t("Continue listening", "كمّل اللي وقفت عنده")
+    val refresh = t("Refresh", "تحديث")
+    val pitch = t("Pitch", "الطبقة")
+    val lowPowerMode = t("Low power mode", "توفير الطاقة")
+    val lowPowerModeDescription = t(
+        "Turn off blur and the visualizer to save battery",
+        "أوقف الضباب وموجة الصوت لتوفير البطارية"
+    )
+    val chargingOnlyDownload = t("Charge to download", "التنزيل أثناء الشحن")
+    val chargingOnlyDownloadDescription = t(
+        "Start downloads only while the phone is charging",
+        "ابدأ التنزيل فقط أثناء شحن الهاتف"
+    )
+    val pictureInPicture = t("Picture-in-picture", "صورة داخل صورة")
+    val pictureInPictureDescription = t(
+        "Keep the player in a small window when leaving the app",
+        "أبقِ المشغّل في نافذة صغيرة عند مغادرة التطبيق"
+    )
+    val dataUsage = t("Data used", "استهلاك البيانات")
+    val crashLog = t("Share crash log", "مشاركة سجل الأعطال")
+    val crashLogDescription = t(
+        "Send the last crash and playback log without opening GitHub",
+        "أرسل آخر عطل وسجل التشغيل من غير فتح GitHub"
+    )
+    val crashLogEmpty = t("No crash log yet", "لا يوجد سجل أعطال بعد")
+    val removeDownloadConfirm = t(
+        "Remove this downloaded song from the device?",
+        "هل تريد حذف هذه الأغنية المنزّلة من الجهاز؟"
+    )
+    val clearDownloadsConfirm = t(
+        "Remove every downloaded song?",
+        "هل تريد حذف كل الأغاني المنزّلة؟"
+    )
+    val playlistCover = t("Playlist cover", "غلاف القائمة")
+    val playlistFolderHint = t(
+        "Tip: name it Folder / Playlist to group lists",
+        "تلميح: اكتب مجلد / اسم القائمة لتجميع القوائم"
+    )
+    val themeSpotify = t("Spotify green", "أخضر سبوتيفاي")
+    val themeYouTube = t("YouTube dark", "يوتيوب داكن")
+    val enterPictureInPicture = t("Pop-out player", "مشغّل عائم")
 
     fun audioQualityName(value: it.vfsfitvnm.vimusic.enums.AudioQuality) = when (value) {
         it.vfsfitvnm.vimusic.enums.AudioQuality.Auto -> audioQualityAuto

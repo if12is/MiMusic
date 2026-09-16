@@ -4,5 +4,7 @@ enum class ColorPaletteName {
     Default,
     Dynamic,
     PureBlack,
-    Gold
+    Gold,
+    Spotify,
+    YouTube
 }

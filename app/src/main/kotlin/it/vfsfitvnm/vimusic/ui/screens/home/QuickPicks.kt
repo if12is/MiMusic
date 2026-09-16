@@ -211,7 +211,15 @@ fun QuickPicks(
                 title = strings.quickPicks,
                 modifier = Modifier
                     .padding(endPaddingValues)
-            )
+            ) {
+                SecondaryTextButton(
+                    text = strings.refresh,
+                    onClick = {
+                        relatedPageResult = null
+                        reloadToken += 1
+                    }
+                )
+            }
 
             khatmaSong?.let { song ->
                 BasicText(

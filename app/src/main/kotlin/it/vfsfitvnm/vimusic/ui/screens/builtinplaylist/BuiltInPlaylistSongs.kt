@@ -48,10 +48,11 @@ import androidx.core.content.ContextCompat
 import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.asLocalMediaItem
 import it.vfsfitvnm.vimusic.utils.asMediaItem
+import it.vfsfitvnm.vimusic.utils.durationTextToMillis
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
-import it.vfsfitvnm.vimusic.utils.queryDeviceSongs
+import it.vfsfitvnm.vimusic.utils.queryDeviceTracks
 import it.vfsfitvnm.vimusic.utils.smartShuffled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -91,7 +92,15 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
             BuiltInPlaylist.Favorites -> Database.favorites()
             BuiltInPlaylist.History -> Database.playbackHistory()
             BuiltInPlaylist.Top -> Database.mostPlayed()
-            BuiltInPlaylist.Device -> flow { emit(context.queryDeviceSongs()) }
+            BuiltInPlaylist.ThisWeek -> Database.playedSince(
+                System.currentTimeMillis() - 7L * 24 * 60 * 60 * 1000
+            )
+            BuiltInPlaylist.ShortFavorites -> Database.favorites().map { favorites ->
+                favorites.filter { durationTextToMillis(it.durationText) in 1 until 5 * 60 * 1000 }
+            }
+            BuiltInPlaylist.Device -> flow {
+                emit(context.queryDeviceTracks().map { it.song })
+            }.flowOn(Dispatchers.IO)
             BuiltInPlaylist.Offline -> Database
                 .downloadedSongs()
                 .flowOn(Dispatchers.IO)
@@ -130,6 +139,8 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                         BuiltInPlaylist.History -> strings.playbackHistory
                         BuiltInPlaylist.Top -> strings.mostPlayed
                         BuiltInPlaylist.Device -> strings.onDevice
+                        BuiltInPlaylist.ThisWeek -> strings.thisWeek
+                        BuiltInPlaylist.ShortFavorites -> strings.shortFavorites
                     },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -181,7 +192,12 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                                             onDismiss = menuState::hide
                                         )
 
-                                        BuiltInPlaylist.Offline, BuiltInPlaylist.History, BuiltInPlaylist.Top, BuiltInPlaylist.Device -> InHistoryMediaItemMenu(
+                                        BuiltInPlaylist.Offline,
+                                        BuiltInPlaylist.History,
+                                        BuiltInPlaylist.Top,
+                                        BuiltInPlaylist.Device,
+                                        BuiltInPlaylist.ThisWeek,
+                                        BuiltInPlaylist.ShortFavorites -> InHistoryMediaItemMenu(
                                             song = song,
                                             onDismiss = menuState::hide
                                         )

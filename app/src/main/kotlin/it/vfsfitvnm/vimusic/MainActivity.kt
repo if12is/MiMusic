@@ -162,6 +162,17 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
         bindService(intent<PlayerService>(), serviceConnection, Context.BIND_AUTO_CREATE)
     }
 
+    override fun onUserLeaveHint() {
+        super.onUserLeaveHint()
+        if (
+            android.os.Build.VERSION.SDK_INT >= 26 &&
+            preferences.getBoolean(it.vfsfitvnm.vimusic.utils.pipOnLeaveKey, false) &&
+            binder?.player?.isPlaying == true
+        ) {
+            enterPictureInPictureMode(android.app.PictureInPictureParams.Builder().build())
+        }
+    }
+
     @OptIn(ExperimentalFoundationApi::class, ExperimentalAnimationApi::class)
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

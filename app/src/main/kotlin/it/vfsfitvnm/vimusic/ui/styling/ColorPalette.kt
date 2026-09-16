@@ -31,6 +31,8 @@ data class ColorPalette(
             1 -> DefaultLightColorPalette
             2 -> PureBlackColorPalette
             3 -> GoldColorPalette
+            4 -> SpotifyColorPalette
+            5 -> YouTubeColorPalette
             else -> dynamicColorPaletteOf(
                 FloatArray(3).apply { ColorUtils.colorToHSL(accent, this) },
                 value[1] as Boolean
@@ -44,6 +46,8 @@ data class ColorPalette(
                     value === DefaultLightColorPalette -> 1
                     value === PureBlackColorPalette -> 2
                     value === GoldColorPalette -> 3
+                    value === SpotifyColorPalette -> 4
+                    value === YouTubeColorPalette -> 5
                     else -> value.accent.toArgb()
                 },
                 value.isDark
@@ -93,6 +97,30 @@ val GoldColorPalette = ColorPalette(
     isDark = true
 )
 
+val SpotifyColorPalette = ColorPalette(
+    background0 = Color(0xff121212),
+    background1 = Color(0xff181818),
+    background2 = Color(0xff282828),
+    text = Color(0xffffffff),
+    textSecondary = Color(0xffb3b3b3),
+    textDisabled = Color(0xff6a6a6a),
+    accent = Color(0xff1db954),
+    onAccent = Color.Black,
+    isDark = true
+)
+
+val YouTubeColorPalette = ColorPalette(
+    background0 = Color(0xff0f0f0f),
+    background1 = Color(0xff212121),
+    background2 = Color(0xff2c2c2c),
+    text = Color(0xfff1f1f1),
+    textSecondary = Color(0xffaaaaaa),
+    textDisabled = Color(0xff717171),
+    accent = Color(0xffff0000),
+    onAccent = Color.White,
+    isDark = true
+)
+
 fun colorPaletteOf(
     colorPaletteName: ColorPaletteName,
     colorPaletteMode: ColorPaletteMode,
@@ -109,6 +137,8 @@ fun colorPaletteOf(
         }
         ColorPaletteName.PureBlack -> PureBlackColorPalette
         ColorPaletteName.Gold -> GoldColorPalette
+        ColorPaletteName.Spotify -> SpotifyColorPalette
+        ColorPaletteName.YouTube -> YouTubeColorPalette
     }
 }
 

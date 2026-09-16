@@ -302,6 +302,13 @@ private fun SettingsSearch(onOpenTab: (Int) -> Unit) {
             Entry(strings.appLock, 4),
             Entry(strings.hideRecents, 4),
             Entry(strings.androidAutoTitle, 4),
+            Entry(strings.thisWeek, 1),
+            Entry(strings.shortFavorites, 1),
+            Entry(strings.lowPowerMode, 0),
+            Entry(strings.pictureInPicture, 1),
+            Entry(strings.chargingOnlyDownload, 1),
+            Entry(strings.dataUsage, 4),
+            Entry(strings.crashLog, 5),
             Entry(strings.about, 5)
         )
     }

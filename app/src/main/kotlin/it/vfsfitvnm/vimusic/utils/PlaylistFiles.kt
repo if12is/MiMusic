@@ -182,12 +182,20 @@ private fun parseCsvOrList(text: String): List<ImportedTrack> {
     val hasHeader = header.any { isKnownHeader(it) }
 
     return if (hasHeader) {
-        val titleIdx = indexOfHeader(header, "title", "track name", "track title", "song", "song name", "video title", "name")
-        val artistIdx = indexOfHeader(header, "artist", "artist name", "artists", "artist name(s)", "artists name", "singer")
+        val titleIdx = indexOfHeader(
+            header,
+            "title", "track name", "track title", "song", "song name", "video title", "name",
+            "عنوان", "أغنية", "اسم الأغنية", "اسم الاغنية"
+        )
+        val artistIdx = indexOfHeader(
+            header,
+            "artist", "artist name", "artists", "artist name(s)", "artists name", "singer",
+            "فنان", "الفنان", "مطرب", "المطرب", "مغني"
+        )
         val urlIdx = indexOfHeader(
             header,
             "url", "uri", "link", "track uri", "track url", "spotify", "youtube",
-            "youtube url", "youtube id", "anghami", "video id", "id"
+            "youtube url", "youtube id", "anghami", "video id", "id", "رابط"
         )
         rows.drop(1).mapNotNull { columns ->
             val url = columns.getOrNull(urlIdx).orEmpty()
@@ -267,7 +275,8 @@ private fun normalizeHeader(value: String): String {
 private fun isKnownHeader(header: String): Boolean {
     val tokens = listOf(
         "title", "track", "song", "artist", "album", "url", "uri", "link",
-        "spotify", "youtube", "anghami", "video id", "isrc"
+        "spotify", "youtube", "anghami", "video id", "isrc",
+        "عنوان", "أغنية", "فنان", "مطرب", "رابط"
     )
     return tokens.any { header == it || header.contains(it) }
 }

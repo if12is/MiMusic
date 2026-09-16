@@ -39,6 +39,7 @@ import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.useSystemFontKey
 import it.vfsfitvnm.vimusic.utils.blurPlayerBackgroundKey
 import it.vfsfitvnm.vimusic.utils.lyricsScaleKey
+import it.vfsfitvnm.vimusic.utils.lowPowerModeKey
 import it.vfsfitvnm.vimusic.utils.visualizerEnabledKey
 
 @ExperimentalAnimationApi
@@ -62,6 +63,7 @@ fun AppearanceSettings() {
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
     var visualizerEnabled by rememberPreference(visualizerEnabledKey, false)
     var blurPlayerBackground by rememberPreference(blurPlayerBackgroundKey, true)
+    var lowPowerMode by rememberPreference(lowPowerModeKey, false)
     var lyricsScale by rememberPreference(lyricsScaleKey, 1)
     var isShowingThumbnailInLockscreen by rememberPreference(
         isShowingThumbnailInLockscreenKey,
@@ -107,7 +109,9 @@ fun AppearanceSettings() {
             title = strings.themeMode,
             selectedValue = colorPaletteMode,
             isEnabled = colorPaletteName != ColorPaletteName.PureBlack &&
-                colorPaletteName != ColorPaletteName.Gold,
+                colorPaletteName != ColorPaletteName.Gold &&
+                colorPaletteName != ColorPaletteName.Spotify &&
+                colorPaletteName != ColorPaletteName.YouTube,
             onValueSelected = { colorPaletteMode = it },
             valueText = strings::colorPaletteMode
         )
@@ -174,6 +178,13 @@ fun AppearanceSettings() {
             text = strings.blurPlayer,
             isChecked = blurPlayerBackground,
             onCheckedChange = { blurPlayerBackground = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.lowPowerMode,
+            text = strings.lowPowerModeDescription,
+            isChecked = lowPowerMode,
+            onCheckedChange = { lowPowerMode = it }
         )
 
         ValueSelectorSettingsEntry(

@@ -66,6 +66,7 @@ import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.parsePlaylistFile
+import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.readTextFromUri
 import it.vfsfitvnm.vimusic.utils.resolveImportedTracks
 import it.vfsfitvnm.vimusic.utils.smartShuffled
@@ -141,6 +142,21 @@ fun LocalPlaylistSongs(
             }
             context.toast(strings.importFinished(songs.size))
         }
+    }
+
+    val coverLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        runCatching {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+        context.preferences.edit()
+            .putString(it.vfsfitvnm.vimusic.utils.playlistCoverKey(playlistId), uri.toString())
+            .apply()
     }
 
     LaunchedEffect(Unit) {
@@ -327,6 +343,15 @@ fun LocalPlaylistSongs(
                                                     "*/*"
                                                 )
                                             )
+                                        }
+                                    )
+
+                                    MenuEntry(
+                                        icon = R.drawable.disc,
+                                        text = strings.playlistCover,
+                                        onClick = {
+                                            menuState.hide()
+                                            coverLauncher.launch(arrayOf("image/*"))
                                         }
                                     )
 

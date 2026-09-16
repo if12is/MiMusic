@@ -121,7 +121,7 @@ fun HomePlaylists(
 
     if (isCreatingANewPlaylist) {
         TextFieldDialog(
-            hintText = strings.enterPlaylistName,
+            hintText = strings.playlistFolderHint,
             onDismiss = {
                 isCreatingANewPlaylist = false
             },
@@ -293,6 +293,34 @@ fun HomePlaylists(
                     alternative = true,
                     modifier = Modifier
                         .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Device) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "thisWeek") {
+                PlaylistItem(
+                    icon = R.drawable.calendar,
+                    colorTint = colorPalette.accent,
+                    name = strings.thisWeek,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.ThisWeek) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "shortFavorites") {
+                PlaylistItem(
+                    icon = R.drawable.heart_outline,
+                    colorTint = colorPalette.red,
+                    name = strings.shortFavorites,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.ShortFavorites) })
                         .animateItemPlacement()
                 )
             }

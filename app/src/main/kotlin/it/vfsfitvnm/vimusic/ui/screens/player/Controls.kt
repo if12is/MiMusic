@@ -55,6 +55,7 @@ import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.carModeKey
+import it.vfsfitvnm.vimusic.utils.playbackPitchKey
 import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.LocalStrings
@@ -78,9 +79,11 @@ fun Controls(
     binder?.player ?: return
     var trackLoopEnabled by rememberPreference(trackLoopEnabledKey, defaultValue = false)
     var playbackSpeed by rememberPreference(playbackSpeedKey, 1f)
+    var playbackPitch by rememberPreference(playbackPitchKey, 1f)
     var carMode by rememberPreference(carModeKey, false)
     val strings = LocalStrings.current
     val speedOptions = listOf(0.75f, 1f, 1.25f, 1.5f)
+    val pitchOptions = listOf(0.8f, 0.9f, 1f, 1.1f, 1.2f)
     var loopA by remember(mediaId) { mutableStateOf<Long?>(null) }
     var loopB by remember(mediaId) { mutableStateOf<Long?>(null) }
 
@@ -227,7 +230,7 @@ fun Controls(
                 onClick = binder.player::forceSeekToPrevious,
                 modifier = Modifier
                     .weight(1f)
-                    .size(24.dp)
+                    .size(if (carMode) 36.dp else 24.dp)
             )
 
             Spacer(
@@ -272,7 +275,7 @@ fun Controls(
                 onClick = binder.player::forceSeekToNext,
                 modifier = Modifier
                     .weight(1f)
-                    .size(24.dp)
+                    .size(if (carMode) 36.dp else 24.dp)
             )
 
             IconButton(
@@ -329,6 +332,19 @@ fun Controls(
                         binder.setPlaybackSpeed(playbackSpeed)
                     }
                     .padding(horizontal = 12.dp, vertical = 6.dp)
+            )
+
+            BasicText(
+                text = "${strings.pitch} ${playbackPitch}",
+                style = typography.xxs.semiBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(16.dp))
+                    .clickable {
+                        val index = pitchOptions.indexOfFirst { it == playbackPitch }
+                        playbackPitch = pitchOptions[(index + 1).mod(pitchOptions.size)]
+                        binder.setPlaybackPitch(playbackPitch)
+                    }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             )
 
             IconButton(

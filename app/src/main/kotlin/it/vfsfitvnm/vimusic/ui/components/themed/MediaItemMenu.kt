@@ -317,6 +317,20 @@ fun MediaItemMenu(
             }
         )
     }
+    var isRemovingDownload by remember {
+        mutableStateOf(false)
+    }
+    if (isRemovingDownload) {
+        ConfirmationDialog(
+            text = strings.removeDownloadConfirm,
+            onDismiss = { isRemovingDownload = false },
+            onConfirm = {
+                binder?.removeDownload(mediaItem.mediaId)
+                context.toast(strings.downloadRemoved)
+                onDismiss()
+            }
+        )
+    }
     val downloadStatus by remember(mediaItem.mediaId, binder) {
         binder?.downloadStatusFlow(mediaItem.mediaId) ?: flowOf(DownloadStatus.None)
     }.collectAsState(initial = binder?.downloadStatus(mediaItem.mediaId) ?: DownloadStatus.None)
@@ -613,9 +627,7 @@ fun MediaItemMenu(
                     onClick = {
                         when (downloadStatus) {
                             DownloadStatus.Completed -> {
-                                binder?.removeDownload(mediaItem.mediaId)
-                                context.toast(strings.downloadRemoved)
-                                onDismiss()
+                                isRemovingDownload = true
                             }
 
                             DownloadStatus.Downloading -> Unit

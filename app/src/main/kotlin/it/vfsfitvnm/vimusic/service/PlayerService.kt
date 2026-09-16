@@ -41,6 +41,7 @@ import androidx.media3.common.AudioAttributes
 import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
+import androidx.media3.common.PlaybackParameters
 import androidx.media3.common.Player
 import androidx.media3.common.Timeline
 import androidx.media3.database.StandaloneDatabaseProvider
@@ -116,6 +117,7 @@ import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid7
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
+import it.vfsfitvnm.vimusic.utils.isCharging
 import it.vfsfitvnm.vimusic.utils.isInvincibilityEnabledKey
 import it.vfsfitvnm.vimusic.utils.isOnUnmeteredNetwork
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
@@ -128,7 +130,9 @@ import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.resumePlaybackWhenDeviceConnectedKey
 import it.vfsfitvnm.vimusic.utils.shouldBePlaying
+import it.vfsfitvnm.vimusic.utils.playbackPitchKey
 import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
+import it.vfsfitvnm.vimusic.utils.chargingOnlyDownloadKey
 import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.startMediaForeground
 import it.vfsfitvnm.vimusic.utils.timer
@@ -292,7 +296,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
 
         player.skipSilenceEnabled = preferences.getBoolean(skipSilenceKey, false)
-        player.setPlaybackSpeed(preferences.getFloat(playbackSpeedKey, 1f).coerceIn(0.5f, 2f))
+        applyPlaybackParameters()
         player.addListener(this)
         player.addAnalyticsListener(PlaybackStatsListener(false, this))
 
@@ -488,6 +492,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 Database.insert(queuedMediaItems)
             }
         }
+    }
+
+    private fun applyPlaybackParameters() {
+        val speed = preferences.getFloat(playbackSpeedKey, 1f).coerceIn(0.5f, 2f)
+        val pitch = preferences.getFloat(playbackPitchKey, 1f).coerceIn(0.5f, 2f)
+        player.playbackParameters = PlaybackParameters(speed, pitch)
     }
 
     private fun maybeRestorePlayerQueue() {
@@ -758,7 +768,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             skipSilenceKey -> player.skipSilenceEnabled = sharedPreferences.getBoolean(key, false)
             equalizerEnabledKey, equalizerPresetKey, bassBoostKey ->
-                if (player.playbackState == Player.STATE_READY) audioFx.apply(player.audioSessionId)
+                if (player.playbackState == Player.STATE_READY) {
+                    audioFx.apply(this@PlayerService.player.audioSessionId)
+                }
             isShowingThumbnailInLockscreenKey -> {
                 isShowingThumbnailInLockscreen = sharedPreferences.getBoolean(key, true)
                 maybeShowSongCoverInLockScreen()
@@ -805,7 +817,14 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             Notification.Builder(applicationContext)
         }
             .setContentTitle(mediaMetadata.title)
-            .setContentText(mediaMetadata.artist)
+            .setContentText(
+                listOfNotNull(
+                    mediaMetadata.artist,
+                    timerJob?.millisLeft?.value?.let { left ->
+                        "⏱ ${DateUtils.formatElapsedTime(left / 1000)}"
+                    }
+                ).joinToString(" · ")
+            )
             .setSubText(player.playerError?.message)
             .setLargeIcon(artwork)
             .setAutoCancel(false)
@@ -1279,9 +1298,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             .distinctUntilChanged()
 
         fun setPlaybackSpeed(speed: Float) {
-            val normalized = speed.coerceIn(0.5f, 2f)
-            preferences.edit().putFloat(playbackSpeedKey, normalized).apply()
-            player.setPlaybackSpeed(normalized)
+            preferences.edit().putFloat(playbackSpeedKey, speed.coerceIn(0.5f, 2f)).apply()
+            applyPlaybackParameters()
+        }
+
+        fun setPlaybackPitch(pitch: Float) {
+            preferences.edit().putFloat(playbackPitchKey, pitch.coerceIn(0.5f, 2f)).apply()
+            applyPlaybackParameters()
         }
 
         fun downloadAll(mediaItems: List<MediaItem>) {
@@ -1333,6 +1356,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (mediaId.startsWith("local:")) return
             if (downloadJobs.containsKey(mediaId) || isFullyDownloaded(mediaId)) return
             if (preferences.getBoolean(wifiOnlyDownloadKey, false) && !isOnUnmeteredNetwork()) {
+                setDownloadStatus(mediaId, DownloadStatus.Failed)
+                return
+            }
+            if (preferences.getBoolean(chargingOnlyDownloadKey, false) && !isCharging()) {
                 setDownloadStatus(mediaId, DownloadStatus.Failed)
                 return
             }
@@ -1436,6 +1463,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         override fun onStop() = player.pause()
         override fun onRewind() {
             player.seekTo((player.currentPosition - 15_000).coerceAtLeast(0))
+        }
+        override fun onFastForward() {
+            val duration = player.duration
+            val target = player.currentPosition + 15_000
+            player.seekTo(if (duration == C.TIME_UNSET) target else target.coerceAtMost(duration))
         }
         override fun onSkipToQueueItem(id: Long) = runCatching { player.seekToDefaultPosition(id.toInt()) }.let { }
     }

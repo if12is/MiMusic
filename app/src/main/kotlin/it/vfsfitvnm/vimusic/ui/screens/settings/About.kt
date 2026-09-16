@@ -193,6 +193,25 @@ fun About() {
             }
         )
 
+        SettingsEntry(
+            title = strings.crashLog,
+            text = strings.crashLogDescription,
+            onClick = {
+                val log = PlaybackLogStore.snapshot()
+                if (log.isBlank()) {
+                    context.toast(strings.crashLogEmpty)
+                } else {
+                    val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+                    clipboard.setPrimaryClip(ClipData.newPlainText("MiMusic log", log))
+                    runCatching {
+                        context.startActivity(
+                            PlaybackLogStore.shareIntent().addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                        )
+                    }
+                }
+            }
+        )
+
         SettingsEntryGroupText(title = strings.troubleshooting)
 
         SettingsEntry(

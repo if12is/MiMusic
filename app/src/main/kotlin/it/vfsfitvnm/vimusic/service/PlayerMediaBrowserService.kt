@@ -87,7 +87,8 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
                         songsBrowserMediaItem,
                         playlistsBrowserMediaItem,
                         albumsBrowserMediaItem,
-                        historyBrowserMediaItem
+                        historyBrowserMediaItem,
+                        quranBrowserMediaItem
                     )
 
                     MediaId.songs -> Database
@@ -114,6 +115,13 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
 
                     MediaId.history -> Database
                         .playbackHistory()
+                        .first()
+                        .also { lastSongs = it }
+                        .map { it.asBrowserMediaItem }
+                        .toMutableList()
+
+                    MediaId.quran -> Database
+                        .quranSongs()
                         .first()
                         .also { lastSongs = it }
                         .map { it.asBrowserMediaItem }
@@ -209,6 +217,16 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
             BrowserMediaItem.FLAG_PLAYABLE
         )
 
+    private val quranBrowserMediaItem
+        inline get() = BrowserMediaItem(
+            BrowserMediaDescription.Builder()
+                .setMediaId(MediaId.quran)
+                .setTitle("قرآن")
+                .setIconUri(uriFor(R.drawable.star))
+                .build(),
+            BrowserMediaItem.FLAG_BROWSABLE
+        )
+
     private val Song.asBrowserMediaItem
         inline get() = BrowserMediaItem(
             BrowserMediaDescription.Builder()
@@ -289,6 +307,10 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
                         .playbackHistory()
                         .first()
 
+                    MediaId.quran -> Database
+                        .quranSongs()
+                        .first()
+
                     MediaId.playlists -> data
                         .getOrNull(1)
                         ?.toLongOrNull()
@@ -321,6 +343,7 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
         const val favorites = "favorites"
         const val offline = "offline"
         const val history = "history"
+        const val quran = "quran"
         const val shuffle = "shuffle"
 
         fun forSong(id: String) = "songs/$id"

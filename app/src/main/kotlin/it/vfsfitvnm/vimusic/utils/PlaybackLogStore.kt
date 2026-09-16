@@ -15,9 +15,24 @@ object PlaybackLogStore {
     private val time = SimpleDateFormat("HH:mm:ss.SSS", Locale.US)
     @Volatile
     private var logFile: File? = null
+    @Volatile
+    private var crashFile: File? = null
 
     fun init(context: Context) {
         logFile = File(context.filesDir, "playback.log")
+        crashFile = File(context.filesDir, "crash.log")
+        val previous = Thread.getDefaultUncaughtExceptionHandler()
+        Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
+            runCatching {
+                crashFile?.writeText(
+                    buildString {
+                        appendLine(time.format(Date()))
+                        appendLine(throwable.stackTraceToString())
+                    }
+                )
+            }
+            previous?.uncaughtException(thread, throwable)
+        }
     }
 
     fun append(message: String) {
@@ -36,8 +51,14 @@ object PlaybackLogStore {
 
     fun snapshot(): String {
         val fileText = runCatching { logFile?.takeIf { it.exists() }?.readText() }.getOrNull()
+        val crashText = runCatching { crashFile?.takeIf { it.exists() }?.readText() }.getOrNull()
         return buildString {
+            if (!crashText.isNullOrBlank()) {
+                appendLine("=== crash ===")
+                appendLine(crashText.trim())
+            }
             if (!fileText.isNullOrBlank()) {
+                appendLine("=== playback ===")
                 appendLine(fileText.trim())
             }
             val memory = PlayerLog.snapshot()

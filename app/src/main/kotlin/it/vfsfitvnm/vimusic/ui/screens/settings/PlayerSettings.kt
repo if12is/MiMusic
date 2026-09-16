@@ -203,6 +203,22 @@ fun PlayerSettings() {
             onCheckedChange = { wifiOnlyDownload = it }
         )
 
+        var chargingOnlyDownload by rememberPreference(it.vfsfitvnm.vimusic.utils.chargingOnlyDownloadKey, false)
+        SwitchSettingEntry(
+            title = strings.chargingOnlyDownload,
+            text = strings.chargingOnlyDownloadDescription,
+            isChecked = chargingOnlyDownload,
+            onCheckedChange = { chargingOnlyDownload = it }
+        )
+
+        var pipOnLeave by rememberPreference(it.vfsfitvnm.vimusic.utils.pipOnLeaveKey, false)
+        SwitchSettingEntry(
+            title = strings.pictureInPicture,
+            text = strings.pictureInPictureDescription,
+            isChecked = pipOnLeave,
+            onCheckedChange = { pipOnLeave = it }
+        )
+
         SettingsEntry(
             title = strings.equalizer,
             text = strings.equalizerDescription,

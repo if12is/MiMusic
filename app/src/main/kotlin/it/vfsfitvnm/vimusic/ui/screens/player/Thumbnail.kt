@@ -185,7 +185,8 @@ fun Thumbnail(
             )
 
             val visualizerEnabled by rememberPreference(visualizerEnabledKey, false)
-            if (visualizerEnabled && !isShowingLyrics) {
+            val lowPowerMode by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
+            if (visualizerEnabled && !lowPowerMode && !isShowingLyrics) {
                 LightVisualizer(
                     color = LocalAppearance.current.colorPalette.accent,
                     modifier = Modifier

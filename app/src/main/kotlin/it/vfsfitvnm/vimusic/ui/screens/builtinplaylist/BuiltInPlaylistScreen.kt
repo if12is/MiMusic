@@ -29,6 +29,8 @@ fun BuiltInPlaylistScreen(builtInPlaylist: BuiltInPlaylist) {
                 BuiltInPlaylist.History -> 2
                 BuiltInPlaylist.Top -> 3
                 BuiltInPlaylist.Device -> 4
+                BuiltInPlaylist.ThisWeek -> 5
+                BuiltInPlaylist.ShortFavorites -> 6
             }
         )
     }
@@ -50,6 +52,8 @@ fun BuiltInPlaylistScreen(builtInPlaylist: BuiltInPlaylist) {
                     Item(2, strings.playbackHistory, R.drawable.time)
                     Item(3, strings.mostPlayed, R.drawable.trending)
                     Item(4, strings.onDevice, R.drawable.musical_notes)
+                    Item(5, strings.thisWeek, R.drawable.calendar)
+                    Item(6, strings.shortFavorites, R.drawable.heart_outline)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {
@@ -59,6 +63,8 @@ fun BuiltInPlaylistScreen(builtInPlaylist: BuiltInPlaylist) {
                             2 -> BuiltInPlaylist.History
                             3 -> BuiltInPlaylist.Top
                             4 -> BuiltInPlaylist.Device
+                            5 -> BuiltInPlaylist.ThisWeek
+                            6 -> BuiltInPlaylist.ShortFavorites
                             else -> BuiltInPlaylist.Favorites
                         }
                     )

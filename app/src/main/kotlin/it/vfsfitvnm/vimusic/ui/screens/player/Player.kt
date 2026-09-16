@@ -209,7 +209,10 @@ fun Player(
         }
 
         val blurPlayerBackground by rememberPreference(blurPlayerBackgroundKey, true)
+        val lowPowerMode by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
         val strings = LocalStrings.current
+        val context = LocalContext.current
+        val showBlur = blurPlayerBackground && !lowPowerMode
 
         val playerBottomSheetState = rememberBottomSheetState(
             64.dp + horizontalBottomPaddingValues.calculateBottomPadding(),
@@ -218,7 +221,7 @@ fun Player(
 
         val containerModifier = Modifier
             .background(
-                if (blurPlayerBackground) colorPalette.background1.copy(alpha = 0.42f)
+                if (showBlur) colorPalette.background1.copy(alpha = 0.42f)
                 else colorPalette.background1
             )
             .padding(
@@ -263,7 +266,7 @@ fun Player(
             )
         }
 
-        if (blurPlayerBackground) {
+        if (showBlur) {
             AsyncImage(
                 model = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.player.song.px),
                 contentDescription = null,
@@ -350,6 +353,22 @@ fun Player(
                                     mediaItem = mediaItem,
                                     binder = binder,
                                     onShowLyrics = { isShowingLyrics = true }
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
+                            .size(20.dp)
+                    )
+
+                    IconButton(
+                        icon = R.drawable.film,
+                        color = colorPalette.text,
+                        onClick = {
+                            val activity = context as? android.app.Activity ?: return@IconButton
+                            if (Build.VERSION.SDK_INT >= 26) {
+                                activity.enterPictureInPictureMode(
+                                    android.app.PictureInPictureParams.Builder().build()
                                 )
                             }
                         },
