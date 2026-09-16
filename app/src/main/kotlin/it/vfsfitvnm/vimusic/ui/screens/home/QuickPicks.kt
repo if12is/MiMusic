@@ -182,8 +182,9 @@ fun QuickPicks(
     }
 
     LaunchedEffect(lastPlayedId) {
-        if (!lastPlayedId.isNullOrEmpty()) {
-            Database.song(lastPlayedId).collect { lastPlayedSong = it }
+        val mediaId = lastPlayedId
+        if (!mediaId.isNullOrEmpty()) {
+            Database.song(mediaId).collect { lastPlayedSong = it }
         } else {
             lastPlayedSong = null
         }

@@ -15,7 +15,6 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.MediaMetadata
@@ -111,7 +110,6 @@ fun VideoLyricsCaption(
         BasicText(
             text = line,
             style = typography.s.medium.center.color(Color.White),
-            textAlign = TextAlign.Center,
             modifier = Modifier.fillMaxWidth()
         )
     }
