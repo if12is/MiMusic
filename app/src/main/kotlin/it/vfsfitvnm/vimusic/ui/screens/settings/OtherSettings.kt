@@ -39,6 +39,8 @@ import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid12
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isIgnoringBatteryOptimizations
 import it.vfsfitvnm.vimusic.utils.isInvincibilityEnabledKey
+import it.vfsfitvnm.vimusic.utils.appLockKey
+import it.vfsfitvnm.vimusic.utils.hideFromRecentsKey
 import it.vfsfitvnm.vimusic.utils.pauseSearchHistoryKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.toast
@@ -84,6 +86,8 @@ fun OtherSettings() {
         }
 
     var pauseSearchHistory by rememberPreference(pauseSearchHistoryKey, false)
+    var appLock by rememberPreference(appLockKey, false)
+    var hideFromRecents by rememberPreference(hideFromRecentsKey, false)
 
     val queriesCount by remember {
         Database.queriesCount().distinctUntilChanged()
@@ -101,6 +105,22 @@ fun OtherSettings() {
             )
     ) {
         Header(title = strings.other)
+
+        SwitchSettingEntry(
+            title = strings.appLock,
+            text = strings.appLockDescription,
+            isChecked = appLock,
+            onCheckedChange = { appLock = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.hideRecents,
+            text = strings.hideRecentsDescription,
+            isChecked = hideFromRecents,
+            onCheckedChange = { hideFromRecents = it }
+        )
+
+        SettingsGroupSpacer()
 
         SettingsEntryGroupText(title = strings.androidAuto)
 

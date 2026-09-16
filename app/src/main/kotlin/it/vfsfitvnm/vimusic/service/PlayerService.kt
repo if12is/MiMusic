@@ -83,6 +83,7 @@ import it.vfsfitvnm.innertube.requests.player
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.MainActivity
 import it.vfsfitvnm.vimusic.R
+import it.vfsfitvnm.vimusic.enums.AudioQuality
 import it.vfsfitvnm.vimusic.enums.ExoPlayerDiskCacheMaxSize
 import it.vfsfitvnm.vimusic.models.Event
 import it.vfsfitvnm.vimusic.models.Format
@@ -96,12 +97,18 @@ import it.vfsfitvnm.vimusic.utils.RingBuffer
 import it.vfsfitvnm.vimusic.utils.TimerJob
 import it.vfsfitvnm.vimusic.utils.YouTubeRadio
 import it.vfsfitvnm.vimusic.utils.activityPendingIntent
+import it.vfsfitvnm.vimusic.utils.audioQualityKey
+import it.vfsfitvnm.vimusic.utils.bassBoostKey
 import it.vfsfitvnm.vimusic.utils.broadCastPendingIntent
+import it.vfsfitvnm.vimusic.utils.crossfadeEnabledKey
+import it.vfsfitvnm.vimusic.utils.equalizerEnabledKey
+import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
 import it.vfsfitvnm.vimusic.utils.exoPlayerDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.findNextMediaItemById
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
+import it.vfsfitvnm.vimusic.utils.formatFor
 import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.intent
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid12
@@ -110,8 +117,12 @@ import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid7
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
 import it.vfsfitvnm.vimusic.utils.isInvincibilityEnabledKey
+import it.vfsfitvnm.vimusic.utils.isOnUnmeteredNetwork
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
+import it.vfsfitvnm.vimusic.utils.khatmaMediaIdKey
+import it.vfsfitvnm.vimusic.utils.khatmaPositionKey
 import it.vfsfitvnm.vimusic.utils.mediaItems
+import it.vfsfitvnm.vimusic.utils.offlineModeKey
 import it.vfsfitvnm.vimusic.utils.persistentQueueKey
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
@@ -123,6 +134,7 @@ import it.vfsfitvnm.vimusic.utils.startMediaForeground
 import it.vfsfitvnm.vimusic.utils.timer
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
+import it.vfsfitvnm.vimusic.utils.wifiOnlyDownloadKey
 import kotlin.math.roundToInt
 import kotlin.system.exitProcess
 import kotlinx.coroutines.CoroutineScope
@@ -185,6 +197,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private var audioDeviceCallback: AudioDeviceCallback? = null
 
     private var loudnessEnhancer: LoudnessEnhancer? = null
+    private val audioFx = InAppAudioFx(this)
+    private var loopStartMs = C.TIME_UNSET
+    private var loopEndMs = C.TIME_UNSET
 
     private val binder = Binder()
 
@@ -335,6 +350,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         downloadCache.release()
 
         loudnessEnhancer?.release()
+        audioFx.release()
 
         super.onDestroy()
     }
@@ -673,11 +689,59 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (player.shouldBePlaying) {
                 makeInvincible(false)
                 sendOpenEqualizerIntent()
+                audioFx.apply(player.audioSessionId)
             } else {
                 makeInvincible(true)
                 sendCloseEqualizerIntent()
             }
+
+            PlayerWidgetProvider.update(
+                this@PlayerService,
+                player.mediaMetadata.title?.toString(),
+                player.mediaMetadata.artist?.toString(),
+                player.isPlaying
+            )
+
+            maybeCrossfade()
+            maybeEnforceAbLoop()
+            maybeSaveKhatma()
         }
+    }
+
+    private fun maybeCrossfade() {
+        if (!preferences.getBoolean(crossfadeEnabledKey, false)) {
+            player.volume = 1f
+            return
+        }
+        val duration = player.duration
+        if (duration == C.TIME_UNSET) return
+        val remaining = duration - player.currentPosition
+        player.volume = when {
+            remaining in 1..3500L && player.hasNextMediaItem() ->
+                (remaining / 3500f).coerceIn(0.12f, 1f)
+            player.currentPosition < 2200L ->
+                (player.currentPosition / 2200f).coerceIn(0.12f, 1f)
+            else -> 1f
+        }
+    }
+
+    private fun maybeEnforceAbLoop() {
+        if (loopStartMs == C.TIME_UNSET || loopEndMs == C.TIME_UNSET) return
+        if (loopEndMs <= loopStartMs) return
+        if (player.currentPosition >= loopEndMs) {
+            player.seekTo(loopStartMs)
+        }
+    }
+
+    private fun maybeSaveKhatma() {
+        val title = player.mediaMetadata.title?.toString().orEmpty()
+        val artist = player.mediaMetadata.artist?.toString().orEmpty()
+        val haystack = "$title $artist"
+        if (!haystack.contains("قرآن") && !haystack.contains("Quran", ignoreCase = true)) return
+        preferences.edit()
+            .putString(khatmaMediaIdKey, player.currentMediaItem?.mediaId)
+            .putLong(khatmaPositionKey, player.currentPosition)
+            .apply()
     }
 
     override fun onSharedPreferenceChanged(sharedPreferences: SharedPreferences, key: String?) {
@@ -693,6 +757,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 sharedPreferences.getBoolean(key, isInvincibilityEnabled)
 
             skipSilenceKey -> player.skipSilenceEnabled = sharedPreferences.getBoolean(key, false)
+            equalizerEnabledKey, equalizerPresetKey, bassBoostKey ->
+                if (player.playbackState == Player.STATE_READY) audioFx.apply(player.audioSessionId)
             isShowingThumbnailInLockscreenKey -> {
                 isShowingThumbnailInLockscreen = sharedPreferences.getBoolean(key, true)
                 maybeShowSongCoverInLockScreen()
@@ -875,7 +941,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             else -> throw PlayableFormatNotFoundException()
         }
 
-        val format = response.streamingData?.playableFormat ?: throw PlayableFormatNotFoundException()
+        val format = response.streamingData?.formatFor(
+            preferences.getEnum(audioQualityKey, AudioQuality.Auto)
+        ) ?: throw PlayableFormatNotFoundException()
         if (format.url.isNullOrBlank()) throw PlayableFormatNotFoundException()
 
         return response to format
@@ -947,8 +1015,18 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val chunkLength = 512 * 1024L
         val ringBuffer = RingBuffer<ResolvedUri?>(2) { null }
 
-        return ResolvingDataSource.Factory(createCacheDataSource()) { dataSpec ->
+        return ResolvingDataSource.Factory(
+            androidx.media3.datasource.DefaultDataSource.Factory(this, createCacheDataSource())
+        ) { dataSpec ->
             val videoId = dataSpec.key ?: error("A key must be set")
+            val uri = dataSpec.uri
+            if (
+                videoId.startsWith("local:") ||
+                uri.scheme == "content" ||
+                uri.scheme == "file"
+            ) {
+                return@Factory dataSpec
+            }
 
             val requestedLength = dataSpec.length
             val canServeFromCache = isFullyDownloaded(videoId) || (
@@ -961,6 +1039,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             if (canServeFromCache) {
                 dataSpec
+            } else if (preferences.getBoolean(offlineModeKey, false)) {
+                throw UnplayableException()
             } else {
                 when (videoId) {
                     ringBuffer.getOrNull(0)?.videoId -> applyResolvedUri(dataSpec, ringBuffer.getOrNull(0)!!, chunkLength)
@@ -976,7 +1056,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                             }
 
                             when (val status = body.playabilityStatus?.status) {
-                                "OK" -> body.streamingData?.playableFormat?.let { format ->
+                                "OK" -> body.streamingData?.formatFor(
+                                    preferences.getEnum(audioQualityKey, AudioQuality.Auto)
+                                )?.let { format ->
                                     val mediaItem = runBlocking(Dispatchers.Main) {
                                         player.findNextMediaItemById(videoId)
                                     }
@@ -1206,13 +1288,54 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             mediaItems.forEach(::download)
         }
 
-        fun clearDownloads() {
-            downloadCache.keys.forEach(::removeDownload)
+        fun setAbLoop(startMs: Long, endMs: Long) {
+            loopStartMs = startMs
+            loopEndMs = endMs
+        }
+
+        fun clearAbLoop() {
+            loopStartMs = C.TIME_UNSET
+            loopEndMs = C.TIME_UNSET
+        }
+
+        val hasAbLoop: Boolean
+            get() = loopStartMs != C.TIME_UNSET && loopEndMs != C.TIME_UNSET
+
+        fun exportDownload(mediaId: String, output: android.net.Uri) {
+            coroutineScope.launch(Dispatchers.IO) {
+                val length = downloadedContentLength(mediaId) ?: return@launch
+                val source = CacheDataSource.Factory()
+                    .setCache(this@PlayerService.downloadCache)
+                    .setUpstreamDataSourceFactory(createHttpDataSourceFactory())
+                    .createDataSource()
+                val spec = DataSpec.Builder()
+                    .setUri("https://youtube.com/watch?v=$mediaId".toUri())
+                    .setKey(mediaId)
+                    .setLength(length)
+                    .build()
+                runCatching {
+                    source.open(spec)
+                    contentResolver.openOutputStream(output)?.use { outputStream ->
+                        val buffer = ByteArray(DEFAULT_BUFFER_SIZE)
+                        while (true) {
+                            val read = source.read(buffer, 0, buffer.size)
+                            if (read == C.RESULT_END_OF_INPUT) break
+                            outputStream.write(buffer, 0, read)
+                        }
+                    }
+                }
+                runCatching { source.close() }
+            }
         }
 
         fun download(mediaItem: MediaItem) {
             val mediaId = mediaItem.mediaId
+            if (mediaId.startsWith("local:")) return
             if (downloadJobs.containsKey(mediaId) || isFullyDownloaded(mediaId)) return
+            if (preferences.getBoolean(wifiOnlyDownloadKey, false) && !isOnUnmeteredNetwork()) {
+                setDownloadStatus(mediaId, DownloadStatus.Failed)
+                return
+            }
 
             setDownloadStatus(mediaId, DownloadStatus.Downloading)
             downloadJobs[mediaId] = coroutineScope.launch(Dispatchers.IO) {
@@ -1302,7 +1425,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         override fun onSkipToNext() = runCatching(player::forceSeekToNext).let { }
         override fun onSeekTo(pos: Long) = player.seekTo(pos)
         override fun onStop() = player.pause()
-        override fun onRewind() = player.seekToDefaultPosition()
+        override fun onRewind() {
+            player.seekTo((player.currentPosition - 15_000).coerceAtLeast(0))
+        }
         override fun onSkipToQueueItem(id: Long) = runCatching { player.seekToDefaultPosition(id.toInt()) }.let { }
     }
 

@@ -15,6 +15,8 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ripple.rememberRipple
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -22,6 +24,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.innertube.Innertube
@@ -61,7 +64,12 @@ import it.vfsfitvnm.vimusic.utils.completed
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
+import it.vfsfitvnm.vimusic.utils.parseM3uVideoIds
+import it.vfsfitvnm.vimusic.utils.readTextFromUri
+import it.vfsfitvnm.vimusic.utils.smartShuffled
+import it.vfsfitvnm.vimusic.utils.songsToM3u
 import it.vfsfitvnm.vimusic.utils.toast
+import it.vfsfitvnm.vimusic.utils.writeTextToUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
 import kotlinx.coroutines.runBlocking
@@ -78,9 +86,48 @@ fun LocalPlaylistSongs(
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val strings = it.vfsfitvnm.vimusic.utils.LocalStrings.current
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
 
     var playlistWithSongs by persist<PlaylistWithSongs?>("localPlaylist/$playlistId/playlistWithSongs")
+
+    val exportM3uLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("audio/x-mpegurl")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        playlistWithSongs?.songs?.let { songs ->
+            context.writeTextToUri(uri, songsToM3u(songs))
+        }
+    }
+
+    val importM3uLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        val ids = parseM3uVideoIds(context.readTextFromUri(uri))
+        if (ids.isEmpty()) return@rememberLauncherForActivityResult
+        val start = playlistWithSongs?.songs?.size ?: 0
+        query {
+            ids.forEach { id ->
+                Database.insert(
+                    Song(
+                        id = id,
+                        title = id,
+                        durationText = null,
+                        thumbnailUrl = null
+                    )
+                )
+            }
+            Database.insertSongPlaylistMaps(
+                ids.mapIndexed { index, id ->
+                    SongPlaylistMap(
+                        songId = id,
+                        playlistId = playlistId,
+                        position = start + index
+                    )
+                }
+            )
+        }
+    }
 
     LaunchedEffect(Unit) {
         Database.playlistWithSongs(playlistId).filterNotNull().collect { playlistWithSongs = it }
@@ -223,7 +270,7 @@ fun LocalPlaylistSongs(
 
                                     MenuEntry(
                                         icon = R.drawable.pencil,
-                                        text = "Rename",
+                                        text = strings.rename,
                                         onClick = {
                                             menuState.hide()
                                             isRenaming = true
@@ -231,8 +278,30 @@ fun LocalPlaylistSongs(
                                     )
 
                                     MenuEntry(
+                                        icon = R.drawable.share_social,
+                                        text = strings.exportM3u,
+                                        onClick = {
+                                            menuState.hide()
+                                            exportM3uLauncher.launch(
+                                                "${playlistWithSongs?.playlist?.name ?: "playlist"}.m3u"
+                                            )
+                                        }
+                                    )
+
+                                    MenuEntry(
+                                        icon = R.drawable.download,
+                                        text = strings.importM3u,
+                                        onClick = {
+                                            menuState.hide()
+                                            importM3uLauncher.launch(
+                                                arrayOf("audio/*", "text/*", "*/*")
+                                            )
+                                        }
+                                    )
+
+                                    MenuEntry(
                                         icon = R.drawable.trash,
-                                        text = "Delete",
+                                        text = strings.delete,
                                         onClick = {
                                             menuState.hide()
                                             isDeleting = true
@@ -301,7 +370,7 @@ fun LocalPlaylistSongs(
                     if (songs.isNotEmpty()) {
                         binder?.stopRadio()
                         binder?.player?.forcePlayFromBeginning(
-                            songs.shuffled().map(Song::asMediaItem)
+                            songs.map(Song::asMediaItem).smartShuffled()
                         )
                     }
                 }

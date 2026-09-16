@@ -190,6 +190,48 @@ fun HomePlaylists(
                 )
             }
 
+            item(key = "history") {
+                PlaylistItem(
+                    icon = R.drawable.time,
+                    colorTint = colorPalette.text,
+                    name = strings.playbackHistory,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.History) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "top") {
+                PlaylistItem(
+                    icon = R.drawable.trending,
+                    colorTint = colorPalette.accent,
+                    name = strings.mostPlayed,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Top) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "device") {
+                PlaylistItem(
+                    icon = R.drawable.musical_notes,
+                    colorTint = colorPalette.blue,
+                    name = strings.onDevice,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Device) })
+                        .animateItemPlacement()
+                )
+            }
+
             items(items = items, key = { it.playlist.id }) { playlistPreview ->
                 PlaylistItem(
                     playlist = playlistPreview,

@@ -309,6 +309,12 @@ interface Database {
     @Query("SELECT * FROM Song WHERE title LIKE :query OR artistsText LIKE :query")
     fun search(query: String): Flow<List<Song>>
 
+    @Query("SELECT * FROM Song WHERE totalPlayTimeMs > 0")
+    fun allPlayedSongs(): Flow<List<Song>>
+
+    @Query("UPDATE Song SET title = :title, artistsText = :artistsText WHERE id = :id")
+    fun updateSongMetadata(id: String, title: String, artistsText: String?)
+
     @Query("SELECT albumId AS id, NULL AS name FROM SongAlbumMap WHERE songId = :songId")
     fun songAlbumInfo(songId: String): Info
 
@@ -324,6 +330,16 @@ interface Database {
     @Query("SELECT Song.* FROM Event JOIN Song ON Song.id = songId GROUP BY songId ORDER BY MAX(timestamp) DESC LIMIT 20")
     @RewriteQueriesToDropUnusedColumns
     fun recentlyPlayed(): Flow<List<Song>>
+
+    @Transaction
+    @Query("SELECT Song.* FROM Event JOIN Song ON Song.id = songId GROUP BY songId ORDER BY MAX(timestamp) DESC LIMIT 100")
+    @RewriteQueriesToDropUnusedColumns
+    fun playbackHistory(): Flow<List<Song>>
+
+    @Transaction
+    @Query("SELECT Song.* FROM Event JOIN Song ON Song.id = songId GROUP BY songId ORDER BY SUM(playTime) DESC LIMIT 50")
+    @RewriteQueriesToDropUnusedColumns
+    fun mostPlayed(): Flow<List<Song>>
 
     @Query("SELECT COUNT (*) FROM Event")
     fun eventsCount(): Flow<Int>

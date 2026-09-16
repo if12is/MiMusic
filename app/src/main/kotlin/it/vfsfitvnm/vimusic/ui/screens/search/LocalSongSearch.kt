@@ -40,6 +40,7 @@ import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.align
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.forcePlay
+import it.vfsfitvnm.vimusic.utils.matchesLooseArabic
 import it.vfsfitvnm.vimusic.utils.medium
 
 @ExperimentalFoundationApi
@@ -58,7 +59,12 @@ fun LocalSongSearch(
 
     LaunchedEffect(textFieldValue.text) {
         if (textFieldValue.text.length > 1) {
-            Database.search("%${textFieldValue.text}%").collect { items = it }
+            Database.allPlayedSongs().collect { songs ->
+                items = songs.filter { song ->
+                    song.title.matchesLooseArabic(textFieldValue.text) ||
+                        song.artistsText.orEmpty().matchesLooseArabic(textFieldValue.text)
+                }
+            }
         }
     }
 

@@ -336,6 +336,7 @@ class UiStrings(private val language: AppLanguage) {
         ColorPaletteName.Default -> themeDefault
         ColorPaletteName.Dynamic -> themeDynamic
         ColorPaletteName.PureBlack -> themePureBlack
+        ColorPaletteName.Gold -> goldTheme
     }
 
     fun colorPaletteMode(value: ColorPaletteMode) = when (value) {
@@ -422,4 +423,61 @@ class UiStrings(private val language: AppLanguage) {
         "احفظ الألبومات لتظهر هنا"
     )
     val sharedViaMimusic = t("Shared via MiMusic", "مُشارك عبر MiMusic")
+    val playbackHistory = t("Listening history", "سجل الاستماع")
+    val mostPlayed = t("Most played", "الأكثر تشغيلًا")
+    val onDevice = t("On this device", "على الجهاز")
+    val audioQuality = t("Audio quality", "جودة الصوت")
+    val audioQualityAuto = t("Auto", "تلقائي")
+    val audioQualityHigh = t("High", "عالية")
+    val audioQualityMedium = t("Medium", "متوسطة")
+    val audioQualityLow = t("Low / Data saver", "منخفضة / توفير البيانات")
+    val crossfade = t("Crossfade", "تلاشي بين الأغاني")
+    val crossfadeDescription = t("Fade out the current song into the next one", "تلاشٍ ناعم من الأغنية الحالية إلى التالية")
+    val inAppEqualizer = t("In-app equalizer", "معادل داخل التطبيق")
+    val inAppEqualizerDescription = t("Use a built-in preset instead of the system equalizer", "استخدم إعدادًا جاهزًا بدل معادل النظام")
+    val bassBoost = t("Bass boost", "تعزيز الباس")
+    val wifiOnlyDownload = t("Wi-Fi downloads only", "التنزيل عبر Wi-Fi فقط")
+    val wifiOnlyDownloadDescription = t("Don't start downloads on mobile data", "لا تبدأ التنزيل على بيانات الجوال")
+    val offlineMode = t("Offline mode", "وضع بدون اتصال")
+    val offlineModeDescription = t("Play downloaded and on-device songs only", "تشغيل التنزيلات وملفات الجهاز فقط")
+    val carMode = t("Car mode", "وضع السيارة")
+    val carModeDescription = t("Larger player buttons while driving", "أزرار أكبر في المشغّل أثناء القيادة")
+    val lyricsSize = t("Lyrics size", "حجم الكلمات")
+    val visualizer = t("Audio visualizer", "موجة الصوت")
+    val blurPlayer = t("Blurred player background", "خلفية مشغّل ضبابية")
+    val appLock = t("Lock with device PIN", "قفل برقم الجهاز")
+    val appLockDescription = t("Ask for the phone lock when opening MiMusic", "اطلب قفل الهاتف عند فتح مي ميوزك")
+    val hideRecents = t("Hide from recents screenshots", "إخفاء لقطات التطبيقات")
+    val hideRecentsDescription = t("Block screenshots of MiMusic in the recents screen", "منع لقطات شاشة مي ميوزك في قائمة التطبيقات")
+    val smartShuffle = t("Smart shuffle", "خلط ذكي")
+    val smartShuffleDescription = t("Avoid playing the same artist twice in a row", "تجنب تشغيل نفس الفنان مرتين متتاليتين")
+    val abLoop = t("A–B loop", "تكرار مقطع")
+    val markA = t("Mark A", "تحديد أ")
+    val markB = t("Mark B", "تحديد ب")
+    val clearLoop = t("Clear loop", "إلغاء التكرار")
+    val playerLock = t("Lock player", "قفل المشغّل")
+    val unlockPlayer = t("Tap to unlock", "اضغط للفتح")
+    val similarSongs = t("Similar songs", "أغانٍ مشابهة")
+    val editMetadata = t("Edit title", "تعديل العنوان")
+    val exportM3u = t("Export M3U", "تصدير M3U")
+    val importM3u = t("Import M3U", "استيراد M3U")
+    val exportFile = t("Save file", "حفظ الملف")
+    val continueRecitation = t("Continue recitation", "متابعة التلاوة")
+    val shareCard = t("Share card", "مشاركة كارت")
+    val goldTheme = t("Gold", "ذهبي")
+    val settingsSearch = t("Search settings", "بحث في الإعدادات")
+    val onboardingTitle = t("Welcome to MiMusic", "أهلًا بك في مي ميوزك")
+    val onboardingBody = t(
+        "Arabic is the default language. Pick a nav style later in Appearance.",
+        "العربية هي لغة الواجهة. يمكنك تغيير شكل القائمة لاحقًا من المظهر."
+    )
+    val gotIt = t("Got it", "حسنًا")
+    val eqPreset = t("Equalizer preset", "إعداد المعادل")
+
+    fun audioQualityName(value: it.vfsfitvnm.vimusic.enums.AudioQuality) = when (value) {
+        it.vfsfitvnm.vimusic.enums.AudioQuality.Auto -> audioQualityAuto
+        it.vfsfitvnm.vimusic.enums.AudioQuality.High -> audioQualityHigh
+        it.vfsfitvnm.vimusic.enums.AudioQuality.Medium -> audioQualityMedium
+        it.vfsfitvnm.vimusic.enums.AudioQuality.Low -> audioQualityLow
+    }
 }

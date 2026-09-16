@@ -37,6 +37,9 @@ import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.navigationStyleKey
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.useSystemFontKey
+import it.vfsfitvnm.vimusic.utils.blurPlayerBackgroundKey
+import it.vfsfitvnm.vimusic.utils.lyricsScaleKey
+import it.vfsfitvnm.vimusic.utils.visualizerEnabledKey
 
 @ExperimentalAnimationApi
 @Composable
@@ -57,6 +60,9 @@ fun AppearanceSettings() {
     )
     var useSystemFont by rememberPreference(useSystemFontKey, false)
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
+    var visualizerEnabled by rememberPreference(visualizerEnabledKey, false)
+    var blurPlayerBackground by rememberPreference(blurPlayerBackgroundKey, true)
+    var lyricsScale by rememberPreference(lyricsScaleKey, 1)
     var isShowingThumbnailInLockscreen by rememberPreference(
         isShowingThumbnailInLockscreenKey,
         false
@@ -100,7 +106,8 @@ fun AppearanceSettings() {
         EnumValueSelectorSettingsEntry(
             title = strings.themeMode,
             selectedValue = colorPaletteMode,
-            isEnabled = colorPaletteName != ColorPaletteName.PureBlack,
+            isEnabled = colorPaletteName != ColorPaletteName.PureBlack &&
+                colorPaletteName != ColorPaletteName.Gold,
             onValueSelected = { colorPaletteMode = it },
             valueText = strings::colorPaletteMode
         )
@@ -153,6 +160,34 @@ fun AppearanceSettings() {
             text = strings.applyFontPaddingDescription,
             isChecked = applyFontPadding,
             onCheckedChange = { applyFontPadding = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.visualizer,
+            text = strings.visualizer,
+            isChecked = visualizerEnabled,
+            onCheckedChange = { visualizerEnabled = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.blurPlayer,
+            text = strings.blurPlayer,
+            isChecked = blurPlayerBackground,
+            onCheckedChange = { blurPlayerBackground = it }
+        )
+
+        ValueSelectorSettingsEntry(
+            title = strings.lyricsSize,
+            selectedValue = lyricsScale.coerceIn(0, 2),
+            values = listOf(0, 1, 2),
+            onValueSelected = { lyricsScale = it },
+            valueText = {
+                when (it) {
+                    0 -> strings.roundnessLight
+                    2 -> strings.roundnessHeavy
+                    else -> strings.roundnessMedium
+                }
+            }
         )
 
         if (!isAtLeastAndroid13) {

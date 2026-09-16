@@ -12,18 +12,25 @@ import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.enums.BuiltInPlaylist
 import it.vfsfitvnm.vimusic.ui.components.themed.Scaffold
 import it.vfsfitvnm.vimusic.ui.screens.globalRoutes
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
 fun BuiltInPlaylistScreen(builtInPlaylist: BuiltInPlaylist) {
     val saveableStateHolder = rememberSaveableStateHolder()
+    val strings = LocalStrings.current
 
     val (tabIndex, onTabIndexChanged) = rememberSaveable {
-        mutableStateOf(when (builtInPlaylist) {
-            BuiltInPlaylist.Favorites -> 0
-            BuiltInPlaylist.Offline -> 1
-        })
+        mutableStateOf(
+            when (builtInPlaylist) {
+                BuiltInPlaylist.Favorites -> 0
+                BuiltInPlaylist.Offline -> 1
+                BuiltInPlaylist.History -> 2
+                BuiltInPlaylist.Top -> 3
+                BuiltInPlaylist.Device -> 4
+            }
+        )
     }
 
     PersistMapCleanup(tagPrefix = "${builtInPlaylist.name}/")
@@ -38,15 +45,23 @@ fun BuiltInPlaylistScreen(builtInPlaylist: BuiltInPlaylist) {
                 tabIndex = tabIndex,
                 onTabChanged = onTabIndexChanged,
                 tabColumnContent = { Item ->
-                    Item(0, "Favorites", R.drawable.heart)
-                    Item(1, "Offline", R.drawable.airplane)
+                    Item(0, strings.favorites, R.drawable.heart)
+                    Item(1, strings.offline, R.drawable.airplane)
+                    Item(2, strings.playbackHistory, R.drawable.time)
+                    Item(3, strings.mostPlayed, R.drawable.trending)
+                    Item(4, strings.onDevice, R.drawable.musical_notes)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {
-                    when (currentTabIndex) {
-                        0 -> BuiltInPlaylistSongs(builtInPlaylist = BuiltInPlaylist.Favorites)
-                        1 -> BuiltInPlaylistSongs(builtInPlaylist = BuiltInPlaylist.Offline)
-                    }
+                    BuiltInPlaylistSongs(
+                        builtInPlaylist = when (currentTabIndex) {
+                            1 -> BuiltInPlaylist.Offline
+                            2 -> BuiltInPlaylist.History
+                            3 -> BuiltInPlaylist.Top
+                            4 -> BuiltInPlaylist.Device
+                            else -> BuiltInPlaylist.Favorites
+                        }
+                    )
                 }
             }
         }

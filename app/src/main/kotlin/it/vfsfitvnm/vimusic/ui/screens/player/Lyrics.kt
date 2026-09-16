@@ -74,6 +74,7 @@ import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.isBlank
 import it.vfsfitvnm.vimusic.utils.isShowingSynchronizedLyricsKey
+import it.vfsfitvnm.vimusic.utils.lyricsScaleKey
 import it.vfsfitvnm.vimusic.utils.medium
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.resolveLyrics
@@ -105,6 +106,27 @@ fun Lyrics(
         val menuState = LocalMenuState.current
         val currentView = LocalView.current
         val strings = LocalStrings.current
+        val lyricsScale by rememberPreference(lyricsScaleKey, 1)
+        val currentLineStyle = when (lyricsScale) {
+            0 -> typography.xs
+            2 -> typography.l
+            else -> typography.s
+        }
+        val otherLineStyle = when (lyricsScale) {
+            0 -> typography.xxs
+            2 -> typography.s
+            else -> typography.xs
+        }
+        val currentWordSp = when (lyricsScale) {
+            0 -> 14.sp
+            2 -> 20.sp
+            else -> 16.sp
+        }
+        val otherWordSp = when (lyricsScale) {
+            0 -> 12.sp
+            2 -> 16.sp
+            else -> 14.sp
+        }
 
         var preferSynchronizedLyrics by rememberPreference(isShowingSynchronizedLyricsKey, true)
 
@@ -312,9 +334,9 @@ fun Lyrics(
                             val alreadySung = index < synchronizedLyrics.index
                             val words = line.words
                             val style = if (isCurrent) {
-                                typography.s.center.medium.color(PureBlackColorPalette.text)
+                                currentLineStyle.center.medium.color(PureBlackColorPalette.text)
                             } else {
-                                typography.xs.center.medium.color(
+                                otherLineStyle.center.medium.color(
                                     if (alreadySung) {
                                         PureBlackColorPalette.text.copy(alpha = 0.38f)
                                     } else {
@@ -335,9 +357,9 @@ fun Lyrics(
                                                     PureBlackColorPalette.textDisabled
                                                 },
                                                 fontSize = if (wordIndex == synchronizedLyrics.wordIndex) {
-                                                    16.sp
+                                                    currentWordSp
                                                 } else {
-                                                    14.sp
+                                                    otherWordSp
                                                 }
                                             )
                                         ) {
@@ -362,7 +384,7 @@ fun Lyrics(
                 } else {
                     BasicText(
                         text = text,
-                        style = typography.xs.center.medium.color(PureBlackColorPalette.text),
+                        style = otherLineStyle.center.medium.color(PureBlackColorPalette.text),
                         modifier = Modifier
                             .verticalFadingEdge()
                             .verticalScroll(rememberScrollState())

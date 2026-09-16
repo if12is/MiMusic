@@ -38,12 +38,23 @@ import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
+import android.Manifest
+import android.os.Build
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.ui.platform.LocalContext
+import androidx.core.content.ContextCompat
 import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.asLocalMediaItem
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
+import it.vfsfitvnm.vimusic.utils.queryDeviceSongs
+import it.vfsfitvnm.vimusic.utils.smartShuffled
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.flow.flow
 import kotlinx.coroutines.flow.flowOn
 import kotlinx.coroutines.flow.map
 
@@ -55,14 +66,32 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val strings = LocalStrings.current
+    val context = LocalContext.current
+    val permission = if (Build.VERSION.SDK_INT >= 33) {
+        Manifest.permission.READ_MEDIA_AUDIO
+    } else {
+        Manifest.permission.READ_EXTERNAL_STORAGE
+    }
+    val permissionLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.RequestPermission()
+    ) { }
+
+    LaunchedEffect(builtInPlaylist) {
+        if (builtInPlaylist == BuiltInPlaylist.Device &&
+            ContextCompat.checkSelfPermission(context, permission) != android.content.pm.PackageManager.PERMISSION_GRANTED
+        ) {
+            permissionLauncher.launch(permission)
+        }
+    }
 
     var songs by persistList<Song>("${builtInPlaylist.name}/songs")
 
-    LaunchedEffect(Unit) {
+    LaunchedEffect(builtInPlaylist) {
         when (builtInPlaylist) {
-            BuiltInPlaylist.Favorites -> Database
-                .favorites()
-
+            BuiltInPlaylist.Favorites -> Database.favorites()
+            BuiltInPlaylist.History -> Database.playbackHistory()
+            BuiltInPlaylist.Top -> Database.mostPlayed()
+            BuiltInPlaylist.Device -> flow { emit(context.queryDeviceSongs()) }
             BuiltInPlaylist.Offline -> Database
                 .downloadedSongs()
                 .flowOn(Dispatchers.IO)
@@ -98,6 +127,9 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                     title = when (builtInPlaylist) {
                         BuiltInPlaylist.Favorites -> strings.favorites
                         BuiltInPlaylist.Offline -> strings.offline
+                        BuiltInPlaylist.History -> strings.playbackHistory
+                        BuiltInPlaylist.Top -> strings.mostPlayed
+                        BuiltInPlaylist.Device -> strings.onDevice
                     },
                     modifier = Modifier
                         .padding(bottom = 8.dp)
@@ -105,8 +137,11 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                     SecondaryTextButton(
                         text = strings.enqueue,
                         enabled = songs.isNotEmpty(),
-                        onClick = {
-                            binder?.player?.enqueue(songs.map(Song::asMediaItem))
+                            onClick = {
+                            val mediaItems = songs.map { song ->
+                                if (song.id.startsWith("local:")) song.asLocalMediaItem() else song.asMediaItem
+                            }
+                            binder?.player?.enqueue(mediaItems)
                         }
                     )
 
@@ -146,7 +181,7 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                                             onDismiss = menuState::hide
                                         )
 
-                                        BuiltInPlaylist.Offline -> InHistoryMediaItemMenu(
+                                        BuiltInPlaylist.Offline, BuiltInPlaylist.History, BuiltInPlaylist.Top, BuiltInPlaylist.Device -> InHistoryMediaItemMenu(
                                             song = song,
                                             onDismiss = menuState::hide
                                         )
@@ -154,11 +189,11 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                                 }
                             },
                             onClick = {
+                                val mediaItems = songs.map { song ->
+                                    if (song.id.startsWith("local:")) song.asLocalMediaItem() else song.asMediaItem
+                                }
                                 binder?.stopRadio()
-                                binder?.player?.forcePlayAtIndex(
-                                    songs.map(Song::asMediaItem),
-                                    index
-                                )
+                                binder?.player?.forcePlayAtIndex(mediaItems, index)
                             }
                         )
                         .animateItemPlacement()
@@ -173,7 +208,9 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                 if (songs.isNotEmpty()) {
                     binder?.stopRadio()
                     binder?.player?.forcePlayFromBeginning(
-                        songs.shuffled().map(Song::asMediaItem)
+                        songs.map { song ->
+                            if (song.id.startsWith("local:")) song.asLocalMediaItem() else song.asMediaItem
+                        }.smartShuffled()
                     )
                 }
             }

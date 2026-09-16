@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="shortcut_search">بحث</string>
+    <string name="shortcut_favorites">المفضلة</string>
+    <string name="shortcut_offline">بدون اتصال</string>
+</resources>

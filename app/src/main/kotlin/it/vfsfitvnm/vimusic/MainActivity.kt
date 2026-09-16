@@ -1,6 +1,7 @@
 package it.vfsfitvnm.vimusic
 
 import android.Manifest
+import android.app.KeyguardManager
 import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
@@ -15,7 +16,9 @@ import android.widget.Toast
 import androidx.core.content.ContextCompat
 import androidx.core.content.edit
 import androidx.activity.ComponentActivity
+import androidx.activity.compose.rememberLauncherForActivityResult
 import androidx.activity.compose.setContent
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.animation.core.LinearEasing
 import androidx.compose.animation.core.RepeatMode
@@ -24,6 +27,7 @@ import androidx.compose.animation.core.tween
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.LocalIndication
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.BoxWithConstraints
@@ -40,6 +44,7 @@ import androidx.compose.material.ripple.rememberRipple
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.CompositionLocalProvider
 import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
@@ -70,6 +75,7 @@ import it.vfsfitvnm.innertube.models.bodies.BrowseBody
 import it.vfsfitvnm.innertube.requests.playlistPage
 import it.vfsfitvnm.innertube.requests.song
 import it.vfsfitvnm.vimusic.enums.AppLanguage
+import it.vfsfitvnm.vimusic.enums.BuiltInPlaylist
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
 import it.vfsfitvnm.vimusic.enums.NavigationStyle
@@ -78,14 +84,17 @@ import it.vfsfitvnm.vimusic.service.PlayerService
 import it.vfsfitvnm.vimusic.ui.components.BottomSheetMenu
 import it.vfsfitvnm.vimusic.ui.components.LocalMenuState
 import it.vfsfitvnm.vimusic.ui.components.rememberBottomSheetState
+import it.vfsfitvnm.vimusic.ui.components.themed.ConfirmationDialog
 import it.vfsfitvnm.vimusic.ui.components.themed.GlassNavigationHost
 import it.vfsfitvnm.vimusic.ui.components.themed.LocalGlassNavigationHost
 import it.vfsfitvnm.vimusic.ui.components.themed.NavigationBar
 import it.vfsfitvnm.vimusic.ui.screens.albumRoute
 import it.vfsfitvnm.vimusic.ui.screens.artistRoute
+import it.vfsfitvnm.vimusic.ui.screens.builtInPlaylistRoute
 import it.vfsfitvnm.vimusic.ui.screens.home.HomeScreen
 import it.vfsfitvnm.vimusic.ui.screens.player.Player
 import it.vfsfitvnm.vimusic.ui.screens.playlistRoute
+import it.vfsfitvnm.vimusic.ui.screens.searchRoute
 import it.vfsfitvnm.vimusic.ui.styling.Appearance
 import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
@@ -96,6 +105,7 @@ import it.vfsfitvnm.vimusic.ui.styling.typographyOf
 import it.vfsfitvnm.vimusic.utils.LocalAppLanguage
 import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.appLanguageKey
+import it.vfsfitvnm.vimusic.utils.appLockKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
 import it.vfsfitvnm.vimusic.utils.applyInnertubeLocale
 import it.vfsfitvnm.vimusic.utils.asMediaItem
@@ -104,6 +114,7 @@ import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.GitHubUpdater
+import it.vfsfitvnm.vimusic.utils.hideFromRecentsKey
 import it.vfsfitvnm.vimusic.utils.intent
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid6
@@ -111,6 +122,7 @@ import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid8
 import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
 import it.vfsfitvnm.vimusic.utils.navigationStyleKey
 import it.vfsfitvnm.vimusic.utils.lastUpdateCheckMsKey
+import it.vfsfitvnm.vimusic.utils.onboardingDoneKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
@@ -426,6 +438,45 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     }
                 }
 
+                val hideFromRecents by rememberPreference(hideFromRecentsKey, false)
+                DisposableEffect(hideFromRecents) {
+                    if (hideFromRecents) {
+                        window.addFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    } else {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    }
+                    onDispose {
+                        window.clearFlags(WindowManager.LayoutParams.FLAG_SECURE)
+                    }
+                }
+
+                var appLock by rememberPreference(appLockKey, false)
+                var unlocked by rememberSaveable { mutableStateOf(false) }
+                val credentialLauncher = rememberLauncherForActivityResult(
+                    ActivityResultContracts.StartActivityForResult()
+                ) { result ->
+                    unlocked = result.resultCode == android.app.Activity.RESULT_OK
+                }
+                LaunchedEffect(appLock) {
+                    if (!appLock) {
+                        unlocked = true
+                        return@LaunchedEffect
+                    }
+                    if (unlocked) return@LaunchedEffect
+                    val keyguard = getSystemService(Context.KEYGUARD_SERVICE) as KeyguardManager
+                    val credentialIntent = keyguard.createConfirmDeviceCredentialIntent(
+                        UiStrings(preferredAppLanguage()).appLock,
+                        UiStrings(preferredAppLanguage()).appLockDescription
+                    )
+                    if (credentialIntent != null) {
+                        credentialLauncher.launch(credentialIntent)
+                    } else {
+                        unlocked = true
+                    }
+                }
+
+                var onboardingDone by rememberPreference(onboardingDoneKey, false)
+
                 CompositionLocalProvider(
                     LocalAppearance provides appearance,
                     LocalIndication provides rememberRipple(bounded = true),
@@ -467,6 +518,25 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                         modifier = Modifier
                             .align(Alignment.BottomCenter)
                     )
+
+                    if (appLock && !unlocked) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxSize()
+                                .background(appearance.colorPalette.background0)
+                                .clickable(enabled = false) {}
+                        )
+                    }
+
+                    if (!onboardingDone) {
+                        ConfirmationDialog(
+                            text = "${LocalStrings.current.onboardingTitle}\n\n${LocalStrings.current.onboardingBody}",
+                            confirmText = LocalStrings.current.gotIt,
+                            cancelText = LocalStrings.current.gotIt,
+                            onConfirm = { onboardingDone = true },
+                            onDismiss = { onboardingDone = true }
+                        )
+                    }
                 }
 
                 DisposableEffect(binder?.player) {
@@ -511,6 +581,32 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
 
     override fun onNewIntent(intent: Intent) {
         super.onNewIntent(intent)
+
+        when (intent.action) {
+            "it.vfsfitvnm.vimusic.SEARCH" -> {
+                this.intent = null
+                lifecycleScope.launch {
+                    searchRoute.ensureGlobal("")
+                }
+                return
+            }
+
+            "it.vfsfitvnm.vimusic.FAVORITES" -> {
+                this.intent = null
+                lifecycleScope.launch {
+                    builtInPlaylistRoute.ensureGlobal(BuiltInPlaylist.Favorites)
+                }
+                return
+            }
+
+            "it.vfsfitvnm.vimusic.OFFLINE" -> {
+                this.intent = null
+                lifecycleScope.launch {
+                    builtInPlaylistRoute.ensureGlobal(BuiltInPlaylist.Offline)
+                }
+                return
+            }
+        }
 
         val uri = intent.data ?: return
 

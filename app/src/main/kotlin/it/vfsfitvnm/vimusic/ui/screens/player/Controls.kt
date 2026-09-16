@@ -54,8 +54,10 @@ import it.vfsfitvnm.vimusic.utils.formatAsDuration
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
+import it.vfsfitvnm.vimusic.utils.carModeKey
 import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import kotlinx.coroutines.flow.distinctUntilChanged
 
 @Composable
@@ -76,7 +78,11 @@ fun Controls(
     binder?.player ?: return
     var trackLoopEnabled by rememberPreference(trackLoopEnabledKey, defaultValue = false)
     var playbackSpeed by rememberPreference(playbackSpeedKey, 1f)
+    var carMode by rememberPreference(carModeKey, false)
+    val strings = LocalStrings.current
     val speedOptions = listOf(0.75f, 1f, 1.25f, 1.5f)
+    var loopA by remember(mediaId) { mutableStateOf<Long?>(null) }
+    var loopB by remember(mediaId) { mutableStateOf<Long?>(null) }
 
     var scrubbingPosition by remember(mediaId) {
         mutableStateOf<Long?>(null)
@@ -243,7 +249,7 @@ fun Controls(
                         }
                     }
                     .background(colorPalette.background2)
-                    .size(64.dp)
+                    .size(if (carMode) 80.dp else 64.dp)
             ) {
                 Image(
                     painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
@@ -335,6 +341,52 @@ fun Controls(
                     }
                 },
                 modifier = Modifier.size(20.dp)
+            )
+        }
+
+        Spacer(modifier = Modifier.height(8.dp))
+
+        Row(
+            horizontalArrangement = Arrangement.SpaceEvenly,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            BasicText(
+                text = strings.markA,
+                style = typography.xxs.semiBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable {
+                        loopA = binder.player.currentPosition
+                        loopB?.let { end ->
+                            loopA?.let { start -> binder.setAbLoop(start, end) }
+                        }
+                    }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            )
+            BasicText(
+                text = strings.markB,
+                style = typography.xxs.semiBold,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable {
+                        loopB = binder.player.currentPosition
+                        loopA?.let { start ->
+                            loopB?.let { end -> binder.setAbLoop(start, end) }
+                        }
+                    }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
+            )
+            BasicText(
+                text = strings.clearLoop,
+                style = typography.xxs.semiBold.secondary,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(12.dp))
+                    .clickable {
+                        loopA = null
+                        loopB = null
+                        binder.clearAbLoop()
+                    }
+                    .padding(horizontal = 10.dp, vertical = 6.dp)
             )
         }
 

@@ -30,6 +30,7 @@ data class ColorPalette(
             0 -> DefaultDarkColorPalette
             1 -> DefaultLightColorPalette
             2 -> PureBlackColorPalette
+            3 -> GoldColorPalette
             else -> dynamicColorPaletteOf(
                 FloatArray(3).apply { ColorUtils.colorToHSL(accent, this) },
                 value[1] as Boolean
@@ -42,6 +43,7 @@ data class ColorPalette(
                     value === DefaultDarkColorPalette -> 0
                     value === DefaultLightColorPalette -> 1
                     value === PureBlackColorPalette -> 2
+                    value === GoldColorPalette -> 3
                     else -> value.accent.toArgb()
                 },
                 value.isDark
@@ -73,10 +75,16 @@ val DefaultLightColorPalette = ColorPalette(
     isDark = false
 )
 
-val PureBlackColorPalette = DefaultDarkColorPalette.copy(
-    background0 = Color.Black,
-    background1 = Color.Black,
-    background2 = Color.Black
+val GoldColorPalette = ColorPalette(
+    background0 = Color(0xff14110c),
+    background1 = Color(0xff1c1810),
+    background2 = Color(0xff2a2318),
+    text = Color(0xfff4e6c8),
+    textSecondary = Color(0xffcbb98a),
+    textDisabled = Color(0xff8a7a55),
+    accent = Color(0xffd4a017),
+    onAccent = Color(0xff1a1408),
+    isDark = true
 )
 
 fun colorPaletteOf(
@@ -94,6 +102,7 @@ fun colorPaletteOf(
             }
         }
         ColorPaletteName.PureBlack -> PureBlackColorPalette
+        ColorPaletteName.Gold -> GoldColorPalette
     }
 }
 
