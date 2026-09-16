@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<shortcuts xmlns:android="http://schemas.android.com/apk/res/android">
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/search"
+        android:shortcutId="search"
+        android:shortcutShortLabel="@string/shortcut_search">
+        <intent
+            android:action="it.vfsfitvnm.vimusic.SEARCH"
+            android:targetClass="it.vfsfitvnm.vimusic.MainActivity"
+            android:targetPackage="it.vfsfitvnm.vimusic" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/heart"
+        android:shortcutId="favorites"
+        android:shortcutShortLabel="@string/shortcut_favorites">
+        <intent
+            android:action="it.vfsfitvnm.vimusic.FAVORITES"
+            android:targetClass="it.vfsfitvnm.vimusic.MainActivity"
+            android:targetPackage="it.vfsfitvnm.vimusic" />
+    </shortcut>
+    <shortcut
+        android:enabled="true"
+        android:icon="@drawable/airplane"
+        android:shortcutId="offline"
+        android:shortcutShortLabel="@string/shortcut_offline">
+        <intent
+            android:action="it.vfsfitvnm.vimusic.OFFLINE"
+            android:targetClass="it.vfsfitvnm.vimusic.MainActivity"
+            android:targetPackage="it.vfsfitvnm.vimusic" />
+    </shortcut>
+</shortcuts>

@@ -30,6 +30,9 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
@@ -43,7 +46,10 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.IntOffset
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
+import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
+import it.vfsfitvnm.innertube.models.bodies.NextBody
+import it.vfsfitvnm.innertube.requests.relatedPage
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
@@ -68,14 +74,17 @@ import it.vfsfitvnm.vimusic.utils.addNext
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlay
+import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.formatAsDuration
 import it.vfsfitvnm.vimusic.utils.medium
 import it.vfsfitvnm.vimusic.utils.semiBold
+import it.vfsfitvnm.vimusic.utils.shareNowPlayingCard
 import it.vfsfitvnm.vimusic.utils.thumbnail
 import it.vfsfitvnm.vimusic.utils.toast
 import kotlin.system.measureTimeMillis
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flowOf
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 
 @ExperimentalAnimationApi
@@ -283,6 +292,45 @@ fun MediaItemMenu(
     val strings = LocalStrings.current
     val context = LocalContext.current
     val binder = LocalPlayerServiceBinder.current
+    val coroutineScope = rememberCoroutineScope()
+    val exportLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("audio/mpeg")
+    ) { uri ->
+        uri?.let { binder?.exportDownload(mediaItem.mediaId, it) }
+    }
+    var isEditingTitle by remember {
+        mutableStateOf(false)
+    }
+    if (isEditingTitle) {
+        TextFieldDialog(
+            hintText = strings.enterAName,
+            initialTextInput = mediaItem.mediaMetadata.title?.toString().orEmpty(),
+            onDismiss = { isEditingTitle = false },
+            onDone = { text ->
+                query {
+                    Database.updateSongMetadata(
+                        mediaItem.mediaId,
+                        text,
+                        mediaItem.mediaMetadata.artist?.toString()
+                    )
+                }
+            }
+        )
+    }
+    var isRemovingDownload by remember {
+        mutableStateOf(false)
+    }
+    if (isRemovingDownload) {
+        ConfirmationDialog(
+            text = strings.removeDownloadConfirm,
+            onDismiss = { isRemovingDownload = false },
+            onConfirm = {
+                binder?.removeDownload(mediaItem.mediaId)
+                context.toast(strings.downloadRemoved)
+                onDismiss()
+            }
+        )
+    }
     val downloadStatus by remember(mediaItem.mediaId, binder) {
         binder?.downloadStatusFlow(mediaItem.mediaId) ?: flowOf(DownloadStatus.None)
     }.collectAsState(initial = binder?.downloadStatus(mediaItem.mediaId) ?: DownloadStatus.None)
@@ -491,6 +539,55 @@ fun MediaItemMenu(
                     )
                 }
 
+                if (!mediaItem.mediaId.startsWith("local:")) {
+                    MenuEntry(
+                        icon = R.drawable.sparkles,
+                        text = strings.similarSongs,
+                        onClick = {
+                            onDismiss()
+                            coroutineScope.launch {
+                                val related = withContext(Dispatchers.IO) {
+                                    Innertube.relatedPage(NextBody(videoId = mediaItem.mediaId))
+                                }?.getOrNull()?.songs.orEmpty()
+                                if (related.isNotEmpty()) {
+                                    binder?.stopRadio()
+                                    binder?.player?.forcePlayFromBeginning(related.map { it.asMediaItem })
+                                }
+                            }
+                        }
+                    )
+                }
+
+                MenuEntry(
+                    icon = R.drawable.share_social,
+                    text = strings.shareCard,
+                    onClick = {
+                        onDismiss()
+                        context.shareNowPlayingCard(
+                            mediaItem.mediaMetadata.title?.toString().orEmpty(),
+                            mediaItem.mediaMetadata.artist?.toString().orEmpty(),
+                            null
+                        )
+                    }
+                )
+
+                MenuEntry(
+                    icon = R.drawable.pencil,
+                    text = strings.editMetadata,
+                    onClick = { isEditingTitle = true }
+                )
+
+                if (downloadStatus == DownloadStatus.Completed) {
+                    MenuEntry(
+                        icon = R.drawable.download,
+                        text = strings.exportFile,
+                        onClick = {
+                            onDismiss()
+                            exportLauncher.launch("${mediaItem.mediaMetadata.title}.m4a")
+                        }
+                    )
+                }
+
                 onPlayNext?.let { onPlayNext ->
                     MenuEntry(
                         icon = R.drawable.play_skip_forward,
@@ -530,9 +627,7 @@ fun MediaItemMenu(
                     onClick = {
                         when (downloadStatus) {
                             DownloadStatus.Completed -> {
-                                binder?.removeDownload(mediaItem.mediaId)
-                                context.toast(strings.downloadRemoved)
-                                onDismiss()
+                                isRemovingDownload = true
                             }
 
                             DownloadStatus.Downloading -> Unit

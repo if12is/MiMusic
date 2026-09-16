@@ -19,6 +19,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.SolidColor
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.input.ImeAction
 import androidx.compose.ui.text.input.TextFieldValue
 import androidx.compose.ui.text.style.TextAlign
@@ -38,9 +39,14 @@ import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.align
+import it.vfsfitvnm.vimusic.utils.asLocalMediaItem
 import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.forcePlay
+import it.vfsfitvnm.vimusic.utils.matchesLooseArabic
 import it.vfsfitvnm.vimusic.utils.medium
+import it.vfsfitvnm.vimusic.utils.queryDeviceSongs
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
@@ -53,12 +59,23 @@ fun LocalSongSearch(
     val (colorPalette, typography) = LocalAppearance.current
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
+    val context = LocalContext.current
 
     var items by persistList<Song>("search/local/songs")
 
     LaunchedEffect(textFieldValue.text) {
         if (textFieldValue.text.length > 1) {
-            Database.search("%${textFieldValue.text}%").collect { items = it }
+            Database.allPlayedSongs().collect { songs ->
+                val device = withContext(Dispatchers.IO) {
+                    runCatching { context.queryDeviceSongs() }.getOrDefault(emptyList())
+                }
+                items = (songs + device)
+                    .distinctBy { it.id }
+                    .filter { song ->
+                        song.title.matchesLooseArabic(textFieldValue.text) ||
+                            song.artistsText.orEmpty().matchesLooseArabic(textFieldValue.text)
+                    }
+            }
         }
     }
 
@@ -122,12 +139,18 @@ fun LocalSongSearch(
                                 }
                             },
                             onClick = {
-                                val mediaItem = song.asMediaItem
+                                val mediaItem = if (song.id.startsWith("local:")) {
+                                    song.asLocalMediaItem()
+                                } else {
+                                    song.asMediaItem
+                                }
                                 binder?.stopRadio()
                                 binder?.player?.forcePlay(mediaItem)
-                                binder?.setupRadio(
-                                    NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
-                                )
+                                if (!song.id.startsWith("local:")) {
+                                    binder?.setupRadio(
+                                        NavigationEndpoint.Endpoint.Watch(videoId = mediaItem.mediaId)
+                                    )
+                                }
                             }
                         )
                         .animateItemPlacement()

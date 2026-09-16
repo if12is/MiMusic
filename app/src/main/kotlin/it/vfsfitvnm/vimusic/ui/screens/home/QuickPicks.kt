@@ -37,6 +37,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persist
@@ -78,6 +79,9 @@ import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.forcePlay
 import it.vfsfitvnm.vimusic.utils.isLandscape
+import it.vfsfitvnm.vimusic.utils.khatmaMediaIdKey
+import it.vfsfitvnm.vimusic.utils.khatmaPositionKey
+import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -100,9 +104,13 @@ fun QuickPicks(
     val windowInsets = LocalPlayerAwareWindowInsets.current
     val strings = LocalStrings.current
     val appLanguage = LocalAppLanguage.current
+    val context = LocalContext.current
 
     var trending by persist<Song?>("home/trending")
     var recentlyPlayed by persistList<Song>("home/recentlyPlayed")
+    var khatmaSong by remember { mutableStateOf<Song?>(null) }
+    val khatmaId = remember { context.preferences.getString(khatmaMediaIdKey, null) }
+    val khatmaPosition = remember { context.preferences.getLong(khatmaPositionKey, 0L) }
 
     var relatedPageResult by persist<Result<Innertube.RelatedPage>>(tag = "home/relatedPageResult")
     var reloadToken by remember { mutableStateOf(0) }
@@ -121,6 +129,12 @@ fun QuickPicks(
                 trending?.id ?: DefaultLandingVideoId
             }
             relatedPageResult = loadLanding(seed)
+        }
+    }
+
+    LaunchedEffect(khatmaId) {
+        if (!khatmaId.isNullOrEmpty()) {
+            Database.song(khatmaId).collect { khatmaSong = it }
         }
     }
 
@@ -197,7 +211,67 @@ fun QuickPicks(
                 title = strings.quickPicks,
                 modifier = Modifier
                     .padding(endPaddingValues)
-            )
+            ) {
+                SecondaryTextButton(
+                    text = strings.refresh,
+                    onClick = {
+                        relatedPageResult = null
+                        reloadToken += 1
+                    }
+                )
+            }
+
+            khatmaSong?.let { song ->
+                BasicText(
+                    text = strings.continueRecitation,
+                    style = typography.m.semiBold,
+                    modifier = sectionTextModifier
+                )
+                SongItem(
+                    song = song,
+                    thumbnailSizePx = songThumbnailSizePx,
+                    thumbnailSizeDp = songThumbnailSizeDp,
+                    modifier = Modifier
+                        .padding(endPaddingValues)
+                        .clickable {
+                            binder?.stopRadio()
+                            binder?.player?.forcePlay(song.asMediaItem)
+                            binder?.player?.seekTo(khatmaPosition)
+                        }
+                )
+            }
+
+            trending?.let { song ->
+                BasicText(
+                    text = strings.songOfTheDay,
+                    style = typography.m.semiBold,
+                    modifier = sectionTextModifier
+                )
+                SongItem(
+                    song = song,
+                    thumbnailSizePx = songThumbnailSizePx,
+                    thumbnailSizeDp = songThumbnailSizeDp,
+                    modifier = Modifier
+                        .padding(endPaddingValues)
+                        .combinedClickable(
+                            onLongClick = {
+                                menuState.display {
+                                    NonQueuedMediaItemMenu(
+                                        onDismiss = menuState::hide,
+                                        mediaItem = song.asMediaItem
+                                    )
+                                }
+                            },
+                            onClick = {
+                                binder?.stopRadio()
+                                binder?.player?.forcePlay(song.asMediaItem)
+                                binder?.setupRadio(
+                                    NavigationEndpoint.Endpoint.Watch(videoId = song.id)
+                                )
+                            }
+                        )
+                )
+            }
 
             val moods = listOf(
                 strings.moodCalm to "موسيقى هادئة",

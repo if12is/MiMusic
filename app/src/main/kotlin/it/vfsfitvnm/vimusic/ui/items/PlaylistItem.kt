@@ -26,6 +26,7 @@ import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
+import androidx.compose.ui.platform.LocalContext
 import coil.compose.AsyncImage
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.models.PlaylistPreview
@@ -36,6 +37,8 @@ import it.vfsfitvnm.vimusic.ui.styling.overlay
 import it.vfsfitvnm.vimusic.ui.styling.shimmer
 import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.medium
+import it.vfsfitvnm.vimusic.utils.playlistCoverKey
+import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.thumbnail
@@ -82,6 +85,10 @@ fun PlaylistItem(
     modifier: Modifier = Modifier,
     alternative: Boolean = false,
 ) {
+    val context = LocalContext.current
+    val customCover = remember(playlist.playlist.id) {
+        context.preferences.getString(playlistCoverKey(playlist.playlist.id), null)
+    }
     val thumbnails by remember {
         Database.playlistThumbnailUrls(playlist.playlist.id).distinctUntilChanged().map {
             it.map { url ->
@@ -92,7 +99,14 @@ fun PlaylistItem(
 
     PlaylistItem(
         thumbnailContent = {
-            if (thumbnails.toSet().size == 1) {
+            if (!customCover.isNullOrBlank()) {
+                AsyncImage(
+                    model = customCover,
+                    contentDescription = null,
+                    contentScale = ContentScale.Crop,
+                    modifier = it
+                )
+            } else if (thumbnails.toSet().size == 1) {
                 AsyncImage(
                     model = thumbnails.first().thumbnail(thumbnailSizePx),
                     contentDescription = null,

@@ -15,13 +15,17 @@ import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.itemsIndexed
 import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.material.ripple.rememberRipple
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.innertube.Innertube
@@ -61,9 +65,18 @@ import it.vfsfitvnm.vimusic.utils.completed
 import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
+import it.vfsfitvnm.vimusic.utils.parsePlaylistFile
+import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.readTextFromUri
+import it.vfsfitvnm.vimusic.utils.resolveImportedTracks
+import it.vfsfitvnm.vimusic.utils.smartShuffled
+import it.vfsfitvnm.vimusic.utils.songsToCsv
+import it.vfsfitvnm.vimusic.utils.songsToM3u
 import it.vfsfitvnm.vimusic.utils.toast
+import it.vfsfitvnm.vimusic.utils.writeTextToUri
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.filterNotNull
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.runBlocking
 import kotlinx.coroutines.withContext
 
@@ -78,9 +91,73 @@ fun LocalPlaylistSongs(
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val strings = it.vfsfitvnm.vimusic.utils.LocalStrings.current
-    val context = androidx.compose.ui.platform.LocalContext.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
 
     var playlistWithSongs by persist<PlaylistWithSongs?>("localPlaylist/$playlistId/playlistWithSongs")
+
+    val exportM3uLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("audio/x-mpegurl")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        playlistWithSongs?.songs?.let { songs ->
+            context.writeTextToUri(uri, songsToM3u(songs))
+        }
+    }
+
+    val exportCsvLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.CreateDocument("text/csv")
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        playlistWithSongs?.songs?.let { songs ->
+            context.writeTextToUri(uri, songsToCsv(songs))
+        }
+    }
+
+    val importPlaylistLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch {
+            context.toast(strings.importingPlaylist)
+            val songs = withContext(Dispatchers.IO) {
+                resolveImportedTracks(parsePlaylistFile(context.readTextFromUri(uri)))
+            }
+            if (songs.isEmpty()) {
+                context.toast(strings.importEmpty)
+                return@launch
+            }
+            val start = playlistWithSongs?.songs?.size ?: 0
+            query {
+                songs.forEach { song -> Database.insert(song) }
+                Database.insertSongPlaylistMaps(
+                    songs.mapIndexed { index, song ->
+                        SongPlaylistMap(
+                            songId = song.id,
+                            playlistId = playlistId,
+                            position = start + index
+                        )
+                    }
+                )
+            }
+            context.toast(strings.importFinished(songs.size))
+        }
+    }
+
+    val coverLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        runCatching {
+            context.contentResolver.takePersistableUriPermission(
+                uri,
+                android.content.Intent.FLAG_GRANT_READ_URI_PERMISSION
+            )
+        }
+        context.preferences.edit()
+            .putString(it.vfsfitvnm.vimusic.utils.playlistCoverKey(playlistId), uri.toString())
+            .apply()
+    }
 
     LaunchedEffect(Unit) {
         Database.playlistWithSongs(playlistId).filterNotNull().collect { playlistWithSongs = it }
@@ -223,7 +300,7 @@ fun LocalPlaylistSongs(
 
                                     MenuEntry(
                                         icon = R.drawable.pencil,
-                                        text = "Rename",
+                                        text = strings.rename,
                                         onClick = {
                                             menuState.hide()
                                             isRenaming = true
@@ -231,8 +308,56 @@ fun LocalPlaylistSongs(
                                     )
 
                                     MenuEntry(
+                                        icon = R.drawable.share_social,
+                                        text = strings.exportM3u,
+                                        onClick = {
+                                            menuState.hide()
+                                            exportM3uLauncher.launch(
+                                                "${playlistWithSongs?.playlist?.name ?: "playlist"}.m3u"
+                                            )
+                                        }
+                                    )
+
+                                    MenuEntry(
+                                        icon = R.drawable.share_social,
+                                        text = strings.exportCsv,
+                                        onClick = {
+                                            menuState.hide()
+                                            exportCsvLauncher.launch(
+                                                "${playlistWithSongs?.playlist?.name ?: "playlist"}.csv"
+                                            )
+                                        }
+                                    )
+
+                                    MenuEntry(
+                                        icon = R.drawable.download,
+                                        text = strings.importM3u,
+                                        onClick = {
+                                            menuState.hide()
+                                            importPlaylistLauncher.launch(
+                                                arrayOf(
+                                                    "audio/*",
+                                                    "text/*",
+                                                    "text/csv",
+                                                    "text/comma-separated-values",
+                                                    "*/*"
+                                                )
+                                            )
+                                        }
+                                    )
+
+                                    MenuEntry(
+                                        icon = R.drawable.disc,
+                                        text = strings.playlistCover,
+                                        onClick = {
+                                            menuState.hide()
+                                            coverLauncher.launch(arrayOf("image/*"))
+                                        }
+                                    )
+
+                                    MenuEntry(
                                         icon = R.drawable.trash,
-                                        text = "Delete",
+                                        text = strings.delete,
                                         onClick = {
                                             menuState.hide()
                                             isDeleting = true
@@ -301,7 +426,7 @@ fun LocalPlaylistSongs(
                     if (songs.isNotEmpty()) {
                         binder?.stopRadio()
                         binder?.player?.forcePlayFromBeginning(
-                            songs.shuffled().map(Song::asMediaItem)
+                            songs.map(Song::asMediaItem).smartShuffled()
                         )
                     }
                 }

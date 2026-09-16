@@ -15,6 +15,8 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -24,6 +26,7 @@ import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.enums.CoilDiskCacheMaxSize
 import it.vfsfitvnm.vimusic.enums.ExoPlayerDiskCacheMaxSize
+import it.vfsfitvnm.vimusic.ui.components.themed.ConfirmationDialog
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.utils.LocalStrings
@@ -49,6 +52,18 @@ fun CacheSettings() {
         exoPlayerDiskCacheMaxSizeKey,
         ExoPlayerDiskCacheMaxSize.`2GB`
     )
+    var clearingDownloads by rememberSaveable { mutableStateOf(false) }
+
+    if (clearingDownloads) {
+        ConfirmationDialog(
+            text = strings.clearDownloadsConfirm,
+            onDismiss = { clearingDownloads = false },
+            onConfirm = {
+                binder?.clearDownloads()
+                context.toast(strings.downloadsCleared)
+            }
+        )
+    }
 
     Column(
         modifier = Modifier
@@ -132,10 +147,7 @@ fun CacheSettings() {
             SettingsEntry(
                 title = strings.clearDownloads,
                 text = strings.downloadsDescription,
-                onClick = {
-                    binder.clearDownloads()
-                    context.toast(strings.downloadsCleared)
-                }
+                onClick = { clearingDownloads = true }
             )
         }
     }

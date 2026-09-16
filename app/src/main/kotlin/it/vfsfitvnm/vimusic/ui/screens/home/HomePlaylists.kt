@@ -26,10 +26,14 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.graphicsLayer
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import it.vfsfitvnm.compose.persist.persistList
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
@@ -39,6 +43,7 @@ import it.vfsfitvnm.vimusic.enums.PlaylistSortBy
 import it.vfsfitvnm.vimusic.enums.SortOrder
 import it.vfsfitvnm.vimusic.models.Playlist
 import it.vfsfitvnm.vimusic.models.PlaylistPreview
+import it.vfsfitvnm.vimusic.models.SongPlaylistMap
 import it.vfsfitvnm.vimusic.query
 import it.vfsfitvnm.vimusic.ui.components.themed.FloatingActionsContainerWithScrollToTop
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
@@ -50,9 +55,16 @@ import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.parsePlaylistFile
 import it.vfsfitvnm.vimusic.utils.playlistSortByKey
 import it.vfsfitvnm.vimusic.utils.playlistSortOrderKey
+import it.vfsfitvnm.vimusic.utils.readTextFromUri
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.resolveImportedTracks
+import it.vfsfitvnm.vimusic.utils.toast
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @ExperimentalAnimationApi
 @ExperimentalFoundationApi
@@ -64,6 +76,44 @@ fun HomePlaylists(
 ) {
     val (colorPalette) = LocalAppearance.current
     val strings = LocalStrings.current
+    val context = LocalContext.current
+    val coroutineScope = rememberCoroutineScope()
+
+    val importPlaylistLauncher = rememberLauncherForActivityResult(
+        ActivityResultContracts.OpenDocument()
+    ) { uri ->
+        uri ?: return@rememberLauncherForActivityResult
+        coroutineScope.launch {
+            context.toast(strings.importingPlaylist)
+            val songs = withContext(Dispatchers.IO) {
+                resolveImportedTracks(parsePlaylistFile(context.readTextFromUri(uri)))
+            }
+            if (songs.isEmpty()) {
+                context.toast(strings.importEmpty)
+                return@launch
+            }
+            val name = uri.lastPathSegment
+                ?.substringAfterLast('/')
+                ?.substringBeforeLast('.')
+                ?.replace("%20", " ")
+                ?.ifBlank { null }
+                ?: strings.newPlaylist
+            query {
+                val playlistId = Database.insert(Playlist(name = name))
+                songs.forEach { song -> Database.insert(song) }
+                Database.insertSongPlaylistMaps(
+                    songs.mapIndexed { index, song ->
+                        SongPlaylistMap(
+                            songId = song.id,
+                            playlistId = playlistId,
+                            position = index
+                        )
+                    }
+                )
+            }
+            context.toast(strings.importFinished(songs.size))
+        }
+    }
 
     var isCreatingANewPlaylist by rememberSaveable {
         mutableStateOf(false)
@@ -71,7 +121,7 @@ fun HomePlaylists(
 
     if (isCreatingANewPlaylist) {
         TextFieldDialog(
-            hintText = strings.enterPlaylistName,
+            hintText = strings.playlistFolderHint,
             onDismiss = {
                 isCreatingANewPlaylist = false
             },
@@ -122,6 +172,21 @@ fun HomePlaylists(
                     SecondaryTextButton(
                         text = strings.newPlaylist,
                         onClick = { isCreatingANewPlaylist = true }
+                    )
+
+                    SecondaryTextButton(
+                        text = strings.importPlaylistFile,
+                        onClick = {
+                            importPlaylistLauncher.launch(
+                                arrayOf(
+                                    "audio/*",
+                                    "text/*",
+                                    "text/csv",
+                                    "text/comma-separated-values",
+                                    "*/*"
+                                )
+                            )
+                        }
                     )
 
                     Spacer(
@@ -186,6 +251,76 @@ fun HomePlaylists(
                     alternative = true,
                     modifier = Modifier
                         .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Offline) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "history") {
+                PlaylistItem(
+                    icon = R.drawable.time,
+                    colorTint = colorPalette.text,
+                    name = strings.playbackHistory,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.History) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "top") {
+                PlaylistItem(
+                    icon = R.drawable.trending,
+                    colorTint = colorPalette.accent,
+                    name = strings.mostPlayed,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Top) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "device") {
+                PlaylistItem(
+                    icon = R.drawable.musical_notes,
+                    colorTint = colorPalette.blue,
+                    name = strings.onDevice,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.Device) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "thisWeek") {
+                PlaylistItem(
+                    icon = R.drawable.calendar,
+                    colorTint = colorPalette.accent,
+                    name = strings.thisWeek,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.ThisWeek) })
+                        .animateItemPlacement()
+                )
+            }
+
+            item(key = "shortFavorites") {
+                PlaylistItem(
+                    icon = R.drawable.heart_outline,
+                    colorTint = colorPalette.red,
+                    name = strings.shortFavorites,
+                    songCount = null,
+                    thumbnailSizeDp = thumbnailSizeDp,
+                    alternative = true,
+                    modifier = Modifier
+                        .clickable(onClick = { onBuiltInPlaylist(BuiltInPlaylist.ShortFavorites) })
                         .animateItemPlacement()
                 )
             }

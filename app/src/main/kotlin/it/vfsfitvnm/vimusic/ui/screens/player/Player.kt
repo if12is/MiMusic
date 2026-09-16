@@ -8,6 +8,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
@@ -35,6 +36,8 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
+import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -63,6 +66,7 @@ import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.collapsedPlayerProgressBar
 import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.DisposableListener
+import it.vfsfitvnm.vimusic.utils.blurPlayerBackgroundKey
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.isLandscape
 import it.vfsfitvnm.vimusic.utils.navigationStyleKey
@@ -74,6 +78,8 @@ import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.shouldBePlaying
 import it.vfsfitvnm.vimusic.utils.thumbnail
 import it.vfsfitvnm.vimusic.utils.toast
+import it.vfsfitvnm.vimusic.utils.LocalStrings
+import android.os.Build
 import kotlin.math.absoluteValue
 
 @ExperimentalFoundationApi
@@ -198,13 +204,26 @@ fun Player(
             mutableStateOf(false)
         }
 
+        var playerLocked by rememberSaveable {
+            mutableStateOf(false)
+        }
+
+        val blurPlayerBackground by rememberPreference(blurPlayerBackgroundKey, true)
+        val lowPowerMode by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
+        val strings = LocalStrings.current
+        val context = LocalContext.current
+        val showBlur = blurPlayerBackground && !lowPowerMode
+
         val playerBottomSheetState = rememberBottomSheetState(
             64.dp + horizontalBottomPaddingValues.calculateBottomPadding(),
             layoutState.expandedBound
         )
 
         val containerModifier = Modifier
-            .background(colorPalette.background1)
+            .background(
+                if (showBlur) colorPalette.background1.copy(alpha = 0.42f)
+                else colorPalette.background1
+            )
             .padding(
                 windowInsets
                     .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
@@ -244,6 +263,20 @@ fun Player(
                     }
                 },
                 modifier = modifier
+            )
+        }
+
+        if (showBlur) {
+            AsyncImage(
+                model = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.player.song.px),
+                contentDescription = null,
+                contentScale = ContentScale.Crop,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .then(
+                        if (Build.VERSION.SDK_INT >= 31) Modifier.blur(42.dp) else Modifier
+                    )
+                    .alpha(0.28f)
             )
         }
 
@@ -328,6 +361,31 @@ fun Player(
                             .size(20.dp)
                     )
 
+                    IconButton(
+                        icon = R.drawable.film,
+                        color = colorPalette.text,
+                        onClick = {
+                            val activity = context as? android.app.Activity ?: return@IconButton
+                            if (Build.VERSION.SDK_INT >= 26) {
+                                activity.enterPictureInPictureMode(
+                                    android.app.PictureInPictureParams.Builder().build()
+                                )
+                            }
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
+                            .size(20.dp)
+                    )
+
+                    IconButton(
+                        icon = R.drawable.alert_circle,
+                        color = if (playerLocked) colorPalette.accent else colorPalette.text,
+                        onClick = { playerLocked = !playerLocked },
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp, vertical = 8.dp)
+                            .size(20.dp)
+                    )
+
                     Spacer(
                         modifier = Modifier
                             .width(4.dp)
@@ -338,6 +396,21 @@ fun Player(
             modifier = Modifier
                 .align(Alignment.BottomCenter)
         )
+
+        if (playerLocked) {
+            Box(
+                contentAlignment = Alignment.Center,
+                modifier = Modifier
+                    .fillMaxSize()
+                    .background(colorPalette.background0.copy(alpha = 0.72f))
+                    .clickable { playerLocked = false }
+            ) {
+                BasicText(
+                    text = strings.unlockPlayer,
+                    style = typography.s.semiBold
+                )
+            }
+        }
     }
 }
 

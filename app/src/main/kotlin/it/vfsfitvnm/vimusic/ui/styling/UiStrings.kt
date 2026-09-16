@@ -336,6 +336,9 @@ class UiStrings(private val language: AppLanguage) {
         ColorPaletteName.Default -> themeDefault
         ColorPaletteName.Dynamic -> themeDynamic
         ColorPaletteName.PureBlack -> themePureBlack
+        ColorPaletteName.Gold -> goldTheme
+        ColorPaletteName.Spotify -> themeSpotify
+        ColorPaletteName.YouTube -> themeYouTube
     }
 
     fun colorPaletteMode(value: ColorPaletteMode) = when (value) {
@@ -422,4 +425,120 @@ class UiStrings(private val language: AppLanguage) {
         "احفظ الألبومات لتظهر هنا"
     )
     val sharedViaMimusic = t("Shared via MiMusic", "مُشارك عبر MiMusic")
+    val playbackHistory = t("Listening history", "سجل الاستماع")
+    val mostPlayed = t("Most played", "الأكثر تشغيلًا")
+    val onDevice = t("On this device", "على الجهاز")
+    val audioQuality = t("Audio quality", "جودة الصوت")
+    val audioQualityAuto = t("Auto", "تلقائي")
+    val audioQualityHigh = t("High", "عالية")
+    val audioQualityMedium = t("Medium", "متوسطة")
+    val audioQualityLow = t("Low / Data saver", "منخفضة / توفير البيانات")
+    val crossfade = t("Crossfade", "تلاشي بين الأغاني")
+    val crossfadeDescription = t("Fade out the current song into the next one", "تلاشٍ ناعم من الأغنية الحالية إلى التالية")
+    val inAppEqualizer = t("In-app equalizer", "معادل داخل التطبيق")
+    val inAppEqualizerDescription = t("Use a built-in preset instead of the system equalizer", "استخدم إعدادًا جاهزًا بدل معادل النظام")
+    val bassBoost = t("Bass boost", "تعزيز الباس")
+    val wifiOnlyDownload = t("Wi-Fi downloads only", "التنزيل عبر Wi-Fi فقط")
+    val wifiOnlyDownloadDescription = t("Don't start downloads on mobile data", "لا تبدأ التنزيل على بيانات الجوال")
+    val offlineMode = t("Offline mode", "وضع بدون اتصال")
+    val offlineModeDescription = t("Play downloaded and on-device songs only", "تشغيل التنزيلات وملفات الجهاز فقط")
+    val carMode = t("Car mode", "وضع السيارة")
+    val carModeDescription = t("Larger player buttons while driving", "أزرار أكبر في المشغّل أثناء القيادة")
+    val lyricsSize = t("Lyrics size", "حجم الكلمات")
+    val visualizer = t("Audio visualizer", "موجة الصوت")
+    val blurPlayer = t("Blurred player background", "خلفية مشغّل ضبابية")
+    val appLock = t("Lock with device PIN", "قفل برقم الجهاز")
+    val appLockDescription = t("Ask for the phone lock when opening MiMusic", "اطلب قفل الهاتف عند فتح مي ميوزك")
+    val hideRecents = t("Hide from recents screenshots", "إخفاء لقطات التطبيقات")
+    val hideRecentsDescription = t("Block screenshots of MiMusic in the recents screen", "منع لقطات شاشة مي ميوزك في قائمة التطبيقات")
+    val smartShuffle = t("Smart shuffle", "خلط ذكي")
+    val smartShuffleDescription = t("Avoid playing the same artist twice in a row", "تجنب تشغيل نفس الفنان مرتين متتاليتين")
+    val abLoop = t("A–B loop", "تكرار مقطع")
+    val markA = t("Mark A", "تحديد أ")
+    val markB = t("Mark B", "تحديد ب")
+    val clearLoop = t("Clear loop", "إلغاء التكرار")
+    val playerLock = t("Lock player", "قفل المشغّل")
+    val unlockPlayer = t("Tap to unlock", "اضغط للفتح")
+    val similarSongs = t("Similar songs", "أغانٍ مشابهة")
+    val editMetadata = t("Edit title", "تعديل العنوان")
+    val exportM3u = t("Export M3U", "تصدير M3U")
+    val importM3u = t("Import M3U / CSV", "استيراد M3U / CSV")
+    val exportCsv = t("Export CSV", "تصدير CSV")
+    val importPlaylistFile = t("Import playlist file", "استيراد قائمة من ملف")
+    val importPlaylistHint = t(
+        "YouTube Music, Spotify, or Anghami M3U/CSV",
+        "يوتيوب ميوزك أو سبوتيفاي أو أنغامي بصيغة M3U أو CSV"
+    )
+    val importFinished: (Int) -> String = { count ->
+        t("Imported $count songs", "تم استيراد $count أغنية")
+    }
+    val importEmpty = t("No songs found in this file", "لا توجد أغاني في هذا الملف")
+    val importingPlaylist = t("Importing playlist…", "جاري استيراد القائمة…")
+    val exportFile = t("Save file", "حفظ الملف")
+    val continueRecitation = t("Continue recitation", "متابعة التلاوة")
+    val shareCard = t("Share card", "مشاركة كارت")
+    val goldTheme = t("Gold", "ذهبي")
+    val settingsSearch = t("Search settings", "بحث في الإعدادات")
+    val onboardingTitle = t("Welcome to MiMusic", "أهلًا بك في مي ميوزك")
+    val onboardingBody = t(
+        "Arabic is the default language. Pick a nav style later in Appearance.",
+        "العربية هي لغة الواجهة. يمكنك تغيير شكل القائمة لاحقًا من المظهر."
+    )
+    val gotIt = t("Got it", "حسنًا")
+    val eqPreset = t("Equalizer preset", "إعداد المعادل")
+    val search = t("Search", "بحث")
+    val thisWeek = t("Played this week", "استُمع إليه هذا الأسبوع")
+    val shortFavorites = t("Short favorites", "مفضّل قصير")
+    val quranMishary = t("Mishary", "مشاري")
+    val quranMinshawi = t("Minshawi", "المنشاوي")
+    val quranHosary = t("Al-Husary", "الحصري")
+    val quranSudais = t("As-Sudais", "السديس")
+    val continueListening = t("Continue listening", "كمّل اللي وقفت عنده")
+    val refresh = t("Refresh", "تحديث")
+    val pitch = t("Pitch", "الطبقة")
+    val lowPowerMode = t("Low power mode", "توفير الطاقة")
+    val lowPowerModeDescription = t(
+        "Turn off blur and the visualizer to save battery",
+        "أوقف الضباب وموجة الصوت لتوفير البطارية"
+    )
+    val chargingOnlyDownload = t("Charge to download", "التنزيل أثناء الشحن")
+    val chargingOnlyDownloadDescription = t(
+        "Start downloads only while the phone is charging",
+        "ابدأ التنزيل فقط أثناء شحن الهاتف"
+    )
+    val pictureInPicture = t("Picture-in-picture", "صورة داخل صورة")
+    val pictureInPictureDescription = t(
+        "Keep the player in a small window when leaving the app",
+        "أبقِ المشغّل في نافذة صغيرة عند مغادرة التطبيق"
+    )
+    val dataUsage = t("Data used", "استهلاك البيانات")
+    val crashLog = t("Share crash log", "مشاركة سجل الأعطال")
+    val crashLogDescription = t(
+        "Send the last crash and playback log without opening GitHub",
+        "أرسل آخر عطل وسجل التشغيل من غير فتح GitHub"
+    )
+    val crashLogEmpty = t("No crash log yet", "لا يوجد سجل أعطال بعد")
+    val removeDownloadConfirm = t(
+        "Remove this downloaded song from the device?",
+        "هل تريد حذف هذه الأغنية المنزّلة من الجهاز؟"
+    )
+    val clearDownloadsConfirm = t(
+        "Remove every downloaded song?",
+        "هل تريد حذف كل الأغاني المنزّلة؟"
+    )
+    val playlistCover = t("Playlist cover", "غلاف القائمة")
+    val playlistFolderHint = t(
+        "Tip: name it Folder / Playlist to group lists",
+        "تلميح: اكتب مجلد / اسم القائمة لتجميع القوائم"
+    )
+    val themeSpotify = t("Spotify green", "أخضر سبوتيفاي")
+    val themeYouTube = t("YouTube dark", "يوتيوب داكن")
+    val enterPictureInPicture = t("Pop-out player", "مشغّل عائم")
+
+    fun audioQualityName(value: it.vfsfitvnm.vimusic.enums.AudioQuality) = when (value) {
+        it.vfsfitvnm.vimusic.enums.AudioQuality.Auto -> audioQualityAuto
+        it.vfsfitvnm.vimusic.enums.AudioQuality.High -> audioQualityHigh
+        it.vfsfitvnm.vimusic.enums.AudioQuality.Medium -> audioQualityMedium
+        it.vfsfitvnm.vimusic.enums.AudioQuality.Low -> audioQualityLow
+    }
 }

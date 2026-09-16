@@ -2,5 +2,10 @@ package it.vfsfitvnm.vimusic.enums
 
 enum class BuiltInPlaylist {
     Favorites,
-    Offline
+    Offline,
+    History,
+    Top,
+    Device,
+    ThisWeek,
+    ShortFavorites
 }

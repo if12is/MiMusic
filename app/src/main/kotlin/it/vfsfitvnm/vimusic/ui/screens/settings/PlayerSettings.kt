@@ -31,8 +31,18 @@ import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.resumePlaybackWhenDeviceConnectedKey
 import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.toast
+import it.vfsfitvnm.vimusic.enums.AudioQuality
+import it.vfsfitvnm.vimusic.utils.audioQualityKey
+import it.vfsfitvnm.vimusic.utils.bassBoostKey
+import it.vfsfitvnm.vimusic.utils.carModeKey
+import it.vfsfitvnm.vimusic.utils.crossfadeEnabledKey
+import it.vfsfitvnm.vimusic.utils.equalizerEnabledKey
+import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
+import it.vfsfitvnm.vimusic.utils.offlineModeKey
+import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
+import it.vfsfitvnm.vimusic.utils.wifiOnlyDownloadKey
 
 @ExperimentalAnimationApi
 @Composable
@@ -50,6 +60,15 @@ fun PlayerSettings() {
     var skipSilence by rememberPreference(skipSilenceKey, false)
     var volumeNormalization by rememberPreference(volumeNormalizationKey, false)
     var keepScreenOn by rememberPreference(keepScreenOnKey, false)
+    var audioQuality by rememberPreference(audioQualityKey, AudioQuality.Auto)
+    var crossfadeEnabled by rememberPreference(crossfadeEnabledKey, false)
+    var equalizerEnabled by rememberPreference(equalizerEnabledKey, false)
+    var equalizerPreset by rememberPreference(equalizerPresetKey, 0)
+    var bassBoost by rememberPreference(bassBoostKey, false)
+    var wifiOnlyDownload by rememberPreference(wifiOnlyDownloadKey, false)
+    var offlineMode by rememberPreference(offlineModeKey, false)
+    var carMode by rememberPreference(carModeKey, false)
+    var smartShuffle by rememberPreference(smartShuffleKey, true)
 
     val activityResultLauncher =
         rememberLauncherForActivityResult(ActivityResultContracts.StartActivityForResult()) { }
@@ -96,6 +115,27 @@ fun PlayerSettings() {
             onCheckedChange = { keepScreenOn = it }
         )
 
+        SwitchSettingEntry(
+            title = strings.carMode,
+            text = strings.carModeDescription,
+            isChecked = carMode,
+            onCheckedChange = { carMode = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.smartShuffle,
+            text = strings.smartShuffleDescription,
+            isChecked = smartShuffle,
+            onCheckedChange = { smartShuffle = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.offlineMode,
+            text = strings.offlineModeDescription,
+            isChecked = offlineMode,
+            onCheckedChange = { offlineMode = it }
+        )
+
         SettingsGroupSpacer()
 
         SettingsEntryGroupText(title = strings.audioGroup)
@@ -116,6 +156,67 @@ fun PlayerSettings() {
             onCheckedChange = {
                 volumeNormalization = it
             }
+        )
+
+        EnumValueSelectorSettingsEntry(
+            title = strings.audioQuality,
+            selectedValue = audioQuality,
+            onValueSelected = { audioQuality = it },
+            valueText = strings::audioQualityName
+        )
+
+        SwitchSettingEntry(
+            title = strings.crossfade,
+            text = strings.crossfadeDescription,
+            isChecked = crossfadeEnabled,
+            onCheckedChange = { crossfadeEnabled = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.inAppEqualizer,
+            text = strings.inAppEqualizerDescription,
+            isChecked = equalizerEnabled,
+            onCheckedChange = { equalizerEnabled = it }
+        )
+
+        if (equalizerEnabled) {
+            ValueSelectorSettingsEntry(
+                title = strings.eqPreset,
+                selectedValue = equalizerPreset.coerceIn(0, 5),
+                values = (0..5).toList(),
+                onValueSelected = { equalizerPreset = it },
+                valueText = { "${strings.eqPreset} ${it + 1}" }
+            )
+        }
+
+        SwitchSettingEntry(
+            title = strings.bassBoost,
+            text = strings.bassBoost,
+            isChecked = bassBoost,
+            onCheckedChange = { bassBoost = it }
+        )
+
+        SwitchSettingEntry(
+            title = strings.wifiOnlyDownload,
+            text = strings.wifiOnlyDownloadDescription,
+            isChecked = wifiOnlyDownload,
+            onCheckedChange = { wifiOnlyDownload = it }
+        )
+
+        var chargingOnlyDownload by rememberPreference(it.vfsfitvnm.vimusic.utils.chargingOnlyDownloadKey, false)
+        SwitchSettingEntry(
+            title = strings.chargingOnlyDownload,
+            text = strings.chargingOnlyDownloadDescription,
+            isChecked = chargingOnlyDownload,
+            onCheckedChange = { chargingOnlyDownload = it }
+        )
+
+        var pipOnLeave by rememberPreference(it.vfsfitvnm.vimusic.utils.pipOnLeaveKey, false)
+        SwitchSettingEntry(
+            title = strings.pictureInPicture,
+            text = strings.pictureInPictureDescription,
+            isChecked = pipOnLeave,
+            onCheckedChange = { pipOnLeave = it }
         )
 
         SettingsEntry(

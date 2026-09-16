@@ -4,22 +4,31 @@ import java.util.Locale
 
 enum class AppLanguage {
     Arabic,
-    English;
+    English,
+    French,
+    Turkish,
+    Urdu;
 
     val code: String
         get() = when (this) {
             Arabic -> "ar"
             English -> "en"
+            French -> "fr"
+            Turkish -> "tr"
+            Urdu -> "ur"
         }
 
     val region: String
         get() = when (this) {
             Arabic -> "EG"
             English -> "US"
+            French -> "FR"
+            Turkish -> "TR"
+            Urdu -> "PK"
         }
 
     val isRtl: Boolean
-        get() = this == Arabic
+        get() = this == Arabic || this == Urdu
 
     val locale: Locale
         get() = Locale(code, region)
@@ -28,5 +37,8 @@ enum class AppLanguage {
         get() = when (this) {
             Arabic -> "العربية"
             English -> "English"
+            French -> "Français"
+            Turkish -> "Türkçe"
+            Urdu -> "اردو"
         }
 }

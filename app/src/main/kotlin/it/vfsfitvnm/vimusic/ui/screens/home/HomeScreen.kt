@@ -126,6 +126,7 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
                     Item(2, strings.playlists, R.drawable.playlist)
                     Item(3, strings.artists, R.drawable.person)
                     Item(4, strings.albums, R.drawable.disc)
+                    Item(5, strings.moodQuran, R.drawable.star)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {
@@ -156,6 +157,10 @@ fun HomeScreen(onPlaylistUrl: (String) -> Unit) {
                         4 -> HomeAlbums(
                             onAlbumClick = { albumRoute(it.id) },
                             onSearchClick = { searchRoute("") }
+                        )
+
+                        5 -> HomeQuran(
+                            onSearchClick = { searchResultRoute(it) }
                         )
                     }
                 }
