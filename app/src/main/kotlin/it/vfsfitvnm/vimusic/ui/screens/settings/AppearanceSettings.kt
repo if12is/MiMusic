@@ -17,8 +17,10 @@ import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
+import it.vfsfitvnm.vimusic.enums.AppFont
 import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
 import it.vfsfitvnm.vimusic.enums.ColorPaletteName
@@ -27,6 +29,7 @@ import it.vfsfitvnm.vimusic.enums.ThumbnailRoundness
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.appFontKey
 import it.vfsfitvnm.vimusic.utils.appLanguageKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
@@ -35,18 +38,18 @@ import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.navigationStyleKey
+import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.selectedAppFont
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
-import it.vfsfitvnm.vimusic.utils.useSystemFontKey
-import it.vfsfitvnm.vimusic.utils.blurPlayerBackgroundKey
 import it.vfsfitvnm.vimusic.utils.lyricsScaleKey
 import it.vfsfitvnm.vimusic.utils.lowPowerModeKey
-import it.vfsfitvnm.vimusic.utils.visualizerEnabledKey
 
 @ExperimentalAnimationApi
 @Composable
 fun AppearanceSettings() {
     val (colorPalette) = LocalAppearance.current
     val strings = LocalStrings.current
+    val context = LocalContext.current
 
     var appLanguage by rememberPreference(appLanguageKey, AppLanguage.Arabic)
     var colorPaletteName by rememberPreference(colorPaletteNameKey, ColorPaletteName.Dynamic)
@@ -59,10 +62,8 @@ fun AppearanceSettings() {
         navigationStyleKey,
         NavigationStyle.Side
     )
-    var useSystemFont by rememberPreference(useSystemFontKey, false)
+    var appFont by rememberPreference(appFontKey, context.preferences.selectedAppFont())
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
-    var visualizerEnabled by rememberPreference(visualizerEnabledKey, false)
-    var blurPlayerBackground by rememberPreference(blurPlayerBackgroundKey, true)
     var lowPowerMode by rememberPreference(lowPowerModeKey, false)
     var lyricsScale by rememberPreference(lyricsScaleKey, 1)
     var isShowingThumbnailInLockscreen by rememberPreference(
@@ -152,32 +153,20 @@ fun AppearanceSettings() {
 
         SettingsEntryGroupText(title = strings.textGroup)
 
-        SwitchSettingEntry(
-            title = strings.useSystemFont,
-            text = strings.useSystemFontDescription,
-            isChecked = useSystemFont,
-            onCheckedChange = { useSystemFont = it }
+        EnumValueSelectorSettingsEntry(
+            title = strings.appFont,
+            selectedValue = appFont,
+            onValueSelected = { appFont = it },
+            valueText = strings::appFontName
         )
+
+        SettingsDescription(text = strings.appFontDescription)
 
         SwitchSettingEntry(
             title = strings.applyFontPadding,
             text = strings.applyFontPaddingDescription,
             isChecked = applyFontPadding,
             onCheckedChange = { applyFontPadding = it }
-        )
-
-        SwitchSettingEntry(
-            title = strings.visualizer,
-            text = strings.visualizer,
-            isChecked = visualizerEnabled,
-            onCheckedChange = { visualizerEnabled = it }
-        )
-
-        SwitchSettingEntry(
-            title = strings.blurPlayer,
-            text = strings.blurPlayer,
-            isChecked = blurPlayerBackground,
-            onCheckedChange = { blurPlayerBackground = it }
         )
 
         SwitchSettingEntry(

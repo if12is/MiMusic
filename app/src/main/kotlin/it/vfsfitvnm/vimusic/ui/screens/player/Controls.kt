@@ -308,13 +308,6 @@ fun Controls(
             modifier = Modifier.fillMaxWidth()
         ) {
             IconButton(
-                icon = R.drawable.play_skip_back,
-                color = colorPalette.text,
-                onClick = { binder.player.seekTo((binder.player.currentPosition - 15_000).coerceAtLeast(0)) },
-                modifier = Modifier.size(20.dp)
-            )
-
-            IconButton(
                 icon = R.drawable.alarm,
                 color = colorPalette.text,
                 onClick = onShowSleepTimer,
@@ -345,18 +338,6 @@ fun Controls(
                         binder.setPlaybackPitch(playbackPitch)
                     }
                     .padding(horizontal = 10.dp, vertical = 6.dp)
-            )
-
-            IconButton(
-                icon = R.drawable.play_skip_forward,
-                color = colorPalette.text,
-                onClick = {
-                    val duration = binder.player.duration
-                    if (duration != C.TIME_UNSET) {
-                        binder.player.seekTo((binder.player.currentPosition + 15_000).coerceAtMost(duration))
-                    }
-                },
-                modifier = Modifier.size(20.dp)
             )
         }
 

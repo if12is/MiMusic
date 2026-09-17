@@ -104,6 +104,7 @@ import it.vfsfitvnm.vimusic.ui.styling.dynamicColorPaletteOf
 import it.vfsfitvnm.vimusic.ui.styling.typographyOf
 import it.vfsfitvnm.vimusic.utils.LocalAppLanguage
 import it.vfsfitvnm.vimusic.utils.LocalStrings
+import it.vfsfitvnm.vimusic.utils.appFontKey
 import it.vfsfitvnm.vimusic.utils.appLanguageKey
 import it.vfsfitvnm.vimusic.utils.appLockKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
@@ -126,6 +127,7 @@ import it.vfsfitvnm.vimusic.utils.onboardingDoneKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.selectedAppFont
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.useSystemFontKey
 import it.vfsfitvnm.vimusic.utils.withAppLanguage
@@ -203,7 +205,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
 
                     val appLanguage = getEnum(appLanguageKey, AppLanguage.Arabic)
                     applyInnertubeLocale(appLanguage)
-                    val useSystemFont = getBoolean(useSystemFontKey, false)
+                    val appFont = selectedAppFont()
                     val applyFontPadding = getBoolean(applyFontPaddingKey, false)
 
                     val colorPalette =
@@ -214,7 +216,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     mutableStateOf(
                         Appearance(
                             colorPalette = colorPalette,
-                            typography = typographyOf(colorPalette.text, useSystemFont, applyFontPadding),
+                            typography = typographyOf(colorPalette.text, appFont, applyFontPadding),
                             thumbnailShape = thumbnailRoundness.shape()
                         )
                     )
@@ -316,12 +318,12 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                                 recreate()
                             }
 
-                            useSystemFontKey, applyFontPaddingKey -> {
-                                val useSystemFont = sharedPreferences.getBoolean(useSystemFontKey, false)
+                            appFontKey, applyFontPaddingKey, useSystemFontKey -> {
+                                val appFont = sharedPreferences.selectedAppFont()
                                 val applyFontPadding = sharedPreferences.getBoolean(applyFontPaddingKey, false)
 
                                 appearance = appearance.copy(
-                                    typography = typographyOf(appearance.colorPalette.text, useSystemFont, applyFontPadding),
+                                    typography = typographyOf(appearance.colorPalette.text, appFont, applyFontPadding),
                                 )
                             }
                         }

@@ -10,13 +10,6 @@ import androidx.compose.animation.fadeIn
 import androidx.compose.animation.fadeOut
 import androidx.compose.animation.scaleIn
 import androidx.compose.animation.scaleOut
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.RepeatMode
-import androidx.compose.animation.core.animateFloat
-import androidx.compose.animation.core.infiniteRepeatable
-import androidx.compose.animation.core.rememberInfiniteTransition
-import androidx.compose.animation.core.tween
-import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.gestures.detectHorizontalDragGestures
 import androidx.compose.foundation.gestures.detectTapGestures
 import androidx.compose.foundation.gestures.detectVerticalDragGestures
@@ -33,9 +26,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
-import androidx.compose.ui.geometry.Offset
-import androidx.compose.ui.geometry.Size
-import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.pointerInput
 import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.unit.dp
@@ -62,8 +52,6 @@ import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
 import it.vfsfitvnm.vimusic.utils.thumbnail
-import it.vfsfitvnm.vimusic.utils.rememberPreference
-import it.vfsfitvnm.vimusic.utils.visualizerEnabledKey
 import java.net.UnknownHostException
 import java.nio.channels.UnresolvedAddressException
 
@@ -210,17 +198,6 @@ fun Thumbnail(
                     .fillMaxSize()
             )
 
-            val visualizerEnabled by rememberPreference(visualizerEnabledKey, false)
-            val lowPowerMode by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
-            if (visualizerEnabled && !lowPowerMode && !isShowingLyrics && !showVideo) {
-                LightVisualizer(
-                    color = LocalAppearance.current.colorPalette.accent,
-                    modifier = Modifier
-                        .align(Alignment.BottomCenter)
-                        .fillMaxSize()
-                )
-            }
-
             if (showVideo && !isShowingLyrics && error == null) {
                 VideoLyricsCaption(
                     mediaId = currentWindow.mediaItem.mediaId,
@@ -275,38 +252,6 @@ fun Thumbnail(
                     }
                 },
                 onDismiss = player::prepare
-            )
-        }
-    }
-}
-
-@Composable
-private fun LightVisualizer(
-    color: Color,
-    modifier: Modifier = Modifier
-) {
-    val transition = rememberInfiniteTransition(label = "visualizer")
-    val t by transition.animateFloat(
-        initialValue = 0f,
-        targetValue = 1f,
-        animationSpec = infiniteRepeatable(
-            animation = tween(durationMillis = 900, easing = LinearEasing),
-            repeatMode = RepeatMode.Reverse
-        ),
-        label = "visualizerT"
-    )
-
-    Canvas(modifier = modifier) {
-        val bars = 14
-        val gap = size.width / (bars * 2f)
-        repeat(bars) { index ->
-            val height = size.height * (
-                0.18f + 0.62f * kotlin.math.abs(kotlin.math.sin((t * 7f + index) * 0.65f))
-            )
-            drawRect(
-                color = color.copy(alpha = 0.42f),
-                topLeft = Offset(x = index * gap * 2f, y = size.height - height),
-                size = Size(gap, height)
             )
         }
     }

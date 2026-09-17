@@ -36,8 +36,6 @@ import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.draw.alpha
-import androidx.compose.ui.draw.blur
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
@@ -66,7 +64,6 @@ import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.collapsedPlayerProgressBar
 import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.DisposableListener
-import it.vfsfitvnm.vimusic.utils.blurPlayerBackgroundKey
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.isLandscape
 import it.vfsfitvnm.vimusic.utils.navigationStyleKey
@@ -208,11 +205,8 @@ fun Player(
             mutableStateOf(false)
         }
 
-        val blurPlayerBackground by rememberPreference(blurPlayerBackgroundKey, true)
-        val lowPowerMode by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
         val strings = LocalStrings.current
         val context = LocalContext.current
-        val showBlur = blurPlayerBackground && !lowPowerMode
 
         val playerBottomSheetState = rememberBottomSheetState(
             64.dp + horizontalBottomPaddingValues.calculateBottomPadding(),
@@ -220,10 +214,7 @@ fun Player(
         )
 
         val containerModifier = Modifier
-            .background(
-                if (showBlur) colorPalette.background1.copy(alpha = 0.42f)
-                else colorPalette.background1
-            )
+            .background(colorPalette.background1)
             .padding(
                 windowInsets
                     .only(WindowInsetsSides.Top + WindowInsetsSides.Horizontal)
@@ -263,20 +254,6 @@ fun Player(
                     }
                 },
                 modifier = modifier
-            )
-        }
-
-        if (showBlur) {
-            AsyncImage(
-                model = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.player.song.px),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .fillMaxSize()
-                    .then(
-                        if (Build.VERSION.SDK_INT >= 31) Modifier.blur(42.dp) else Modifier
-                    )
-                    .alpha(0.28f)
             )
         }
 

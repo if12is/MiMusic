@@ -101,11 +101,8 @@ import it.vfsfitvnm.vimusic.utils.TimerJob
 import it.vfsfitvnm.vimusic.utils.YouTubeRadio
 import it.vfsfitvnm.vimusic.utils.activityPendingIntent
 import it.vfsfitvnm.vimusic.utils.audioQualityKey
-import it.vfsfitvnm.vimusic.utils.bassBoostKey
 import it.vfsfitvnm.vimusic.utils.broadCastPendingIntent
 import it.vfsfitvnm.vimusic.utils.crossfadeEnabledKey
-import it.vfsfitvnm.vimusic.utils.equalizerEnabledKey
-import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
 import it.vfsfitvnm.vimusic.utils.exoPlayerDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.findNextMediaItemById
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
@@ -209,7 +206,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private var audioDeviceCallback: AudioDeviceCallback? = null
 
     private var loudnessEnhancer: LoudnessEnhancer? = null
-    private val audioFx = InAppAudioFx(this)
     private var loopStartMs = C.TIME_UNSET
     private var loopEndMs = C.TIME_UNSET
 
@@ -366,7 +362,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         downloadCache.release()
 
         loudnessEnhancer?.release()
-        audioFx.release()
 
         super.onDestroy()
     }
@@ -418,6 +413,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
+        player.volume = 1f
         maybeRecoverPlaybackError()
         maybeNormalizeVolume()
         maybeProcessRadio()
@@ -715,7 +711,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             if (player.shouldBePlaying) {
                 makeInvincible(false)
                 sendOpenEqualizerIntent()
-                audioFx.apply(this@PlayerService.player.audioSessionId)
+                if (!preferences.getBoolean(crossfadeEnabledKey, false)) {
+                    player.volume = 1f
+                }
             } else {
                 makeInvincible(true)
                 sendCloseEqualizerIntent()
@@ -736,18 +734,15 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     private fun maybeCrossfade() {
         if (!preferences.getBoolean(crossfadeEnabledKey, false)) {
-            player.volume = 1f
             return
         }
         val duration = player.duration
         if (duration == C.TIME_UNSET) return
         val remaining = duration - player.currentPosition
-        player.volume = when {
-            remaining in 1..3500L && player.hasNextMediaItem() ->
-                (remaining / 3500f).coerceIn(0.12f, 1f)
-            player.currentPosition < 2200L ->
-                (player.currentPosition / 2200f).coerceIn(0.12f, 1f)
-            else -> 1f
+        player.volume = if (remaining in 1..3500L && player.hasNextMediaItem()) {
+            (remaining / 3500f).coerceIn(0.12f, 1f)
+        } else {
+            1f
         }
     }
 
@@ -795,10 +790,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 sharedPreferences.getBoolean(key, isInvincibilityEnabled)
 
             skipSilenceKey -> player.skipSilenceEnabled = sharedPreferences.getBoolean(key, false)
-            equalizerEnabledKey, equalizerPresetKey, bassBoostKey ->
-                if (player.playbackState == Player.STATE_READY) {
-                    audioFx.apply(this@PlayerService.player.audioSessionId)
-                }
             isShowingThumbnailInLockscreenKey -> {
                 isShowingThumbnailInLockscreen = sharedPreferences.getBoolean(key, true)
                 maybeShowSongCoverInLockScreen()

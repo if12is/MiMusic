@@ -33,11 +33,8 @@ import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.toast
 import it.vfsfitvnm.vimusic.enums.AudioQuality
 import it.vfsfitvnm.vimusic.utils.audioQualityKey
-import it.vfsfitvnm.vimusic.utils.bassBoostKey
 import it.vfsfitvnm.vimusic.utils.carModeKey
 import it.vfsfitvnm.vimusic.utils.crossfadeEnabledKey
-import it.vfsfitvnm.vimusic.utils.equalizerEnabledKey
-import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
 import it.vfsfitvnm.vimusic.utils.offlineModeKey
 import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
@@ -62,9 +59,6 @@ fun PlayerSettings() {
     var keepScreenOn by rememberPreference(keepScreenOnKey, false)
     var audioQuality by rememberPreference(audioQualityKey, AudioQuality.Auto)
     var crossfadeEnabled by rememberPreference(crossfadeEnabledKey, false)
-    var equalizerEnabled by rememberPreference(equalizerEnabledKey, false)
-    var equalizerPreset by rememberPreference(equalizerPresetKey, 0)
-    var bassBoost by rememberPreference(bassBoostKey, false)
     var wifiOnlyDownload by rememberPreference(wifiOnlyDownloadKey, false)
     var offlineMode by rememberPreference(offlineModeKey, false)
     var carMode by rememberPreference(carModeKey, false)
@@ -170,30 +164,6 @@ fun PlayerSettings() {
             text = strings.crossfadeDescription,
             isChecked = crossfadeEnabled,
             onCheckedChange = { crossfadeEnabled = it }
-        )
-
-        SwitchSettingEntry(
-            title = strings.inAppEqualizer,
-            text = strings.inAppEqualizerDescription,
-            isChecked = equalizerEnabled,
-            onCheckedChange = { equalizerEnabled = it }
-        )
-
-        if (equalizerEnabled) {
-            ValueSelectorSettingsEntry(
-                title = strings.eqPreset,
-                selectedValue = equalizerPreset.coerceIn(0, 5),
-                values = (0..5).toList(),
-                onValueSelected = { equalizerPreset = it },
-                valueText = { "${strings.eqPreset} ${it + 1}" }
-            )
-        }
-
-        SwitchSettingEntry(
-            title = strings.bassBoost,
-            text = strings.bassBoost,
-            isChecked = bassBoost,
-            onCheckedChange = { bassBoost = it }
         )
 
         SwitchSettingEntry(

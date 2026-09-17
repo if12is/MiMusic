@@ -1,6 +1,7 @@
 package it.vfsfitvnm.vimusic.ui.styling
 
 import it.vfsfitvnm.vimusic.enums.AlbumSortBy
+import it.vfsfitvnm.vimusic.enums.AppFont
 import it.vfsfitvnm.vimusic.enums.AppLanguage
 import it.vfsfitvnm.vimusic.enums.ArtistSortBy
 import it.vfsfitvnm.vimusic.enums.ColorPaletteMode
@@ -70,6 +71,16 @@ class UiStrings(private val language: AppLanguage) {
         "Use the system font instead of Cairo for Arabic and English names",
         "استخدم خط النظام بدلاً من خط Cairo لأسماء الأغاني العربية والإنجليزية"
     )
+    val appFont = t("Font", "الخط")
+    val appFontDescription = t(
+        "Choose a typeface for Arabic and English text",
+        "اختر نوع الخط للنصوص العربية والإنجليزية"
+    )
+    val appFontCairo = t("Cairo", "Cairo")
+    val appFontTajawal = t("Tajawal", "Tajawal")
+    val appFontAmiri = t("Amiri", "Amiri")
+    val appFontPoppins = t("Poppins", "Poppins")
+    val appFontSystem = t("System", "خط النظام")
     val applyFontPadding = t("Apply font padding", "تطبيق تباعد الخط")
     val applyFontPaddingDescription = t("Add spacing around texts", "إضافة مسافات حول النصوص")
     val showSongCover = t("Show song cover", "إظهار غلاف الأغنية")
@@ -350,6 +361,14 @@ class UiStrings(private val language: AppLanguage) {
     fun navigationStyleName(value: NavigationStyle) = when (value) {
         NavigationStyle.Side -> navigationStyleSide
         NavigationStyle.GlassBottom -> navigationStyleGlass
+    }
+
+    fun appFontName(value: AppFont) = when (value) {
+        AppFont.Cairo -> appFontCairo
+        AppFont.Tajawal -> appFontTajawal
+        AppFont.Amiri -> appFontAmiri
+        AppFont.Poppins -> appFontPoppins
+        AppFont.System -> appFontSystem
     }
 
     fun thumbnailRoundnessName(value: ThumbnailRoundness) = when (value) {

@@ -9,6 +9,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.ui.platform.LocalContext
 import androidx.core.content.edit
+import it.vfsfitvnm.vimusic.enums.AppFont
 
 const val colorPaletteNameKey = "colorPaletteName"
 const val colorPaletteModeKey = "colorPaletteMode"
@@ -17,6 +18,7 @@ const val coilDiskCacheMaxSizeKey = "coilDiskCacheMaxSize"
 const val exoPlayerDiskCacheMaxSizeKey = "exoPlayerDiskCacheMaxSize"
 const val isInvincibilityEnabledKey = "isInvincibilityEnabled"
 const val useSystemFontKey = "useSystemFont"
+const val appFontKey = "appFont"
 const val applyFontPaddingKey = "applyFontPadding"
 const val songSortOrderKey = "songSortOrder"
 const val songSortByKey = "songSortBy"
@@ -63,6 +65,13 @@ inline fun <reified T : Enum<T>> SharedPreferences.Editor.putEnum(
 
 val Context.preferences: SharedPreferences
     get() = getSharedPreferences("preferences", Context.MODE_PRIVATE)
+
+fun SharedPreferences.selectedAppFont(): AppFont {
+    if (contains(appFontKey)) {
+        return getEnum(appFontKey, AppFont.Cairo)
+    }
+    return if (getBoolean(useSystemFontKey, false)) AppFont.System else AppFont.Cairo
+}
 
 @Composable
 fun rememberPreference(key: String, defaultValue: Boolean): MutableState<Boolean> {
