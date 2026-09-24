@@ -146,6 +146,14 @@ private suspend fun Innertube.relatedPageOrNull(videoId: String?): Innertube.Rel
 internal suspend fun Innertube.homePageOrNull(): Innertube.RelatedPage? =
     browsePageOrNull("FEmusic_home")
 
+suspend fun Innertube.officialChartSongs(): List<Innertube.SongItem> =
+    runCatching {
+        browsePageOrNull("FEmusic_charts")
+            ?.songs
+            .orEmpty()
+            .filter { !it.info?.endpoint?.videoId.isNullOrBlank() }
+    }.getOrDefault(emptyList())
+
 private suspend fun Innertube.browsePageOrNull(browseId: String): Innertube.RelatedPage? {
     val response = client.post(browse) {
         setBody(BrowseBody(browseId = browseId))

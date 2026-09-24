@@ -15,8 +15,13 @@ val LocalAppLanguage = staticCompositionLocalOf { AppLanguage.Arabic }
 
 val LocalStrings = staticCompositionLocalOf { UiStrings(AppLanguage.Arabic) }
 
+fun AppLanguage.displayed(): AppLanguage = when (this) {
+    AppLanguage.Arabic, AppLanguage.English -> this
+    AppLanguage.French, AppLanguage.Turkish, AppLanguage.Urdu -> AppLanguage.English
+}
+
 fun Context.preferredAppLanguage(): AppLanguage =
-    preferences.getEnum(appLanguageKey, AppLanguage.Arabic)
+    preferences.getEnum(appLanguageKey, AppLanguage.Arabic).displayed()
 
 fun applyInnertubeLocale(language: AppLanguage) {
     InnertubeContext.hl = language.code

@@ -301,6 +301,7 @@ fun Player(
                     IconButton(
                         icon = R.drawable.ellipsis_horizontal,
                         color = colorPalette.text,
+                        contentDescription = strings.moreOptions,
                         onClick = {
                             menuState.display {
                                 PlayerMenu(
@@ -312,13 +313,14 @@ fun Player(
                             }
                         },
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .size(20.dp)
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp)
                     )
 
                     IconButton(
                         icon = R.drawable.film,
                         color = colorPalette.text,
+                        contentDescription = strings.pictureInPicture,
                         onClick = {
                             val activity = context as? android.app.Activity ?: return@IconButton
                             if (Build.VERSION.SDK_INT >= 26) {
@@ -328,17 +330,18 @@ fun Player(
                             }
                         },
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .size(20.dp)
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp)
                     )
 
                     IconButton(
                         icon = R.drawable.alert_circle,
                         color = if (playerLocked) colorPalette.accent else colorPalette.text,
+                        contentDescription = strings.playerLock,
                         onClick = { playerLocked = !playerLocked },
                         modifier = Modifier
-                            .padding(horizontal = 4.dp, vertical = 8.dp)
-                            .size(20.dp)
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp)
                     )
 
                     Spacer(

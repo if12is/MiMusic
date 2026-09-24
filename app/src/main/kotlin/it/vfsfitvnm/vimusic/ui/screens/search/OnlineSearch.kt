@@ -57,6 +57,7 @@ import it.vfsfitvnm.vimusic.ui.components.themed.FloatingActionsContainerWithScr
 import it.vfsfitvnm.vimusic.ui.components.themed.Header
 import it.vfsfitvnm.vimusic.ui.components.themed.SecondaryTextButton
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.align
 import it.vfsfitvnm.vimusic.utils.center
 import it.vfsfitvnm.vimusic.utils.medium
@@ -160,7 +161,11 @@ fun OnlineSearch(
                             val isAlbum = playlistId.startsWith("OLAK5uy_")
 
                             SecondaryTextButton(
-                                text = "View ${if (isAlbum) "album" else "playlist"}",
+                                text = if (isAlbum) {
+                                    LocalStrings.current.viewAlbum
+                                } else {
+                                    LocalStrings.current.viewPlaylist
+                                },
                                 onClick = { onViewPlaylist(textFieldValue.text) }
                             )
                         }
@@ -172,8 +177,19 @@ fun OnlineSearch(
 
                         if (textFieldValue.text.isNotEmpty()) {
                             SecondaryTextButton(
-                                text = it.vfsfitvnm.vimusic.utils.LocalStrings.current.clear,
+                                text = LocalStrings.current.clear,
                                 onClick = { onTextFieldValueChanged(TextFieldValue()) }
+                            )
+                        }
+
+                        if (history.isNotEmpty()) {
+                            SecondaryTextButton(
+                                text = LocalStrings.current.clearSearchHistory,
+                                onClick = {
+                                    query {
+                                        Database.clearQueries()
+                                    }
+                                }
                             )
                         }
                     }
@@ -211,7 +227,7 @@ fun OnlineSearch(
 
                     Image(
                         painter = closeIconPainter,
-                        contentDescription = null,
+                        contentDescription = LocalStrings.current.clear,
                         colorFilter = ColorFilter.tint(colorPalette.textDisabled),
                         modifier = Modifier
                             .clickable(
@@ -229,7 +245,7 @@ fun OnlineSearch(
 
                     Image(
                         painter = arrowForwardIconPainter,
-                        contentDescription = null,
+                        contentDescription = LocalStrings.current.search,
                         colorFilter = ColorFilter.tint(colorPalette.textDisabled),
                         modifier = Modifier
                             .clickable(
@@ -297,14 +313,14 @@ fun OnlineSearch(
                         )
                     }
                 }
-            } ?: suggestionsResult?.exceptionOrNull()?.let {
+            } ?: suggestionsResult?.exceptionOrNull()?.let { _ ->
                 item {
                     Box(
                         modifier = Modifier
                             .fillMaxSize()
                     ) {
                         BasicText(
-                            text = "An error has occurred.",
+                            text = LocalStrings.current.anErrorOccurredDot,
                             style = typography.s.secondary.center,
                             modifier = Modifier
                                 .align(Alignment.Center)

@@ -23,7 +23,8 @@ fun HeaderIconButton(
     color: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    indication: Indication? = null
+    indication: Indication? = null,
+    contentDescription: String? = null
 ) {
     IconButton(
         icon = icon,
@@ -31,6 +32,7 @@ fun HeaderIconButton(
         onClick = onClick,
         enabled = enabled,
         indication = indication,
+        contentDescription = contentDescription,
         modifier = modifier
             .padding(all = 4.dp)
             .size(18.dp)
@@ -44,11 +46,12 @@ fun IconButton(
     color: Color,
     modifier: Modifier = Modifier,
     enabled: Boolean = true,
-    indication: Indication? = null
+    indication: Indication? = null,
+    contentDescription: String? = null
 ) {
     Image(
         painter = painterResource(icon),
-        contentDescription = null,
+        contentDescription = contentDescription,
         colorFilter = ColorFilter.tint(color),
         modifier = Modifier
             .clickable(

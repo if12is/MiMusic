@@ -143,6 +143,11 @@ import it.vfsfitvnm.vimusic.utils.skipSilenceKey
 import it.vfsfitvnm.vimusic.utils.startMediaForeground
 import it.vfsfitvnm.vimusic.utils.timer
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
+import it.vfsfitvnm.vimusic.utils.bassBoostKey
+import it.vfsfitvnm.vimusic.utils.equalizerEnabledKey
+import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
+import it.vfsfitvnm.vimusic.utils.lowPowerModeKey
+import it.vfsfitvnm.vimusic.utils.playbackLookahead
 import it.vfsfitvnm.vimusic.utils.videoModeKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
 import it.vfsfitvnm.vimusic.utils.wifiOnlyDownloadKey
@@ -187,7 +192,13 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private val streamResolver by lazy {
         StreamResolver(
             cache = streamUrlCache,
-            quality = { preferences.getEnum(audioQualityKey, AudioQuality.Auto) },
+            quality = {
+                if (preferences.getBoolean(lowPowerModeKey, false)) {
+                    AudioQuality.Low
+                } else {
+                    preferences.getEnum(audioQualityKey, AudioQuality.Auto)
+                }
+            },
             player = { body -> Innertube.player(body) }
         )
     }
@@ -202,6 +213,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     private var audioDeviceCallback: AudioDeviceCallback? = null
 
     private var loudnessEnhancer: LoudnessEnhancer? = null
+    private var playbackEffects: PlaybackEffects? = null
+    private var effectsSessionId = -1
     private var loopStartMs = C.TIME_UNSET
     private var loopEndMs = C.TIME_UNSET
 
@@ -301,6 +314,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         player.skipSilenceEnabled = preferences.getBoolean(skipSilenceKey, false)
         applyPlaybackParameters()
+        applyPlaybackEffects(force = true)
         player.addListener(this)
         player.addAnalyticsListener(PlaybackStatsListener(false, this))
 
@@ -354,6 +368,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         mediaSession.release()
 
         loudnessEnhancer?.release()
+        playbackEffects?.release()
+        playbackEffects = null
 
         super.onDestroy()
     }
@@ -429,7 +445,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val timeline = player.currentTimeline
         if (timeline.windowCount == 0) return
         val start = player.currentMediaItemIndex.coerceAtLeast(0)
-        val end = minOf(timeline.windowCount, start + 3)
+        val end = minOf(
+            timeline.windowCount,
+            start + playbackLookahead(preferences.getBoolean(lowPowerModeKey, false))
+        )
         val ids = (start until end).map { index ->
             timeline.getWindow(index, Timeline.Window()).mediaItem.mediaId
         }
@@ -551,6 +570,15 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
+    private fun applyPlaybackEffects(force: Boolean = false) {
+        if (!::player.isInitialized) return
+        val session = player.audioSessionId
+        if (!force && session == effectsSessionId) return
+        playbackEffects?.release()
+        playbackEffects = PlaybackEffects.attach(session, preferences)
+        effectsSessionId = session
+    }
+
     private fun maybeNormalizeVolume() {
         if (!preferences.getBoolean(volumeNormalizationKey, false)) {
             loudnessEnhancer?.enabled = false
@@ -661,6 +689,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 notificationManager?.notify(NotificationId, notification)
             }
 
+            applyPlaybackEffects()
+
             if (player.shouldBePlaying) {
                 makeInvincible(false)
                 sendOpenEqualizerIntent()
@@ -686,6 +716,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
     }
 
     private fun maybeCrossfade() {
+        if (preferences.getBoolean(lowPowerModeKey, false)) {
+            if (player.volume != 1f) player.volume = 1f
+            return
+        }
         if (!preferences.getBoolean(crossfadeEnabledKey, false)) {
             return
         }
@@ -735,7 +769,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             persistentQueueKey -> isPersistentQueueEnabled =
                 sharedPreferences.getBoolean(key, isPersistentQueueEnabled)
 
-            volumeNormalizationKey -> maybeNormalizeVolume()
+            volumeNormalizationKey -> {
+                maybeNormalizeVolume()
+                applyPlaybackEffects(force = true)
+            }
+
+            equalizerEnabledKey, equalizerPresetKey, bassBoostKey -> applyPlaybackEffects(force = true)
 
             resumePlaybackWhenDeviceConnectedKey -> maybeResumePlaybackWhenDeviceConnected()
 
@@ -1425,6 +1464,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             DownloadScheduler.cancel(this@PlayerService, mediaId)
             this@PlayerService.downloadCache.removeResource(mediaId)
             setDownloadStatus(mediaId, DownloadStatus.None)
+            query { Database.clearDownloadSize(mediaId) }
         }
 
         fun clearDownloads() {

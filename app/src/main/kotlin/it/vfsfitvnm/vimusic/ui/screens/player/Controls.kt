@@ -17,6 +17,7 @@ import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
+import androidx.compose.foundation.layout.sizeIn
 import androidx.compose.foundation.layout.width
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
@@ -60,6 +61,7 @@ import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
 import it.vfsfitvnm.vimusic.utils.shuffleQueue
 import it.vfsfitvnm.vimusic.utils.formatAsDuration
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.carModeKey
@@ -90,6 +92,7 @@ fun Controls(
     var playbackSpeed by rememberPreference(playbackSpeedKey, 1f)
     var playbackPitch by rememberPreference(playbackPitchKey, 1f)
     val carMode by rememberPreference(carModeKey, false)
+    val smartShuffle by rememberPreference(smartShuffleKey, true)
     val strings = LocalStrings.current
     val speedOptions = listOf(0.75f, 1f, 1.25f, 1.5f)
     val pitchOptions = listOf(0.8f, 0.9f, 1f, 1.1f, 1.2f)
@@ -111,8 +114,9 @@ fun Controls(
         Database.likedAt(mediaId).distinctUntilChanged().collect { likedAt = it }
     }
 
-    val skipIconSize = if (carMode) 36.dp else 30.dp
+    val skipIconSize = if (carMode) 56.dp else 48.dp
     val playButtonSize = if (carMode) 84.dp else 68.dp
+    val sideIconSize = 48.dp
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -193,9 +197,10 @@ fun Controls(
                         }
                     }
                 },
+                contentDescription = strings.likeSong,
                 modifier = Modifier
                     .padding(start = 12.dp)
-                    .size(26.dp)
+                    .size(sideIconSize)
             )
         }
 
@@ -276,15 +281,15 @@ fun Controls(
                     icon = R.drawable.infinite,
                     color = if (trackLoopEnabled) colorPalette.accent else colorPalette.textSecondary,
                     onClick = { trackLoopEnabled = !trackLoopEnabled },
-                    modifier = Modifier
-                        .semantics { contentDescription = strings.repeatSong }
-                        .size(22.dp)
+                    contentDescription = strings.repeatSong,
+                    modifier = Modifier.size(sideIconSize)
                 )
 
                 IconButton(
                     icon = R.drawable.play_skip_back,
                     color = colorPalette.text,
                     onClick = binder.player::forceSeekToPrevious,
+                    contentDescription = strings.previousSong,
                     modifier = Modifier.size(skipIconSize)
                 )
 
@@ -306,7 +311,7 @@ fun Controls(
                 ) {
                     Image(
                         painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
-                        contentDescription = null,
+                        contentDescription = if (shouldBePlaying) strings.pause else strings.play,
                         colorFilter = ColorFilter.tint(colorPalette.background0),
                         modifier = Modifier
                             .align(Alignment.Center)
@@ -318,16 +323,16 @@ fun Controls(
                     icon = R.drawable.play_skip_forward,
                     color = colorPalette.text,
                     onClick = binder.player::forceSeekToNext,
+                    contentDescription = strings.nextSong,
                     modifier = Modifier.size(skipIconSize)
                 )
 
                 IconButton(
                     icon = R.drawable.shuffle,
                     color = colorPalette.textSecondary,
-                    onClick = { binder.player.shuffleQueue() },
-                    modifier = Modifier
-                        .semantics { contentDescription = strings.shuffle }
-                        .size(22.dp)
+                    onClick = { binder.player.shuffleQueue(smartShuffle) },
+                    contentDescription = strings.shuffle,
+                    modifier = Modifier.size(sideIconSize)
                 )
             }
         }
@@ -454,7 +459,8 @@ private fun PlayerToolButton(
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
-        modifier = modifier
+            modifier = modifier
+            .sizeIn(minHeight = 48.dp)
             .clip(RoundedCornerShape(14.dp))
             .clickable(role = Role.Button, onClick = onClick)
             .padding(vertical = 8.dp)
@@ -466,7 +472,7 @@ private fun PlayerToolButton(
             if (icon != null) {
                 Image(
                     painter = painterResource(icon),
-                    contentDescription = null,
+                    contentDescription = label,
                     colorFilter = ColorFilter.tint(contentColor),
                     modifier = Modifier.size(20.dp)
                 )

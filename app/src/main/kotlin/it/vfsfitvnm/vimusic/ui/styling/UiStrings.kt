@@ -497,8 +497,6 @@ class UiStrings(private val language: AppLanguage) {
     val carMode = t("Car mode", "وضع السيارة")
     val carModeDescription = t("Larger player buttons while driving", "أزرار أكبر في المشغّل أثناء القيادة")
     val lyricsSize = t("Lyrics size", "حجم الكلمات")
-    val visualizer = t("Audio visualizer", "موجة الصوت")
-    val blurPlayer = t("Blurred player background", "خلفية مشغّل ضبابية")
     val appLock = t("Lock with device PIN", "قفل برقم الجهاز")
     val appLockDescription = t("Ask for the phone lock when opening MiMusic", "اطلب قفل الهاتف عند فتح مي ميوزك")
     val hideRecents = t("Hide from recents screenshots", "إخفاء لقطات التطبيقات")
@@ -550,8 +548,8 @@ class UiStrings(private val language: AppLanguage) {
     val pitch = t("Pitch", "الطبقة")
     val lowPowerMode = t("Low power mode", "توفير الطاقة")
     val lowPowerModeDescription = t(
-        "Turn off blur and the visualizer to save battery",
-        "أوقف الضباب وموجة الصوت لتوفير البطارية"
+        "Lower quality, no crossfade, and smaller artwork to save battery",
+        "جودة أقل، بدون تلاشي، وصور أصغر لتوفير البطارية"
     )
     val chargingOnlyDownload = t("Charge to download", "التنزيل أثناء الشحن")
     val chargingOnlyDownloadDescription = t(
@@ -629,6 +627,55 @@ class UiStrings(private val language: AppLanguage) {
     val morningMoods = t("Morning moods", "مزاج الصباح")
     val eveningMoods = t("Evening moods", "مزاج الليل")
     val sources = t("Sources", "المصادر")
+    val everything = t("All", "الكل")
+    val podcasts = t("Podcasts", "بودكاست")
+    val quran = t("Quran", "قرآن")
+    val officialCharts = t("Official charts", "الرسوم الرسمية")
+    val viewAlbum = t("View album", "عرض الألبوم")
+    val viewPlaylist = t("View playlist", "عرض القائمة")
+    val previousSong = t("Previous", "السابق")
+    val nextSong = t("Next", "التالي")
+    val likeSong = t("Like", "إعجاب")
+    val moreOptions = t("More options", "المزيد")
+    val selectItems = t("Select", "تحديد")
+    val sortRecent = t("Recent", "الأحدث")
+    val sortTitle = t("Title", "العنوان")
+    val sortSize = t("Size", "الحجم")
+    val downloadedSize = { size: String -> t("Downloaded $size", "التنزيلات $size") }
+    val onboardingLanguage = t("Choose your language", "اختار اللغة")
+    val onboardingNavigation = t("Choose how you move around", "اختار شكل التنقل")
+    val onboardingRegion = t("Choose your country", "اختار بلدك")
+    val onboardingNext = t("Next", "التالي")
+    val onboardingBack = t("Back", "رجوع")
+    val onboardingStart = t("Start listening", "ابدأ الاستماع")
+    val statId = t("Id", "المعرّف")
+    val statItag = t("Itag", "الوسم")
+    val statBitrate = t("Bitrate", "معدل البت")
+    val statSize = t("Size", "الحجم")
+    val statCached = t("Cached", "مخزّن")
+    val statLoudness = t("Loudness", "علو الصوت")
+    val bassOff = t("Off", "إيقاف")
+    val bassLow = t("Low", "خفيف")
+    val bassMedium = t("Medium", "متوسط")
+    val bassHigh = t("High", "قوي")
+    val presetFlat = t("Flat", "مستوٍ")
+    val presetBass = t("Bass", "باس")
+    val presetVocal = t("Vocal", "صوت")
+    val presetTreble = t("Treble", "حاد")
+
+    fun equalizerPresetName(value: it.vfsfitvnm.vimusic.utils.EqualizerPreset) = when (value) {
+        it.vfsfitvnm.vimusic.utils.EqualizerPreset.Flat -> presetFlat
+        it.vfsfitvnm.vimusic.utils.EqualizerPreset.Bass -> presetBass
+        it.vfsfitvnm.vimusic.utils.EqualizerPreset.Vocal -> presetVocal
+        it.vfsfitvnm.vimusic.utils.EqualizerPreset.Treble -> presetTreble
+    }
+
+    fun bassLevelName(value: it.vfsfitvnm.vimusic.utils.BassLevel) = when (value) {
+        it.vfsfitvnm.vimusic.utils.BassLevel.Off -> bassOff
+        it.vfsfitvnm.vimusic.utils.BassLevel.Low -> bassLow
+        it.vfsfitvnm.vimusic.utils.BassLevel.Medium -> bassMedium
+        it.vfsfitvnm.vimusic.utils.BassLevel.High -> bassHigh
+    }
 
     fun audioQualityName(value: it.vfsfitvnm.vimusic.enums.AudioQuality) = when (value) {
         it.vfsfitvnm.vimusic.enums.AudioQuality.Auto -> audioQualityAuto

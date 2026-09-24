@@ -3,7 +3,8 @@ package it.vfsfitvnm.vimusic.utils
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 
-fun List<MediaItem>.smartShuffled(): List<MediaItem> {
+fun List<MediaItem>.smartShuffled(enabled: Boolean): List<MediaItem> {
+    if (!enabled) return shuffled()
     if (size <= 2) return shuffled()
 
     val remaining = toMutableList().apply { shuffle() }
@@ -26,7 +27,7 @@ fun List<MediaItem>.smartShuffled(): List<MediaItem> {
 
 fun Player.smartShuffleQueue() {
     val current = currentMediaItem ?: return
-    val rest = currentTimeline.mediaItems.filterNot { it.mediaId == current.mediaId }.smartShuffled()
+    val rest = currentTimeline.mediaItems.filterNot { it.mediaId == current.mediaId }.smartShuffled(enabled = true)
     if (currentMediaItemIndex > 0) removeMediaItems(0, currentMediaItemIndex)
     if (currentMediaItemIndex < mediaItemCount - 1) {
         removeMediaItems(currentMediaItemIndex + 1, mediaItemCount)

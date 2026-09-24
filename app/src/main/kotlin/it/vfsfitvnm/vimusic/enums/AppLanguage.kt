@@ -41,4 +41,8 @@ enum class AppLanguage {
             Turkish -> "Türkçe"
             Urdu -> "اردو"
         }
+
+    companion object {
+        val translated = listOf(Arabic, English)
+    }
 }

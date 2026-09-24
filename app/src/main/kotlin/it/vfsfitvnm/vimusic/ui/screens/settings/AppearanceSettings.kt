@@ -32,6 +32,7 @@ import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.appFontKey
 import it.vfsfitvnm.vimusic.utils.appLanguageKey
+import it.vfsfitvnm.vimusic.utils.displayed
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
 import it.vfsfitvnm.vimusic.utils.contentRegionKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
@@ -93,9 +94,11 @@ fun AppearanceSettings() {
 
         SettingsEntryGroupText(title = strings.languageGroup)
 
-        EnumValueSelectorSettingsEntry(
+        val shownLanguage = appLanguage.displayed()
+        ValueSelectorSettingsEntry(
             title = strings.languageTitle,
-            selectedValue = appLanguage,
+            selectedValue = shownLanguage,
+            values = AppLanguage.translated,
             onValueSelected = { appLanguage = it },
             valueText = { it.nativeName }
         )

@@ -22,6 +22,7 @@ import androidx.compose.ui.unit.dp
 import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.bodies.SearchBody
+import it.vfsfitvnm.innertube.requests.officialChartSongs
 import it.vfsfitvnm.innertube.requests.searchPage
 import it.vfsfitvnm.innertube.utils.from
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
@@ -33,6 +34,7 @@ import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.UiStrings
 import it.vfsfitvnm.vimusic.utils.Region
 import it.vfsfitvnm.vimusic.utils.asMediaItem
+import it.vfsfitvnm.vimusic.utils.chartsOrSearch
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.semiBold
@@ -70,17 +72,17 @@ fun regionalSections(region: String?, strings: UiStrings, locale: Locale): List<
 
     return when {
         code == "EG" -> listOf(
-            RegionalSection("eg_trending", strings.trendingIn(countryName), "ترند مصر اغاني $year"),
+            RegionalSection("eg_trending", strings.officialCharts, "ترند مصر اغاني $year"),
             RegionalSection("eg_top", strings.mostPopularIn(countryName), "اغاني مصرية الاكثر استماعا $year")
         ) + arabicSections
 
         Region.isArab(code) -> listOf(
-            RegionalSection("${code}_trending", strings.trendingIn(countryName), "ترند $arabicName اغاني $year"),
+            RegionalSection("${code}_trending", strings.officialCharts, "ترند $arabicName اغاني $year"),
             RegionalSection("${code}_top", strings.mostPopularIn(countryName), "اغاني $arabicName الاكثر استماعا $year")
         ) + arabicSections
 
         else -> listOf(
-            RegionalSection("${code}_trending", strings.trendingIn(countryName), "trending songs $englishName $year"),
+            RegionalSection("${code}_trending", strings.officialCharts, "trending songs $englishName $year"),
             RegionalSection("${code}_top", strings.mostPopularIn(countryName), "top hits $englishName $year"),
             RegionalSection("${code}_new", strings.newReleases, "new songs $year $englishName")
         )
@@ -109,13 +111,19 @@ fun RegionalSongsSection(
         if (songs != null) return@LaunchedEffect
         songs = withTimeoutOrNull(20_000) {
             withContext(Dispatchers.IO) {
-                Innertube.searchPage(
+                val search = Innertube.searchPage(
                     body = SearchBody(
                         query = section.query,
                         params = Innertube.SearchFilter.Song.value
                     ),
                     fromMusicShelfRendererContent = Innertube.SongItem.Companion::from
                 )?.getOrNull()?.items
+                val charts = if (section.id.endsWith("trending")) {
+                    runCatching { Innertube.officialChartSongs() }.getOrNull()
+                } else {
+                    null
+                }
+                chartsOrSearch(charts, search)
             }
         }?.distinctBy { it.key }?.take(15)
     }

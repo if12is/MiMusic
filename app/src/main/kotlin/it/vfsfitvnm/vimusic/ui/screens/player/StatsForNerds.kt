@@ -36,6 +36,7 @@ import it.vfsfitvnm.vimusic.models.Format
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.onOverlay
 import it.vfsfitvnm.vimusic.ui.styling.overlay
+import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.color
 import it.vfsfitvnm.vimusic.utils.medium
 import kotlin.math.roundToInt
@@ -53,6 +54,7 @@ fun StatsForNerds(
     modifier: Modifier = Modifier
 ) {
     val (colorPalette, typography) = LocalAppearance.current
+    val strings = LocalStrings.current
     val context = LocalContext.current
     val binder = LocalPlayerServiceBinder.current ?: return
 
@@ -140,27 +142,27 @@ fun StatsForNerds(
             ) {
                 Column(horizontalAlignment = Alignment.End) {
                     BasicText(
-                        text = "Id",
+                        text = strings.statId,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = "Itag",
+                        text = strings.statItag,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = "Bitrate",
+                        text = strings.statBitrate,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = "Size",
+                        text = strings.statSize,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = "Cached",
+                        text = strings.statCached,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = "Loudness",
+                        text = strings.statLoudness,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                 }
@@ -172,18 +174,18 @@ fun StatsForNerds(
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = format?.itag?.toString() ?: "Unknown",
+                        text = format?.itag?.toString() ?: strings.unknown,
                         maxLines = 1,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = format?.bitrate?.let { "${it / 1000} kbps" } ?: "Unknown",
+                        text = format?.bitrate?.let { "${it / 1000} kbps" } ?: strings.unknown,
                         maxLines = 1,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
                         text = format?.contentLength
-                            ?.let { Formatter.formatShortFileSize(context, it) } ?: "Unknown",
+                            ?.let { Formatter.formatShortFileSize(context, it) } ?: strings.unknown,
                         maxLines = 1,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
@@ -199,7 +201,7 @@ fun StatsForNerds(
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )
                     BasicText(
-                        text = format?.loudnessDb?.let { "%.2f dB".format(it) } ?: "Unknown",
+                        text = format?.loudnessDb?.let { "%.2f dB".format(it) } ?: strings.unknown,
                         maxLines = 1,
                         style = typography.xs.medium.color(colorPalette.onOverlay)
                     )

@@ -35,6 +35,8 @@ import it.vfsfitvnm.vimusic.ui.items.SongItem
 import it.vfsfitvnm.vimusic.ui.items.SongItemPlaceholder
 import it.vfsfitvnm.vimusic.ui.items.VideoItem
 import it.vfsfitvnm.vimusic.ui.items.VideoItemPlaceholder
+import it.vfsfitvnm.vimusic.ui.screens.search.UnifiedSearchMode
+import it.vfsfitvnm.vimusic.ui.screens.search.UnifiedSearchResults
 import it.vfsfitvnm.vimusic.ui.screens.albumRoute
 import it.vfsfitvnm.vimusic.ui.screens.artistRoute
 import it.vfsfitvnm.vimusic.ui.screens.globalRoutes
@@ -85,17 +87,35 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                 tabIndex = tabIndex,
                 onTabChanged = onTabIndexChanges,
                 tabColumnContent = { Item ->
-                    Item(0, strings.songs, R.drawable.musical_notes)
-                    Item(1, strings.albums, R.drawable.disc)
-                    Item(2, strings.artists, R.drawable.person)
-                    Item(3, strings.videos, R.drawable.film)
-                    Item(4, strings.playlists, R.drawable.playlist)
-                    Item(5, strings.featured, R.drawable.playlist)
+                    Item(0, strings.everything, R.drawable.search)
+                    Item(1, strings.songs, R.drawable.musical_notes)
+                    Item(2, strings.videos, R.drawable.film)
+                    Item(3, strings.artists, R.drawable.person)
+                    Item(4, strings.podcasts, R.drawable.radio)
+                    Item(5, strings.quran, R.drawable.text)
                 }
             ) { tabIndex ->
                 saveableStateHolder.SaveableStateProvider(tabIndex) {
                     when (tabIndex) {
-                        0 -> {
+                        0 -> UnifiedSearchResults(
+                            query = query,
+                            mode = UnifiedSearchMode.All,
+                            headerContent = headerContent
+                        )
+
+                        4 -> UnifiedSearchResults(
+                            query = query,
+                            mode = UnifiedSearchMode.Podcasts,
+                            headerContent = headerContent
+                        )
+
+                        5 -> UnifiedSearchResults(
+                            query = query,
+                            mode = UnifiedSearchMode.Quran,
+                            headerContent = headerContent
+                        )
+
+                        1 -> {
                             val binder = LocalPlayerServiceBinder.current
                             val menuState = LocalMenuState.current
                             val thumbnailSizeDp = Dimensions.thumbnails.song
@@ -147,44 +167,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             )
                         }
 
-                        1 -> {
-                            val thumbnailSizeDp = 108.dp
-                            val thumbnailSizePx = thumbnailSizeDp.px
-
-                            ItemsPage(
-                                tag = "searchResults/$query/albums",
-                                itemsPageProvider = { continuation ->
-                                    if (continuation == null) {
-                                        Innertube.searchPage(
-                                            body = SearchBody(query = query, params = Innertube.SearchFilter.Album.value),
-                                            fromMusicShelfRendererContent = Innertube.AlbumItem::from
-                                        )
-                                    } else {
-                                        Innertube.searchPage(
-                                            body = ContinuationBody(continuation = continuation),
-                                            fromMusicShelfRendererContent = Innertube.AlbumItem::from
-                                        )
-                                    }
-                                },
-                                emptyItemsText = emptyItemsText,
-                                headerContent = headerContent,
-                                itemContent = { album ->
-                                    AlbumItem(
-                                        album = album,
-                                        thumbnailSizePx = thumbnailSizePx,
-                                        thumbnailSizeDp = thumbnailSizeDp,
-                                        modifier = Modifier
-                                            .clickable(onClick = { albumRoute(album.key) })
-                                    )
-
-                                },
-                                itemPlaceholderContent = {
-                                    AlbumItemPlaceholder(thumbnailSizeDp = thumbnailSizeDp)
-                                }
-                            )
-                        }
-
-                        2 -> {
+                        3 -> {
                             val thumbnailSizeDp = 64.dp
                             val thumbnailSizePx = thumbnailSizeDp.px
 
@@ -220,7 +203,7 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             )
                         }
 
-                        3 -> {
+                        2 -> {
                             val binder = LocalPlayerServiceBinder.current
                             val menuState = LocalMenuState.current
                             val thumbnailHeightDp = 72.dp
@@ -275,47 +258,6 @@ fun SearchResultScreen(query: String, onSearchAgain: () -> Unit) {
                             )
                         }
 
-                        4, 5 -> {
-                            val thumbnailSizeDp = 108.dp
-                            val thumbnailSizePx = thumbnailSizeDp.px
-
-                            ItemsPage(
-                                tag = "searchResults/$query/${if (tabIndex == 4) "playlists" else "featured"}",
-                                itemsPageProvider = { continuation ->
-                                    if (continuation == null) {
-                                        val filter = if (tabIndex == 4) {
-                                            Innertube.SearchFilter.CommunityPlaylist
-                                        } else {
-                                            Innertube.SearchFilter.FeaturedPlaylist
-                                        }
-
-                                        Innertube.searchPage(
-                                            body = SearchBody(query = query, params = filter.value),
-                                            fromMusicShelfRendererContent = Innertube.PlaylistItem::from
-                                        )
-                                    } else {
-                                        Innertube.searchPage(
-                                            body = ContinuationBody(continuation = continuation),
-                                            fromMusicShelfRendererContent = Innertube.PlaylistItem::from
-                                        )
-                                    }
-                                },
-                                emptyItemsText = emptyItemsText,
-                                headerContent = headerContent,
-                                itemContent = { playlist ->
-                                    PlaylistItem(
-                                        playlist = playlist,
-                                        thumbnailSizePx = thumbnailSizePx,
-                                        thumbnailSizeDp = thumbnailSizeDp,
-                                        modifier = Modifier
-                                            .clickable(onClick = { playlistRoute(playlist.key) })
-                                    )
-                                },
-                                itemPlaceholderContent = {
-                                    PlaylistItemPlaceholder(thumbnailSizeDp = thumbnailSizeDp)
-                                }
-                            )
-                        }
                     }
                 }
             }

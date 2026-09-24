@@ -53,6 +53,8 @@ import it.vfsfitvnm.vimusic.utils.enqueue
 import it.vfsfitvnm.vimusic.utils.forcePlayAtIndex
 import it.vfsfitvnm.vimusic.utils.forcePlayFromBeginning
 import it.vfsfitvnm.vimusic.utils.queryDeviceTracks
+import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.smartShuffled
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.flow
@@ -67,6 +69,7 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val strings = LocalStrings.current
+    val smartShuffle by rememberPreference(smartShuffleKey, true)
     val context = LocalContext.current
     val permission = if (Build.VERSION.SDK_INT >= 33) {
         Manifest.permission.READ_MEDIA_AUDIO
@@ -226,7 +229,7 @@ fun BuiltInPlaylistSongs(builtInPlaylist: BuiltInPlaylist) {
                     binder?.player?.forcePlayFromBeginning(
                         songs.map { song ->
                             if (song.id.startsWith("local:")) song.asLocalMediaItem() else song.asMediaItem
-                        }.smartShuffled()
+                        }.smartShuffled(smartShuffle)
                     )
                 }
             }

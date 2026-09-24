@@ -80,6 +80,7 @@ import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.shouldBePlaying
 import it.vfsfitvnm.vimusic.utils.shuffleQueue
+import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.smoothScrollToTop
 import it.vfsfitvnm.vimusic.utils.windows
 import kotlinx.coroutines.launch
@@ -131,6 +132,7 @@ fun Queue(
         val player = binder.player
 
         var queueLoopEnabled by rememberPreference(queueLoopEnabledKey, defaultValue = true)
+        val smartShuffle by rememberPreference(smartShuffleKey, true)
 
         val menuState = LocalMenuState.current
 
@@ -316,7 +318,7 @@ fun Queue(
                         reorderingState.coroutineScope.launch {
                             reorderingState.lazyListState.smoothScrollToTop()
                         }.invokeOnCompletion {
-                            player.shuffleQueue()
+                            player.shuffleQueue(smartShuffle)
                         }
                     }
                 )

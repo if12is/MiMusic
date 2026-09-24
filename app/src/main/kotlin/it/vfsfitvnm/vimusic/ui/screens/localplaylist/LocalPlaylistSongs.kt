@@ -69,6 +69,8 @@ import it.vfsfitvnm.vimusic.utils.parsePlaylistFile
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.readTextFromUri
 import it.vfsfitvnm.vimusic.utils.resolveImportedTracks
+import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.smartShuffled
 import it.vfsfitvnm.vimusic.utils.songsToCsv
 import it.vfsfitvnm.vimusic.utils.songsToM3u
@@ -91,6 +93,7 @@ fun LocalPlaylistSongs(
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val strings = it.vfsfitvnm.vimusic.utils.LocalStrings.current
+    val smartShuffle by rememberPreference(smartShuffleKey, true)
     val context = LocalContext.current
     val coroutineScope = rememberCoroutineScope()
 
@@ -424,7 +427,7 @@ fun LocalPlaylistSongs(
                     if (songs.isNotEmpty()) {
                         binder?.stopRadio()
                         binder?.player?.forcePlayFromBeginning(
-                            songs.map(Song::asMediaItem).smartShuffled()
+                            songs.map(Song::asMediaItem).smartShuffled(smartShuffle)
                         )
                     }
                 }

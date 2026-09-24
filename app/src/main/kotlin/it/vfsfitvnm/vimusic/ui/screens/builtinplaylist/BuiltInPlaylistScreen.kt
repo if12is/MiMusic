@@ -57,6 +57,10 @@ fun BuiltInPlaylistScreen(builtInPlaylist: BuiltInPlaylist) {
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(key = currentTabIndex) {
+                    if (currentTabIndex == 1) {
+                        DownloadsLibrary()
+                        return@SaveableStateProvider
+                    }
                     BuiltInPlaylistSongs(
                         builtInPlaylist = when (currentTabIndex) {
                             1 -> BuiltInPlaylist.Offline

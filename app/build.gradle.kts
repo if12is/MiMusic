@@ -27,8 +27,8 @@ android {
         applicationId = "app.mimusic.player"
         minSdk = 21
         targetSdk = 35
-        versionCode = 36
-        versionName = "0.7.4"
+        versionCode = 37
+        versionName = "0.7.5"
     }
 
     signingConfigs {

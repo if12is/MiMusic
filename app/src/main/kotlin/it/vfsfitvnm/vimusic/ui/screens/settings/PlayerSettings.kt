@@ -41,6 +41,11 @@ import it.vfsfitvnm.vimusic.utils.offlineModeKey
 import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.keepScreenOnKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
+import it.vfsfitvnm.vimusic.utils.BassLevel
+import it.vfsfitvnm.vimusic.utils.EqualizerPreset
+import it.vfsfitvnm.vimusic.utils.bassBoostKey
+import it.vfsfitvnm.vimusic.utils.equalizerEnabledKey
+import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
 import it.vfsfitvnm.vimusic.utils.wifiOnlyDownloadKey
 
 @ExperimentalAnimationApi
@@ -226,6 +231,32 @@ fun PlayerSettings() {
                     context.toast(strings.equalizerMissing)
                 }
             }
+        )
+
+        var equalizerEnabled by rememberPreference(equalizerEnabledKey, false)
+        var equalizerPreset by rememberPreference(equalizerPresetKey, EqualizerPreset.Flat)
+        var bassBoost by rememberPreference(bassBoostKey, BassLevel.Off)
+
+        SwitchSettingEntry(
+            title = strings.inAppEqualizer,
+            text = strings.inAppEqualizerDescription,
+            isChecked = equalizerEnabled,
+            onCheckedChange = { equalizerEnabled = it }
+        )
+
+        EnumValueSelectorSettingsEntry(
+            title = strings.eqPreset,
+            selectedValue = equalizerPreset,
+            isEnabled = equalizerEnabled,
+            onValueSelected = { equalizerPreset = it },
+            valueText = strings::equalizerPresetName
+        )
+
+        EnumValueSelectorSettingsEntry(
+            title = strings.bassBoost,
+            selectedValue = bassBoost,
+            onValueSelected = { bassBoost = it },
+            valueText = strings::bassLevelName
         )
     }
 }

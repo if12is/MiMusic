@@ -85,12 +85,11 @@ fun SearchScreen(
                 onTabChanged = onTabChanged,
                 tabColumnContent = { Item ->
                     Item(0, strings.online, R.drawable.globe)
-                    Item(1, strings.sources, R.drawable.link)
-                    Item(2, strings.library, R.drawable.library)
+                    Item(1, strings.library, R.drawable.library)
                 }
             ) { currentTabIndex ->
                 saveableStateHolder.SaveableStateProvider(currentTabIndex) {
-                    when (currentTabIndex) {
+                    when (currentTabIndex.coerceAtMost(1)) {
                         0 -> OnlineSearch(
                             textFieldValue = textFieldValue,
                             onTextFieldValueChanged = onTextFieldValueChanged,
@@ -99,13 +98,7 @@ fun SearchScreen(
                             decorationBox = decorationBox
                         )
 
-                        1 -> ExtraSourceSearch(
-                            textFieldValue = textFieldValue,
-                            onTextFieldValueChanged = onTextFieldValueChanged,
-                            decorationBox = decorationBox
-                        )
-
-                        2 -> LocalSongSearch(
+                        else -> LocalSongSearch(
                             textFieldValue = textFieldValue,
                             onTextFieldValueChanged = onTextFieldValueChanged,
                             decorationBox = decorationBox

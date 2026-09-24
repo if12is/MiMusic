@@ -127,7 +127,7 @@ fun ArtistOverview(
                                 .padding(endPaddingValues)
                         ) {
                             BasicText(
-                                text = "Songs",
+                                text = strings.songs,
                                 style = typography.m.semiBold,
                                 modifier = sectionTextModifier
                             )
@@ -180,7 +180,7 @@ fun ArtistOverview(
                                 .padding(endPaddingValues)
                         ) {
                             BasicText(
-                                text = "Albums",
+                                text = strings.albums,
                                 style = typography.m.semiBold,
                                 modifier = sectionTextModifier
                             )
@@ -225,7 +225,7 @@ fun ArtistOverview(
                                 .padding(endPaddingValues)
                         ) {
                             BasicText(
-                                text = "Singles",
+                                text = strings.singles,
                                 style = typography.m.semiBold,
                                 modifier = sectionTextModifier
                             )
@@ -301,7 +301,7 @@ fun ArtistOverview(
 
                         if (attributionsIndex != -1) {
                             BasicText(
-                                text = "From Wikipedia under Creative Commons Attribution CC-BY-SA 3.0",
+                                text = strings.wikipediaAttribution,
                                 style = typography.xxs.color(colorPalette.textDisabled).align(TextAlign.End),
                                 modifier = Modifier
                                     .padding(horizontal = 16.dp)

@@ -53,6 +53,8 @@ import it.vfsfitvnm.vimusic.utils.khatmaMediaIdKey
 import it.vfsfitvnm.vimusic.utils.khatmaPositionKey
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.semiBold
+import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.smartShuffled
 
 @ExperimentalFoundationApi
@@ -65,6 +67,7 @@ fun HomeQuran(
     val binder = LocalPlayerServiceBinder.current
     val menuState = LocalMenuState.current
     val strings = LocalStrings.current
+    val smartShuffle by rememberPreference(smartShuffleKey, true)
     val context = LocalContext.current
 
     var songs by persistList<Song>("home/quran/songs")
@@ -189,7 +192,7 @@ fun HomeQuran(
                     onClick = {
                 if (songs.isNotEmpty()) {
                     binder?.stopRadio()
-                    binder?.player?.forcePlayAtIndex(songs.map(Song::asMediaItem).smartShuffled(), 0)
+                    binder?.player?.forcePlayAtIndex(songs.map(Song::asMediaItem).smartShuffled(smartShuffle), 0)
                 } else {
                     onSearchClick("تلاوة قرآن")
                 }

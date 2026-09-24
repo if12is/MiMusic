@@ -84,7 +84,6 @@ import it.vfsfitvnm.vimusic.service.PlayerService
 import it.vfsfitvnm.vimusic.ui.components.BottomSheetMenu
 import it.vfsfitvnm.vimusic.ui.components.LocalMenuState
 import it.vfsfitvnm.vimusic.ui.components.rememberBottomSheetState
-import it.vfsfitvnm.vimusic.ui.components.themed.ConfirmationDialog
 import it.vfsfitvnm.vimusic.ui.components.themed.GlassNavigationHost
 import it.vfsfitvnm.vimusic.ui.components.themed.LocalGlassNavigationHost
 import it.vfsfitvnm.vimusic.ui.components.themed.NavigationBar
@@ -113,6 +112,7 @@ import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
 import it.vfsfitvnm.vimusic.utils.forcePlay
+import it.vfsfitvnm.vimusic.utils.displayed
 import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.GitHubUpdater
 import it.vfsfitvnm.vimusic.utils.hideFromRecentsKey
@@ -203,7 +203,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     val thumbnailRoundness =
                         getEnum(thumbnailRoundnessKey, ThumbnailRoundness.Light)
 
-                    val appLanguage = getEnum(appLanguageKey, AppLanguage.Arabic)
+                    val appLanguage = getEnum(appLanguageKey, AppLanguage.Arabic).displayed()
                     applyInnertubeLocale(appLanguage)
                     val appFont = selectedAppFont()
                     val applyFontPadding = getBoolean(applyFontPaddingKey, false)
@@ -313,7 +313,7 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                                 val appLanguage = sharedPreferences.getEnum(
                                     appLanguageKey,
                                     AppLanguage.Arabic
-                                )
+                                ).displayed()
                                 applyInnertubeLocale(appLanguage)
                                 recreate()
                             }
@@ -437,11 +437,12 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                 }
 
                 val appLanguage = remember {
-                    preferences.getEnum(appLanguageKey, AppLanguage.Arabic)
+                    preferences.getEnum(appLanguageKey, AppLanguage.Arabic).displayed()
                 }
                 val keepScreenOn by rememberPreference(keepScreenOnKey, false)
-                DisposableEffect(keepScreenOn) {
-                    if (keepScreenOn) {
+                val lowPower by rememberPreference(it.vfsfitvnm.vimusic.utils.lowPowerModeKey, false)
+                DisposableEffect(keepScreenOn, lowPower) {
+                    if (keepScreenOn && !lowPower) {
                         window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
                     } else {
                         window.clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -542,12 +543,8 @@ class MainActivity : ComponentActivity(), PersistMapOwner {
                     }
 
                     if (!onboardingDone) {
-                        ConfirmationDialog(
-                            text = "${LocalStrings.current.onboardingTitle}\n\n${LocalStrings.current.onboardingBody}",
-                            confirmText = LocalStrings.current.gotIt,
-                            cancelText = LocalStrings.current.gotIt,
-                            onConfirm = { onboardingDone = true },
-                            onDismiss = { onboardingDone = true }
+                        it.vfsfitvnm.vimusic.ui.components.themed.OnboardingDialog(
+                            onFinished = { onboardingDone = true }
                         )
                     }
                 }
