@@ -302,12 +302,23 @@ fun Player(
             content = {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
-                    horizontalArrangement = Arrangement.End,
+                    horizontalArrangement = Arrangement.SpaceEvenly,
                     modifier = Modifier
-                        .align(Alignment.BottomEnd)
-                        .padding(horizontal = 8.dp)
-                        .fillMaxHeight()
+                        .fillMaxSize()
+                        .padding(horizontal = 12.dp)
                 ) {
+                    Box(
+                        contentAlignment = Alignment.Center,
+                        modifier = Modifier.size(44.dp)
+                    ) {
+                        Image(
+                            painter = painterResource(R.drawable.playlist),
+                            contentDescription = strings.queue,
+                            colorFilter = ColorFilter.tint(colorPalette.text),
+                            modifier = Modifier.size(22.dp)
+                        )
+                    }
+
                     StripIcon(
                         icon = R.drawable.ellipsis_horizontal,
                         description = strings.moreOptions,
@@ -358,11 +369,6 @@ fun Player(
                         description = strings.playerLock,
                         tint = if (playerLocked) colorPalette.accent else colorPalette.text,
                         onClick = { playerLocked = !playerLocked }
-                    )
-
-                    Spacer(
-                        modifier = Modifier
-                            .width(4.dp)
                     )
                 }
             },
@@ -495,8 +501,7 @@ private fun StripIcon(
     Box(
         contentAlignment = Alignment.Center,
         modifier = Modifier
-            .padding(horizontal = 2.dp)
-            .size(40.dp)
+            .size(44.dp)
             .clip(CircleShape)
             .clickable(role = Role.Button, onClick = onClick)
     ) {

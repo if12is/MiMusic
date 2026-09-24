@@ -35,6 +35,7 @@ import androidx.media3.common.C
 import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
+import androidx.media3.common.VideoSize
 import coil.compose.AsyncImage
 import it.vfsfitvnm.vimusic.ui.components.themed.Artwork
 import it.vfsfitvnm.vimusic.Database
@@ -85,10 +86,15 @@ fun Thumbnail(
         mutableStateOf<PlaybackException?>(player.playerError)
     }
 
+    var videoWidth by remember {
+        mutableStateOf(player.videoSize.width)
+    }
+
     player.DisposableListener {
         object : Player.Listener {
             override fun onMediaItemTransition(mediaItem: MediaItem?, reason: Int) {
                 nullableWindow = player.currentWindow
+                videoWidth = player.videoSize.width
             }
 
             override fun onPlaybackStateChanged(playbackState: Int) {
@@ -97,6 +103,10 @@ fun Thumbnail(
 
             override fun onPlayerError(playbackException: PlaybackException) {
                 error = playbackException
+            }
+
+            override fun onVideoSizeChanged(videoSize: VideoSize) {
+                videoWidth = videoSize.width
             }
         }
     }
@@ -134,31 +144,38 @@ fun Thumbnail(
         },
         contentAlignment = Alignment.Center
     ) {currentWindow ->
+        val showVideo = binder.isPlayingVideo(currentWindow.mediaItem.mediaId)
+        val videoFrame = showVideo && videoWidth > 0
         Box(
-            modifier = modifier
-                .aspectRatio(1f)
-                .clip(LocalAppearance.current.thumbnailShape)
-                .size(thumbnailSizeDp)
-        ) {
-            Artwork(
-                data = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
-                    thumbnailSizePx,
-                    currentWindow.mediaItem.mediaId
-                ),
-                sizePx = thumbnailSizePx,
-                modifier = Modifier.fillMaxSize()
+            modifier = modifier.then(
+                if (showVideo) {
+                    Modifier.fillMaxWidth().aspectRatio(16f / 9f)
+                } else {
+                    Modifier.aspectRatio(1f).size(thumbnailSizeDp)
+                }
             )
+        ) {
+            if (!videoFrame) {
+                Artwork(
+                    data = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
+                        thumbnailSizePx,
+                        currentWindow.mediaItem.mediaId
+                    ),
+                    sizePx = thumbnailSizePx,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(LocalAppearance.current.thumbnailShape)
+                )
+            }
 
-            val showVideo = binder.isPlayingVideo(currentWindow.mediaItem.mediaId)
             if (showVideo) {
                 AndroidView(
                     factory = { context ->
-                        TextureView(context)
+                        TextureView(context).apply { isOpaque = false }
                     },
                     update = { view ->
                         player.setVideoTextureView(view)
-                        player.videoScalingMode =
-                            C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING
+                        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT
                     },
                     onRelease = { view ->
                         player.clearVideoTextureView(view)
@@ -201,7 +218,7 @@ fun Thumbnail(
                     .fillMaxSize()
             )
 
-            if (showVideo && videoLyrics && !isShowingLyrics && error == null) {
+            if (videoFrame && videoLyrics && !isShowingLyrics && error == null) {
                 VideoLyricsCaption(
                     mediaId = currentWindow.mediaItem.mediaId,
                     mediaMetadata = currentWindow.mediaItem.mediaMetadata,

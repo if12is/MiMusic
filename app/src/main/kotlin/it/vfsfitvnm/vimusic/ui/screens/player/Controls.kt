@@ -65,7 +65,6 @@ import it.vfsfitvnm.vimusic.utils.smartShuffleKey
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import it.vfsfitvnm.vimusic.utils.carModeKey
-import it.vfsfitvnm.vimusic.utils.playbackPitchKey
 import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.videoModeKey
@@ -90,15 +89,10 @@ fun Controls(
     binder?.player ?: return
     var trackLoopEnabled by rememberPreference(trackLoopEnabledKey, defaultValue = false)
     var playbackSpeed by rememberPreference(playbackSpeedKey, 1f)
-    var playbackPitch by rememberPreference(playbackPitchKey, 1f)
     val carMode by rememberPreference(carModeKey, false)
     val smartShuffle by rememberPreference(smartShuffleKey, true)
     val strings = LocalStrings.current
     val speedOptions = listOf(0.75f, 1f, 1.25f, 1.5f)
-    val pitchOptions = listOf(0.8f, 0.9f, 1f, 1.1f, 1.2f)
-    var loopA by remember(mediaId) { mutableStateOf<Long?>(null) }
-    var loopB by remember(mediaId) { mutableStateOf<Long?>(null) }
-    var showMoreTools by rememberSaveable { mutableStateOf(false) }
     val videoMode by rememberPreference(videoModeKey, false)
     val hasVideo = binder.hasVideo(mediaId) || binder.isPlayingVideo(mediaId)
 
@@ -385,70 +379,6 @@ fun Controls(
                 onClick = onShowSleepTimer,
                 modifier = Modifier.weight(1f)
             )
-
-            PlayerToolButton(
-                label = strings.moreTools,
-                icon = if (showMoreTools) R.drawable.chevron_up else R.drawable.ellipsis_horizontal,
-                active = showMoreTools || playbackPitch != 1f || loopA != null || loopB != null,
-                onClick = { showMoreTools = !showMoreTools },
-                modifier = Modifier.weight(1f)
-            )
-        }
-
-        // 5. Advanced tools stay out of the way until asked for.
-        AnimatedVisibility(
-            visible = showMoreTools,
-            enter = fadeIn() + expandVertically(),
-            exit = fadeOut() + shrinkVertically()
-        ) {
-            Row(
-                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
-                verticalAlignment = Alignment.CenterVertically,
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 12.dp)
-            ) {
-                PlayerChip(
-                    text = "${strings.pitch} ${playbackPitch}",
-                    active = playbackPitch != 1f,
-                    onClick = {
-                        val index = pitchOptions.indexOfFirst { it == playbackPitch }
-                        playbackPitch = pitchOptions[(index + 1).mod(pitchOptions.size)]
-                        binder.setPlaybackPitch(playbackPitch)
-                    }
-                )
-                PlayerChip(
-                    text = loopA?.let { "A ${formatAsDuration(it)}" } ?: strings.markA,
-                    active = loopA != null,
-                    onClick = {
-                        loopA = binder.player.currentPosition
-                        loopB?.let { end ->
-                            loopA?.let { start -> binder.setAbLoop(start, end) }
-                        }
-                    }
-                )
-                PlayerChip(
-                    text = loopB?.let { "B ${formatAsDuration(it)}" } ?: strings.markB,
-                    active = loopB != null,
-                    onClick = {
-                        loopB = binder.player.currentPosition
-                        loopA?.let { start ->
-                            loopB?.let { end -> binder.setAbLoop(start, end) }
-                        }
-                    }
-                )
-                if (loopA != null || loopB != null) {
-                    PlayerChip(
-                        text = strings.clearLoop,
-                        active = false,
-                        onClick = {
-                            loopA = null
-                            loopB = null
-                            binder.clearAbLoop()
-                        }
-                    )
-                }
-            }
         }
 
         Spacer(
@@ -544,30 +474,6 @@ private fun PlayerToolButton(
                 .padding(top = 4.dp)
         )
     }
-}
-
-@Composable
-private fun PlayerChip(
-    text: String,
-    active: Boolean,
-    onClick: () -> Unit
-) {
-    val (colorPalette, typography) = LocalAppearance.current
-
-    BasicText(
-        text = text,
-        maxLines = 1,
-        style = typography.xxs.semiBold.copy(
-            color = if (active) colorPalette.accent else colorPalette.text
-        ),
-        modifier = Modifier
-            .clip(RoundedCornerShape(50))
-            .background(
-                if (active) colorPalette.accent.copy(alpha = 0.16f) else colorPalette.background2
-            )
-            .clickable(role = Role.Button, onClick = onClick)
-            .padding(horizontal = 12.dp, vertical = 8.dp)
-    )
 }
 
 @Composable

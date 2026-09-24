@@ -74,6 +74,7 @@ import androidx.media3.exoplayer.audio.SonicAudioProcessor
 import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
+import androidx.media3.exoplayer.source.ProgressiveMediaSource
 import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
 import androidx.media3.exoplayer.video.VideoRendererEventListener
 import androidx.media3.extractor.DefaultExtractorsFactory
@@ -82,6 +83,7 @@ import androidx.media3.extractor.mp4.Mp4Extractor
 import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
+import it.vfsfitvnm.innertube.requests.hasRealMusicVideo
 import it.vfsfitvnm.innertube.requests.player
 import it.vfsfitvnm.innertube.utils.ExtraMediaIds
 import it.vfsfitvnm.innertube.utils.soundCloudStreamUrl
@@ -1120,17 +1122,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
     /** True when the source is a real music video, not a song with static artwork. */
     private fun it.vfsfitvnm.innertube.models.PlayerResponse.hasMusicVideo(): Boolean =
-        streamingData?.muxedFallbackFormat != null &&
-            videoDetails?.musicVideoType != "MUSIC_VIDEO_TYPE_ATV"
-
-    private fun isProgressiveMuxed(
-        format: it.vfsfitvnm.innertube.models.PlayerResponse.StreamingData.AdaptiveFormat
-    ): Boolean {
-        return !format.isAudioOnly ||
-            format.itag == 18 ||
-            format.itag == 22 ||
-            format.mimeType.contains("video", ignoreCase = true)
-    }
+        hasRealMusicVideo()
 
     @Suppress("TooGenericExceptionCaught")
     private fun createDataSourceFactory(): DataSource.Factory {
@@ -1183,7 +1175,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             val audioCached = isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
                 isRangeCached(cache, videoId, dataSpec.position, requestedLength)
             val hasPartialCache = audioCached && (!wantsVideo || offlineOrNoNetwork)
-            val resolveOnNetwork = wantsVideo && !fullyDownloaded && !offlineOrNoNetwork
+            // A downloaded audio file must not stand in for the music video while online.
+            val resolveOnNetwork = wantsVideo && !offlineOrNoNetwork
             if (!resolveOnNetwork) when (
                 it.vfsfitvnm.vimusic.AppGraph.choosePlayback(
                     fullyDownloaded = fullyDownloaded,
@@ -1228,8 +1221,24 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
+    private fun createVideoDataSource(): DataSource.Factory {
+        return CacheDataSource.Factory()
+            .setCache(cache)
+            .setUpstreamDataSourceFactory(createHttpDataSourceFactory())
+            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)
+    }
+
     private fun createMediaSourceFactory(): MediaSource.Factory {
-        return DefaultMediaSourceFactory(createDataSourceFactory(), createExtractorsFactory())
+        val extractors = createExtractorsFactory()
+        return VideoOrAudioMediaSourceFactory(
+            audio = DefaultMediaSourceFactory(createDataSourceFactory(), extractors),
+            direct = ProgressiveMediaSource.Factory(createVideoDataSource(), extractors),
+            videoEnabled = { preferences.getBoolean(videoModeKey, false) },
+            offline = { preferences.getBoolean(offlineModeKey, false) || !hasNetwork() },
+            downloaded = ::isFullyDownloaded,
+            resolve = { videoId -> streamResolver.resolveBlocking(videoId, true) },
+            onVideo = ::publishResolved
+        )
     }
 
     private fun createExtractorsFactory(): ExtractorsFactory {
@@ -1314,7 +1323,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             val item = player.currentMediaItem ?: return
             val mediaId = item.mediaId
             if (mediaId.startsWith("local:") || ExtraMediaIds.isExternal(mediaId)) return
-            if (isFullyDownloaded(mediaId)) return
 
             val position = player.currentPosition
             val playWhenReady = player.playWhenReady

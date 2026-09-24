@@ -5,6 +5,7 @@ import androidx.core.net.toUri
 import androidx.media3.common.PlaybackException
 import it.vfsfitvnm.innertube.models.PlayerResponse
 import it.vfsfitvnm.innertube.models.bodies.PlayerBody
+import it.vfsfitvnm.innertube.requests.hasRealMusicVideo
 import it.vfsfitvnm.vimusic.enums.AudioQuality
 import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.formatFor
@@ -26,9 +27,7 @@ data class ResolvedStream(
     val format: PlayerResponse.StreamingData.AdaptiveFormat
 )
 
-fun PlayerResponse.hasMusicVideo(): Boolean =
-    streamingData?.muxedFallbackFormat != null &&
-        videoDetails?.musicVideoType != "MUSIC_VIDEO_TYPE_ATV"
+fun PlayerResponse.hasMusicVideo(): Boolean = hasRealMusicVideo()
 
 @UnstableApi
 class StreamResolver(
@@ -93,15 +92,16 @@ class StreamResolver(
                 PlaybackException.ERROR_CODE_REMOTE_ERROR
             )
         }
-        val format = body.streamingData?.formatFor(
-            quality(),
-            preferMuxed = wantsVideo && body.hasMusicVideo()
-        ) ?: throw PlayableFormatNotFoundException()
+        val videoChoice = if (wantsVideo && body.hasMusicVideo()) {
+            body.streamingData?.chooseVideo()
+        } else {
+            null
+        }
+        val format = videoChoice?.video
+            ?: body.streamingData?.formatFor(quality(), preferMuxed = false)
+            ?: throw PlayableFormatNotFoundException()
         val streamUrl = format.url ?: throw PlayableFormatNotFoundException()
-        val progressive = !format.isAudioOnly ||
-            format.itag == 18 ||
-            format.itag == 22 ||
-            format.mimeType.contains("video", ignoreCase = true)
+        val progressive = videoChoice != null
         PlaybackLogStore.append("resolved $videoId itag=${format.itag} mime=${format.mimeType}")
         return ResolvedStream(
             key = streamKey,

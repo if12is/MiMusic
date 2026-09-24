@@ -44,15 +44,38 @@ data class PlayerResponse(
                     ?: audio.maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
             }
 
+        /**
+         * A single file that already contains the picture and the sound (itag 22, then 18).
+         * Video-only adaptive streams are not muxed; those are paired in [chooseVideo].
+         */
         val muxedFallbackFormat: AdaptiveFormat?
-            get() = (adaptiveFormats.orEmpty() + formats.orEmpty())
-                .filter { !it.url.isNullOrBlank() && !it.isAudioOnly }
-                .filter { format ->
-                    format.itag == 18 ||
-                        format.itag == 22 ||
-                        format.mimeType.contains("mp4", ignoreCase = true)
+            get() = chooseVideo()?.takeIf { it.audio == null }?.video
+
+        /**
+         * What to play when the user asked for the music video.
+         * Prefers a progressive file. Otherwise pairs a video-only stream with audio
+         * so the picture and the song both play.
+         */
+        fun chooseVideo(): VideoStreamChoice? {
+            val pictures = (formats.orEmpty() + adaptiveFormats.orEmpty())
+                .filter { !it.url.isNullOrBlank() && it.hasVideoPicture }
+            val progressive = listOf(22, 18, 37, 38)
+                .firstNotNullOfOrNull { tag -> pictures.find { it.itag == tag } }
+                ?: pictures.find { it.isProgressiveMuxed }
+            if (progressive != null) return VideoStreamChoice(video = progressive)
+
+            val separate = listOf(136, 135, 134, 137, 133, 160, 247, 244, 243, 242, 248)
+                .firstNotNullOfOrNull { tag ->
+                    pictures.find { it.itag == tag && !it.isProgressiveMuxed }
                 }
-                .minByOrNull { it.bitrate ?: Long.MAX_VALUE }
+                ?: pictures.filterNot { it.isProgressiveMuxed }
+                    .maxByOrNull { it.bitrate ?: 0L }
+            val audio = playableAudioFormats.maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
+            if (separate != null && !audio?.url.isNullOrBlank()) {
+                return VideoStreamChoice(video = separate, audio = audio)
+            }
+            return null
+        }
 
         val playableAudioFormats: List<AdaptiveFormat>
             get() = (adaptiveFormats.orEmpty() + formats.orEmpty())
@@ -83,8 +106,32 @@ data class PlayerResponse(
         ) {
             val isAudioOnly: Boolean
                 get() = mimeType.contains("audio", ignoreCase = true) || audioQuality != null
+
+            /** A moving picture, not an audio-only track. */
+            val hasVideoPicture: Boolean
+                get() = !isAudioOnly && (
+                    mimeType.contains("video", ignoreCase = true) ||
+                        itag == 18 || itag == 22 || itag == 37 || itag == 38
+                    )
+
+            /** Progressive file with both picture and sound, not a video-only adaptive track. */
+            val isProgressiveMuxed: Boolean
+                get() {
+                    if (isAudioOnly) return false
+                    if (itag == 18 || itag == 22 || itag == 37 || itag == 38) return true
+                    val mime = mimeType.lowercase()
+                    val codecsHaveAudio = mime.contains("mp4a") ||
+                        mime.contains("opus") ||
+                        mime.contains("vorbis")
+                    return mime.contains("video") && codecsHaveAudio
+                }
         }
     }
+
+    data class VideoStreamChoice(
+        val video: StreamingData.AdaptiveFormat,
+        val audio: StreamingData.AdaptiveFormat? = null
+    )
 
     @Serializable
     data class VideoDetails(

@@ -112,15 +112,6 @@ fun Queue(
                     .fillMaxSize()
                     .padding(horizontalBottomPaddingValues)
             ) {
-                Image(
-                    painter = painterResource(R.drawable.playlist),
-                    contentDescription = strings.queue,
-                    colorFilter = ColorFilter.tint(colorPalette.text),
-                    modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(22.dp)
-                )
-
                 content()
             }
         }

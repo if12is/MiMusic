@@ -31,10 +31,10 @@ private val playerClients: List<Context>
 private fun PlayerResponse.hasPlayableAudio(): Boolean =
     playabilityStatus?.status == "OK" && streamingData?.highestQualityFormat?.url != null
 
-/** A progressive music video, not a song whose picture never moves. */
+/** A real music video, not a song whose picture never moves. */
 fun PlayerResponse.hasRealMusicVideo(): Boolean =
-    streamingData?.muxedFallbackFormat?.url != null &&
-        videoDetails?.musicVideoType != "MUSIC_VIDEO_TYPE_ATV"
+    videoDetails?.musicVideoType != "MUSIC_VIDEO_TYPE_ATV" &&
+        streamingData?.chooseVideo() != null
 
 private suspend fun Innertube.requestPlayer(body: PlayerBody, context: Context): PlayerResponse {
     val requestContext = when {
