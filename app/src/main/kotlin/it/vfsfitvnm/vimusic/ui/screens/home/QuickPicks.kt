@@ -370,15 +370,44 @@ fun QuickPicks(
                 )
             }
 
+            // Moods follow the listener's region: Egyptian shaabi only makes sense in Egypt,
+            // and outside the Arab world the chips search in English for local music.
+            val moodRegion = (region ?: appLanguage.region).uppercase()
             val moods = orderedHomeMoods(
-                listOf(
-                    HomeMood(strings.moodCalm, "موسيقى هادئة"),
-                    HomeMood(strings.moodEnergetic, "أغاني حماسية"),
-                    HomeMood(strings.moodTarab, "طرب عربي"),
-                    HomeMood(strings.moodShaabi, "شعبي مصري"),
-                    HomeMood(strings.moodQuran, "تلاوة قرآن"),
-                    HomeMood(strings.moodFocus, "موسيقى للعمل")
-                ),
+                when {
+                    moodRegion == "EG" -> listOf(
+                        HomeMood(strings.moodCalm, "موسيقى هادئة"),
+                        HomeMood(strings.moodEnergetic, "أغاني حماسية"),
+                        HomeMood(strings.moodTarab, "طرب عربي"),
+                        HomeMood(strings.moodShaabi, "شعبي مصري"),
+                        HomeMood(strings.moodQuran, "تلاوة قرآن"),
+                        HomeMood(strings.moodFocus, "موسيقى للعمل")
+                    )
+
+                    Region.isArab(moodRegion) -> listOf(
+                        HomeMood(strings.moodCalm, "موسيقى هادئة"),
+                        HomeMood(strings.moodEnergetic, "أغاني حماسية"),
+                        HomeMood(strings.moodTarab, "طرب عربي"),
+                        HomeMood(
+                            strings.moodLocal,
+                            "أغاني ${Region.displayName(moodRegion, java.util.Locale("ar"))}"
+                        ),
+                        HomeMood(strings.moodQuran, "تلاوة قرآن"),
+                        HomeMood(strings.moodFocus, "موسيقى للعمل")
+                    )
+
+                    else -> {
+                        val country = Region.displayName(moodRegion, java.util.Locale.ENGLISH)
+                        listOf(
+                            HomeMood(strings.moodLocal, "top hits $country"),
+                            HomeMood(strings.moodCalm, "calm chill music"),
+                            HomeMood(strings.moodEnergetic, "workout hits"),
+                            HomeMood(strings.moodParty, "party hits $country"),
+                            HomeMood(strings.moodFocus, "focus music"),
+                            HomeMood(strings.moodQuran, "Quran recitation")
+                        )
+                    }
+                },
                 clock
             )
             val hour = clock.get(Calendar.HOUR_OF_DAY)

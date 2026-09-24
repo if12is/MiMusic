@@ -452,6 +452,8 @@ class UiStrings(private val language: AppLanguage) {
     val moodShaabi = t("Shaabi", "شعبي")
     val moodQuran = t("Quran", "قرآن")
     val moodFocus = t("Focus", "عمل")
+    val moodLocal = t("Local hits", "الأشهر محليًا")
+    val moodParty = t("Party", "حفلات")
     val librarySongsHint = t(
         "Songs you have played appear here",
         "الأغاني التي شغّلتها تظهر هنا"
