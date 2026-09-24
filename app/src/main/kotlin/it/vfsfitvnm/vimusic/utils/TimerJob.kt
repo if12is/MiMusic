@@ -1,5 +1,6 @@
 package it.vfsfitvnm.vimusic.utils
 
+import it.vfsfitvnm.vimusic.service.SleepTimerClock
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -18,7 +19,7 @@ fun CoroutineScope.timer(delayMillis: Long, onCompletion: () -> Unit): TimerJob 
     val job = launch {
         while (isActive && millisLeft.value != null) {
             delay(1000)
-            millisLeft.emit(millisLeft.value?.minus(1000)?.takeIf { it > 0 })
+            millisLeft.emit(SleepTimerClock.remainingAfterTick(millisLeft.value))
         }
     }
     val disposableHandle = job.invokeOnCompletion {

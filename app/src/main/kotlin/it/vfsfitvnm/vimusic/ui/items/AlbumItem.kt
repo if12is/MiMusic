@@ -14,6 +14,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import it.vfsfitvnm.vimusic.models.Album
+import it.vfsfitvnm.vimusic.ui.components.themed.Artwork
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.shimmer
@@ -80,14 +81,11 @@ fun AlbumItem(
         thumbnailSizeDp = thumbnailSizeDp,
         modifier = modifier
     ) {
-        AsyncImage(
-            model = thumbnailUrl?.thumbnail(thumbnailSizePx),
-            contentDescription = null,
-            contentScale = ContentScale.Crop,
-            modifier = Modifier
-                .clip(thumbnailShape)
-                .size(thumbnailSizeDp)
-        )
+            Artwork(
+                data = thumbnailUrl?.thumbnail(thumbnailSizePx),
+                sizePx = thumbnailSizePx,
+                modifier = Modifier.size(thumbnailSizeDp)
+            )
 
         ItemInfoContainer {
             BasicText(

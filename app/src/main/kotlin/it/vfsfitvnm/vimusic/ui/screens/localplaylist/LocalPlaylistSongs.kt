@@ -272,13 +272,11 @@ fun LocalPlaylistSongs(
                                             text = strings.sync,
                                             onClick = {
                                                 menuState.hide()
-                                                transaction {
-                                                    runBlocking(Dispatchers.IO) {
-                                                        withContext(Dispatchers.IO) {
-                                                            Innertube.playlistPage(BrowseBody(browseId = browseId))
-                                                                ?.completed()
-                                                        }
-                                                    }?.getOrNull()?.let { remotePlaylist ->
+                                                coroutineScope.launch(Dispatchers.IO) {
+                                                    val remotePlaylist = Innertube.playlistPage(BrowseBody(browseId = browseId))
+                                                        ?.completed()
+                                                        ?.getOrNull() ?: return@launch
+                                                    transaction {
                                                         Database.clearPlaylist(playlistId)
 
                                                         remotePlaylist.songsPage

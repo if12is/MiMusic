@@ -19,6 +19,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.MediaItem
 import coil.compose.AsyncImage
+import it.vfsfitvnm.vimusic.ui.components.themed.Artwork
 import it.vfsfitvnm.vimusic.ui.components.themed.DownloadBadge
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
@@ -112,13 +113,12 @@ fun SongItem(
         duration = duration,
         thumbnailSizeDp = thumbnailSizeDp,
         thumbnailContent = {
-            AsyncImage(
-                model = thumbnailUrl,
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .clip(LocalAppearance.current.thumbnailShape)
-                    .fillMaxSize()
+            Artwork(
+                data = thumbnailUrl,
+                sizePx = with(androidx.compose.ui.platform.LocalDensity.current) {
+                    thumbnailSizeDp.roundToPx()
+                },
+                modifier = Modifier.fillMaxSize()
             )
 
             onThumbnailContent?.invoke(this)

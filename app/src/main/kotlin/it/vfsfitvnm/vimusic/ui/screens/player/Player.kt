@@ -47,6 +47,7 @@ import androidx.lifecycle.viewmodel.compose.viewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import coil.compose.AsyncImage
+import it.vfsfitvnm.vimusic.ui.components.themed.Artwork
 import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.compose.routing.OnGlobalRoute
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
@@ -392,13 +393,10 @@ private fun CollapsedMiniPlayer(
             modifier = Modifier
                 .height(Dimensions.collapsedPlayer)
         ) {
-            AsyncImage(
-                model = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.song.px),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
-                modifier = Modifier
-                    .clip(thumbnailShape)
-                    .size(48.dp)
+            Artwork(
+                data = mediaItem.mediaMetadata.artworkUri.thumbnail(Dimensions.thumbnails.song.px),
+                sizePx = Dimensions.thumbnails.song.px,
+                modifier = Modifier.size(48.dp)
             )
         }
 

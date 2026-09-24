@@ -16,6 +16,7 @@ import androidx.compose.ui.unit.Dp
 import androidx.compose.ui.unit.dp
 import coil.compose.AsyncImage
 import it.vfsfitvnm.vimusic.models.Artist
+import it.vfsfitvnm.vimusic.ui.components.themed.Artwork
 import it.vfsfitvnm.vimusic.ui.components.themed.TextPlaceholder
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.shimmer
@@ -80,12 +81,11 @@ fun ArtistItem(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
     ) {
-        AsyncImage(
-            model = thumbnailUrl?.thumbnail(thumbnailSizePx),
-            contentDescription = null,
-            modifier = Modifier
-                .clip(CircleShape)
-                .requiredSize(thumbnailSizeDp)
+        Artwork(
+            data = thumbnailUrl?.thumbnail(thumbnailSizePx),
+            sizePx = thumbnailSizePx,
+            shape = CircleShape,
+            modifier = Modifier.requiredSize(thumbnailSizeDp)
         )
 
         ItemInfoContainer(

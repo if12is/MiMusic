@@ -36,6 +36,7 @@ import androidx.media3.common.MediaItem
 import androidx.media3.common.PlaybackException
 import androidx.media3.common.Player
 import coil.compose.AsyncImage
+import it.vfsfitvnm.vimusic.ui.components.themed.Artwork
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.service.LoginRequiredException
@@ -139,13 +140,12 @@ fun Thumbnail(
                 .clip(LocalAppearance.current.thumbnailShape)
                 .size(thumbnailSizeDp)
         ) {
-            AsyncImage(
-                model = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
+            Artwork(
+                data = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
                     thumbnailSizePx,
                     currentWindow.mediaItem.mediaId
                 ),
-                contentDescription = null,
-                contentScale = ContentScale.Crop,
+                sizePx = thumbnailSizePx,
                 modifier = Modifier.fillMaxSize()
             )
 

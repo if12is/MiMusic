@@ -51,10 +51,7 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
     override fun onServiceConnected(className: ComponentName, service: IBinder) {
         if (service is PlayerService.Binder) {
             bound = true
-            sessionToken = service.mediaSession.sessionToken
-            service.mediaSession.setCallback(
-                SessionCallback(service.player, service.cache, service.downloadCache)
-            )
+            sessionToken = service.frameworkSessionToken
         }
     }
 
@@ -80,9 +77,14 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
     }
 
     override fun onLoadChildren(parentId: String, result: Result<MutableList<BrowserMediaItem>>) {
-        runBlocking(Dispatchers.IO) {
-            result.sendResult(
-                when (parentId) {
+        result.detach()
+        coroutineScope.launch {
+            result.sendResult(childrenFor(parentId))
+        }
+    }
+
+    private suspend fun childrenFor(parentId: String): MutableList<BrowserMediaItem> {
+        return when (parentId) {
                     MediaId.root -> mutableListOf(
                         songsBrowserMediaItem,
                         playlistsBrowserMediaItem,
@@ -134,8 +136,6 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
                         .toMutableList()
 
                     else -> mutableListOf()
-                }
-            )
         }
     }
 
@@ -259,80 +259,6 @@ class PlayerMediaBrowserService : MediaBrowserService(), ServiceConnection {
                 .build(),
             BrowserMediaItem.FLAG_PLAYABLE
         )
-
-    private inner class SessionCallback(
-        private val player: Player,
-        private val cache: Cache,
-        private val downloadCache: Cache
-    ) : MediaSession.Callback() {
-        override fun onPlay() = player.play()
-        override fun onPause() = player.pause()
-        override fun onSkipToPrevious() = player.forceSeekToPrevious()
-        override fun onSkipToNext() = player.forceSeekToNext()
-        override fun onSeekTo(pos: Long) = player.seekTo(pos)
-        override fun onSkipToQueueItem(id: Long) = player.seekToDefaultPosition(id.toInt())
-
-        override fun onPlayFromMediaId(mediaId: String?, extras: Bundle?) {
-            val data = mediaId?.split('/') ?: return
-            var index = 0
-
-            coroutineScope.launch {
-                val mediaItems = when (data.getOrNull(0)) {
-                    MediaId.shuffle -> lastSongs
-
-                    MediaId.songs ->  data
-                        .getOrNull(1)
-                        ?.let { songId ->
-                            index = lastSongs.indexOfFirst { it.id == songId }
-                            lastSongs
-                        }
-
-                    MediaId.favorites -> Database
-                        .favorites()
-                        .first()
-                        .shuffled()
-
-                    MediaId.offline -> Database
-                        .downloadedSongs()
-                        .first()
-                        .filter { song ->
-                            song.contentLength?.let { length ->
-                                downloadCache.isCached(song.song.id, 0, length)
-                            } ?: false
-                        }
-                        .map(SongWithContentLength::song)
-                        .shuffled()
-
-                    MediaId.history -> Database
-                        .playbackHistory()
-                        .first()
-
-                    MediaId.quran -> Database
-                        .quranSongs()
-                        .first()
-
-                    MediaId.playlists -> data
-                        .getOrNull(1)
-                        ?.toLongOrNull()
-                        ?.let(Database::playlistWithSongs)
-                        ?.first()
-                        ?.songs
-                        ?.shuffled()
-
-                    MediaId.albums -> data
-                        .getOrNull(1)
-                        ?.let(Database::albumSongs)
-                        ?.first()
-
-                    else -> emptyList()
-                }?.map(Song::asMediaItem) ?: return@launch
-
-                withContext(Dispatchers.Main) {
-                    player.forcePlayAtIndex(mediaItems, index.coerceIn(0, mediaItems.size))
-                }
-            }
-        }
-    }
 
     private object MediaId {
         const val root = "root"

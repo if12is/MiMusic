@@ -564,10 +564,10 @@ class UiStrings(private val language: AppLanguage) {
         "أبقِ المشغّل في نافذة صغيرة عند مغادرة التطبيق"
     )
     val dataUsage = t("Data used", "استهلاك البيانات")
-    val crashLog = t("Share crash log", "مشاركة سجل الأعطال")
+    val crashLog = t("Send problem log", "إرسال سجل المشكلة")
     val crashLogDescription = t(
-        "Send the last crash and playback log without opening GitHub",
-        "أرسل آخر عطل وسجل التشغيل من غير فتح GitHub"
+        "The crash report stays on this device until you send it",
+        "تقرير العطل يفضل على الجهاز لحد ما تبعتّه"
     )
     val crashLogEmpty = t("No crash log yet", "لا يوجد سجل أعطال بعد")
     val removeDownloadConfirm = t(

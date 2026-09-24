@@ -715,11 +715,23 @@ object Converters {
 val Database.internal: RoomDatabase
     get() = DatabaseInitializer.Instance
 
-fun query(block: () -> Unit) = DatabaseInitializer.Instance.queryExecutor.execute(block)
+@Suppress("TooGenericExceptionCaught")
+fun query(block: () -> Unit) = DatabaseInitializer.Instance.queryExecutor.execute {
+    try {
+        block()
+    } catch (error: Exception) {
+        it.vfsfitvnm.vimusic.utils.ProblemLog.record("database", error)
+    }
+}
 
+@Suppress("TooGenericExceptionCaught")
 fun transaction(block: () -> Unit) = with(DatabaseInitializer.Instance) {
     transactionExecutor.execute {
-        runInTransaction(block)
+        try {
+            runInTransaction(block)
+        } catch (error: Exception) {
+            it.vfsfitvnm.vimusic.utils.ProblemLog.record("database", error)
+        }
     }
 }
 

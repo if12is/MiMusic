@@ -17,10 +17,13 @@ object PlaybackLogStore {
     private var logFile: File? = null
     @Volatile
     private var crashFile: File? = null
+    private var handlerInstalled = false
 
     fun init(context: Context) {
         logFile = File(context.filesDir, "playback.log")
         crashFile = File(context.filesDir, "crash.log")
+        if (handlerInstalled) return
+        handlerInstalled = true
         val previous = Thread.getDefaultUncaughtExceptionHandler()
         Thread.setDefaultUncaughtExceptionHandler { thread, throwable ->
             runCatching {
@@ -32,6 +35,12 @@ object PlaybackLogStore {
                 )
             }
             previous?.uncaughtException(thread, throwable)
+        }
+    }
+
+    fun writeCrash(report: String) {
+        runCatching {
+            crashFile?.writeText(report)
         }
     }
 

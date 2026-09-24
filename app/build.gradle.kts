@@ -27,8 +27,8 @@ android {
         applicationId = "app.mimusic.player"
         minSdk = 21
         targetSdk = 35
-        versionCode = 35
-        versionName = "0.7.3"
+        versionCode = 36
+        versionName = "0.7.4"
     }
 
     signingConfigs {
@@ -144,6 +144,9 @@ dependencies {
     implementation(libs.security.crypto)
 
     implementation(libs.exoplayer)
+    implementation(libs.media3.session)
+    implementation(libs.work.runtime)
+    implementation(libs.acra.core)
 
     implementation(libs.room)
     ksp(libs.room.compiler)
@@ -154,4 +157,8 @@ dependencies {
     coreLibraryDesugaring(libs.desugaring)
 
     testImplementation(testLibs.junit)
+}
+
+composeCompiler {
+    enableStrongSkippingMode = true
 }
