@@ -35,7 +35,9 @@ jobs:
 
       - name: Build release APK
         env:
-          MIMUSIC_KEYSTORE_FILE: app/keystore/mimusic-release.jks
+          # app/build.gradle.kts resolves this path itself, so it must be absolute.
+          # A path like app/keystore/... is looked up inside the app module and signing is skipped.
+          MIMUSIC_KEYSTORE_FILE: ${{ github.workspace }}/app/keystore/mimusic-release.jks
           MIMUSIC_KEYSTORE_PASSWORD: ${{ secrets.MIMUSIC_KEYSTORE_PASSWORD }}
           MIMUSIC_KEY_ALIAS: ${{ secrets.MIMUSIC_KEY_ALIAS }}
           MIMUSIC_KEY_PASSWORD: ${{ secrets.MIMUSIC_KEY_PASSWORD }}
@@ -48,7 +50,14 @@ jobs:
           if [ -z "$VERSION" ] || [ "$VERSION" = "$GITHUB_REF_NAME" ]; then
             VERSION="${GITHUB_SHA::7}"
           fi
-          cp app/build/outputs/apk/release/app-release.apk "dist/MiMusic-${VERSION}.apk"
+          APK="$(find app/build/outputs/apk/release -name '*.apk' ! -name '*unsigned*' -print -quit)"
+          if [ -z "$APK" ]; then
+            echo "No signed release APK. Check MIMUSIC_KEYSTORE_PASSWORD, MIMUSIC_KEY_ALIAS, and MIMUSIC_KEY_PASSWORD."
+            find app/build/outputs -name '*.apk' -print || true
+            exit 1
+          fi
+          jarsigner -verify "$APK"
+          cp "$APK" "dist/MiMusic-${VERSION}.apk"
           echo "VERSION=$VERSION" >> "$GITHUB_ENV"
 
       - name: Upload APK
