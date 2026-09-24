@@ -136,6 +136,31 @@ inline fun <reified T : Enum<T>> rememberPreference(key: String, defaultValue: T
     return state
 }
 
+/**
+ * Keeps [state] in sync with SharedPreferences so a change made from any other screen
+ * (or outside Compose) is reflected immediately.
+ */
+@Composable
+fun <T> ObservePreference(
+    key: String,
+    state: MutableState<T>,
+    read: SharedPreferences.() -> T
+) {
+    val context = LocalContext.current
+    val currentRead by rememberUpdatedState(read)
+    DisposableEffect(key, state) {
+        val preferences = context.preferences
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, changedKey ->
+            if (changedKey == key) {
+                val newValue = sharedPreferences.currentRead()
+                if (state.value != newValue) state.value = newValue
+            }
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
+    }
+}
+
 inline fun <T> mutableStatePreferenceOf(
     value: T,
     crossinline onStructuralInequality: (newValue: T) -> Unit
