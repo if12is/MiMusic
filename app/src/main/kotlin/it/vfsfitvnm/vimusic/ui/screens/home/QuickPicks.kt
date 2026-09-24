@@ -97,6 +97,7 @@ import it.vfsfitvnm.vimusic.utils.lastPlayedMediaIdKey
 import it.vfsfitvnm.vimusic.utils.lastPlayedPositionKey
 import it.vfsfitvnm.vimusic.utils.orderedHomeMoods
 import it.vfsfitvnm.vimusic.utils.HomeMood
+import it.vfsfitvnm.vimusic.utils.planDailyMixes
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.Region
 import it.vfsfitvnm.vimusic.utils.secondary
@@ -454,6 +455,51 @@ fun QuickPicks(
                             .background(colorPalette.background2, androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     )
+                }
+            }
+
+            val playbackHistory by remember {
+                Database.playbackHistory().distinctUntilChanged()
+            }.collectAsState(initial = emptyList())
+            val epochDay = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis())
+            val dailyMixes = remember(playbackHistory, epochDay) {
+                val songsById = playbackHistory.associateBy { it.id }
+                planDailyMixes(
+                    playbackHistory.map { song -> song.id to song.artistsText.orEmpty() },
+                    epochDay
+                ).map { mix -> mix to mix.songIds.mapNotNull(songsById::get) }
+                    .filter { it.second.isNotEmpty() }
+            }
+            dailyMixes.forEachIndexed { index, (mix, mixSongs) ->
+                BasicText(
+                    text = strings.dailyMix(index + 1),
+                    style = typography.m.semiBold,
+                    modifier = sectionTextModifier
+                )
+                LazyRow(contentPadding = endPaddingValues) {
+                    items(mixSongs, key = { song -> "${mix.id}/${song.id}" }) { song ->
+                        SongItem(
+                            song = song,
+                            thumbnailSizePx = songThumbnailSizePx,
+                            thumbnailSizeDp = songThumbnailSizeDp,
+                            modifier = Modifier
+                                .width(itemInHorizontalGridWidth)
+                                .combinedClickable(
+                                    onLongClick = {
+                                        menuState.display {
+                                            NonQueuedMediaItemMenu(
+                                                onDismiss = menuState::hide,
+                                                mediaItem = song.asMediaItem
+                                            )
+                                        }
+                                    },
+                                    onClick = {
+                                        binder?.stopRadio()
+                                        binder?.player?.forcePlayFromBeginning(mixSongs.map { it.asMediaItem })
+                                    }
+                                )
+                        )
+                    }
                 }
             }
 

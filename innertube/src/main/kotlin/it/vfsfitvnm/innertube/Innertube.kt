@@ -20,6 +20,9 @@ import kotlinx.serialization.ExperimentalSerializationApi
 import kotlinx.serialization.json.Json
 
 object Innertube {
+    @Volatile
+    var cookie: String? = null
+
     val client = HttpClient(OkHttp) {
         BrowserUserAgent()
 
@@ -51,7 +54,38 @@ object Innertube {
                 headers.append("X-Goog-Api-Key", "AIzaSyAO_FJ2SlqU8Q4STEHLGCilw_Y9_11qcW8")
                 parameters.append("prettyPrint", "false")
             }
+            cookie?.takeIf { it.isNotBlank() }?.let { value ->
+                header(HttpHeaders.Cookie, value)
+                authorizationHeader(value)?.let { hash ->
+                    header(HttpHeaders.Authorization, hash)
+                }
+                header(HttpHeaders.Origin, "https://music.youtube.com")
+            }
         }
+    }
+
+    /**
+     * YouTube Music accepts a browser cookie only together with this hash.
+     * The cookie itself is supplied by the app and is not stored here.
+     */
+    fun authorizationHeader(
+        cookie: String?,
+        nowSeconds: Long = System.currentTimeMillis() / 1000
+    ): String? {
+        val raw = cookie?.takeIf { it.isNotBlank() } ?: return null
+        val sapisid = raw.split(';').asSequence().map { it.trim() }.firstNotNullOfOrNull { part ->
+            val value = when {
+                part.startsWith("SAPISID=") -> part.substringAfter('=')
+                part.startsWith("__Secure-3PAPISID=") -> part.substringAfter('=')
+                else -> null
+            }
+            value?.takeIf { it.isNotEmpty() }
+        } ?: return null
+        val origin = "https://music.youtube.com"
+        val digest = java.security.MessageDigest.getInstance("SHA-1")
+            .digest("$nowSeconds $sapisid $origin".toByteArray(Charsets.UTF_8))
+        val hex = digest.joinToString(separator = "") { byte -> "%02x".format(byte) }
+        return "SAPISIDHASH ${nowSeconds}_$hex"
     }
 
     internal const val browse = "/youtubei/v1/browse"

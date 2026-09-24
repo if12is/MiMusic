@@ -662,6 +662,42 @@ class UiStrings(private val language: AppLanguage) {
     val presetBass = t("Bass", "باس")
     val presetVocal = t("Vocal", "صوت")
     val presetTreble = t("Treble", "حاد")
+    val youtubeMusic = t("YouTube Music", "يوتيوب ميوزك")
+    val youtubeCookie = t("YouTube Music cookie", "كوكي يوتيوب ميوزك")
+    val youtubeCookieHint = t("Paste the cookie from music.youtube.com", "الصق الكوكي من music.youtube.com")
+    val youtubeCookieWarning = t(
+        "This cookie can access your YouTube account. It stays on this device and is sent only to YouTube. Likes are copied here and nothing is written back.",
+        "الكوكي ده يقدر يدخل على حساب يوتيوب بتاعك. بيفضل على الجهاز ومش بيتبعت غير ليوتيوب. الإعجابات بتتنسخ هنا ومفيش حاجة بترجع ليوتيوب."
+    )
+    val importLikedSongs = t("Import liked songs", "استيراد الأغاني المعجب بها")
+    val importLikedSongsDescription = t(
+        "Copy your YouTube Music likes into this library. One way only.",
+        "انسخ إعجابات يوتيوب ميوزك للمكتبة دي. اتجاه واحد بس."
+    )
+    fun importLikedSongsDone(count: Int) = t("Imported $count liked songs", "تم استيراد $count أغنية")
+    val importLikedSongsEmpty = t("No liked songs came back. Check the cookie.", "مفيش أغاني رجعت. راجع الكوكي.")
+    val scheduledBackup = t("Daily backup folder", "مجلد النسخ اليومي")
+    val scheduledBackupPick = t(
+        "Choose a folder. A copy is saved once a day, and the newest 5 are kept.",
+        "اختار مجلد. النسخة بتتحفظ مرة في اليوم، وآخر 5 نسخ بس بتفضل."
+    )
+    val scheduledBackupOn = t(
+        "A copy is saved once a day. The newest 5 are kept.",
+        "النسخة بتتحفظ مرة في اليوم. آخر 5 نسخ بتفضل."
+    )
+    val importLatestBackup = t("Import newest backup", "استيراد أحدث نسخة")
+    val importLatestBackupDescription = t(
+        "Replace this library with the newest file in the backup folder, then close the app.",
+        "استبدل المكتبة دي بأحدث ملف في مجلد النسخ، وبعدين التطبيق هيتقفل."
+    )
+    val noScheduledBackup = t("No backup file in that folder yet", "لسه مفيش ملف نسخ في المجلد ده")
+    val stopScheduledBackup = t("Stop daily backup", "إيقاف النسخ اليومي")
+    fun dailyMix(number: Int) = t("Daily mix $number", "مزيج اليوم $number")
+    val cast = t("Cast", "البث")
+    val castUnavailable = t(
+        "Cast needs Google Play services and a Chromecast on this network",
+        "البث محتاج خدمات جوجل وجهاز كرومكاست على الشبكة"
+    )
 
     fun equalizerPresetName(value: it.vfsfitvnm.vimusic.utils.EqualizerPreset) = when (value) {
         it.vfsfitvnm.vimusic.utils.EqualizerPreset.Flat -> presetFlat

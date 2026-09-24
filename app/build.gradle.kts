@@ -27,8 +27,8 @@ android {
         applicationId = "app.mimusic.player"
         minSdk = 21
         targetSdk = 35
-        versionCode = 37
-        versionName = "0.7.5"
+        versionCode = 38
+        versionName = "0.7.6"
     }
 
     signingConfigs {
@@ -145,6 +145,7 @@ dependencies {
 
     implementation(libs.exoplayer)
     implementation(libs.media3.session)
+    implementation(libs.media3.cast)
     implementation(libs.work.runtime)
     implementation(libs.acra.core)
 

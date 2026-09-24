@@ -17,7 +17,8 @@ object SecretStore {
     private val secretKeys = setOf(
         listenBrainzTokenKey,
         jellyfinPasswordKey,
-        jellyfinTokenKey
+        jellyfinTokenKey,
+        youtubeCookieKey
     )
 
     @Volatile

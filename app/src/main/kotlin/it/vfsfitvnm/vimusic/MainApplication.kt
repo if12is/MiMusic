@@ -6,9 +6,11 @@ import coil.ImageLoader
 import coil.ImageLoaderFactory
 import coil.disk.DiskCache
 import it.vfsfitvnm.vimusic.enums.CoilDiskCacheMaxSize
+import it.vfsfitvnm.innertube.Innertube
 import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.Region
 import it.vfsfitvnm.vimusic.utils.SecretStore
+import it.vfsfitvnm.vimusic.utils.youtubeCookieKey
 import it.vfsfitvnm.vimusic.utils.applyInnertubeLocale
 import it.vfsfitvnm.vimusic.utils.coilDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.getEnum
@@ -37,6 +39,7 @@ class MainApplication : Application(), ImageLoaderFactory {
     override fun onCreate() {
         super.onCreate()
         SecretStore.init(this)
+        Innertube.cookie = SecretStore.get(youtubeCookieKey).ifBlank { null }
         Region.load(this)
         applyInnertubeLocale(preferredAppLanguage())
         MainScope().launch {

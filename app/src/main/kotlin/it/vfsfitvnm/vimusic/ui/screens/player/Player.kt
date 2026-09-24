@@ -1,3 +1,5 @@
+@file:OptIn(androidx.media3.common.util.UnstableApi::class)
+
 package it.vfsfitvnm.vimusic.ui.screens.player
 
 import android.content.ActivityNotFoundException
@@ -52,6 +54,7 @@ import it.vfsfitvnm.innertube.models.NavigationEndpoint
 import it.vfsfitvnm.compose.routing.OnGlobalRoute
 import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
+import it.vfsfitvnm.vimusic.service.DeviceCast
 import it.vfsfitvnm.vimusic.service.PlayerService
 import it.vfsfitvnm.vimusic.ui.components.BottomSheet
 import it.vfsfitvnm.vimusic.ui.components.BottomSheetState
@@ -78,6 +81,7 @@ import it.vfsfitvnm.vimusic.utils.LocalStrings
 import android.os.Build
 import kotlin.math.absoluteValue
 
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @ExperimentalFoundationApi
 @ExperimentalAnimationApi
 @Composable
@@ -318,6 +322,24 @@ fun Player(
                     )
 
                     IconButton(
+                        icon = R.drawable.cast,
+                        color = colorPalette.text,
+                        contentDescription = strings.cast,
+                        onClick = {
+                            val started = DeviceCast.request(
+                                context = context,
+                                localPlayer = binder.player,
+                                mediaItem = mediaItem,
+                                resolve = binder::castableUri
+                            )
+                            if (!started) context.toast(strings.castUnavailable)
+                        },
+                        modifier = Modifier
+                            .padding(horizontal = 4.dp)
+                            .size(48.dp)
+                    )
+
+                    IconButton(
                         icon = R.drawable.film,
                         color = colorPalette.text,
                         contentDescription = strings.pictureInPicture,
@@ -470,6 +492,7 @@ private fun CollapsedMiniPlayer(
 }
 
 @ExperimentalAnimationApi
+@androidx.annotation.OptIn(androidx.media3.common.util.UnstableApi::class)
 @Composable
 private fun PlayerMenu(
     binder: PlayerService.Binder,

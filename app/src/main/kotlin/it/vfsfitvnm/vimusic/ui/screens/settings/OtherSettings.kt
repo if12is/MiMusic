@@ -21,6 +21,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -30,6 +31,8 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
+import it.vfsfitvnm.innertube.Innertube
+import it.vfsfitvnm.innertube.requests.likedSongs
 import it.vfsfitvnm.vimusic.Database
 import it.vfsfitvnm.vimusic.LocalPlayerAwareWindowInsets
 import it.vfsfitvnm.vimusic.query
@@ -56,7 +59,9 @@ import it.vfsfitvnm.vimusic.utils.podcastFeedsKey
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.rememberSecret
+import it.vfsfitvnm.vimusic.utils.asMediaItem
 import it.vfsfitvnm.vimusic.utils.toast
+import it.vfsfitvnm.vimusic.utils.youtubeCookieKey
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
 import kotlinx.coroutines.launch
@@ -110,12 +115,18 @@ fun OtherSettings() {
     var jellyfinServer by rememberPreference(jellyfinServerKey, "")
     var jellyfinUser by rememberPreference(jellyfinUserKey, "")
     var jellyfinPassword by rememberSecret(jellyfinPasswordKey, "")
+    var youtubeCookie by rememberSecret(youtubeCookieKey, "")
     var editingToken by remember { mutableStateOf(false) }
     var editingFeeds by remember { mutableStateOf(false) }
     var editingServer by remember { mutableStateOf(false) }
     var editingUser by remember { mutableStateOf(false) }
     var editingPassword by remember { mutableStateOf(false) }
+    var editingCookie by remember { mutableStateOf(false) }
     val scope = rememberCoroutineScope()
+
+    LaunchedEffect(youtubeCookie) {
+        Innertube.cookie = youtubeCookie.ifBlank { null }
+    }
 
     val queriesCount by remember {
         Database.queriesCount().distinctUntilChanged()
@@ -186,6 +197,42 @@ fun OtherSettings() {
             }
         )
 
+        SettingsGroupSpacer()
+
+        SettingsEntryGroupText(title = strings.youtubeMusic)
+
+        SettingsDescription(text = strings.youtubeCookieWarning)
+
+        SettingsEntry(
+            title = strings.youtubeCookie,
+            text = if (youtubeCookie.isBlank()) strings.youtubeCookieHint else "••••••••",
+            onClick = { editingCookie = true }
+        )
+
+        SettingsEntry(
+            title = strings.importLikedSongs,
+            text = strings.importLikedSongsDescription,
+            isEnabled = youtubeCookie.isNotBlank(),
+            onClick = {
+                scope.launch {
+                    val songs = withContext(Dispatchers.IO) { Innertube.likedSongs() }
+                    if (songs.isEmpty()) {
+                        context.toast(strings.importLikedSongsEmpty)
+                        return@launch
+                    }
+                    val now = System.currentTimeMillis()
+                    query {
+                        songs.forEach { item ->
+                            val mediaItem = item.asMediaItem
+                            Database.insert(mediaItem) { song -> song.copy(likedAt = now) }
+                            Database.like(mediaItem.mediaId, now)
+                        }
+                    }
+                    context.toast(strings.importLikedSongsDone(songs.size))
+                }
+            }
+        )
+
         if (editingToken) {
             TextFieldDialog(
                 hintText = strings.listenBrainzTokenHint,
@@ -248,6 +295,21 @@ fun OtherSettings() {
                 onDone = {
                     jellyfinPassword = it
                     editingPassword = false
+                },
+                isTextInputValid = { true }
+            )
+        }
+
+        if (editingCookie) {
+            TextFieldDialog(
+                hintText = strings.youtubeCookieHint,
+                initialTextInput = youtubeCookie,
+                singleLine = false,
+                maxLines = 6,
+                onDismiss = { editingCookie = false },
+                onDone = {
+                    youtubeCookie = it.trim()
+                    editingCookie = false
                 },
                 isTextInputValid = { true }
             )

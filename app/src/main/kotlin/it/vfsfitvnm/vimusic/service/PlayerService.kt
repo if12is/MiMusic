@@ -132,6 +132,7 @@ import it.vfsfitvnm.vimusic.utils.ListenBrainz
 import it.vfsfitvnm.vimusic.utils.mediaItems
 import it.vfsfitvnm.vimusic.utils.offlineModeKey
 import it.vfsfitvnm.vimusic.utils.persistentQueueKey
+import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.queueLoopEnabledKey
 import it.vfsfitvnm.vimusic.utils.resumePlaybackWhenDeviceConnectedKey
@@ -1369,6 +1370,21 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         fun isAvailableOffline(mediaId: String, contentLength: Long): Boolean {
             return isFullyDownloaded(mediaId) || cache.isCached(mediaId, 0, contentLength)
+        }
+
+        suspend fun castableUri(mediaId: String): android.net.Uri? {
+            if (mediaId.startsWith("local:") || ExtraMediaIds.isExternal(mediaId)) return null
+            return withContext(Dispatchers.IO) {
+                try {
+                    streamResolver.resolve(mediaId, false).uri
+                } catch (e: PlaybackException) {
+                    PlaybackLogStore.append("cast resolve failed ${e.message}")
+                    null
+                } catch (e: java.io.IOException) {
+                    PlaybackLogStore.append("cast resolve failed ${e.message}")
+                    null
+                }
+            }
         }
 
         fun downloadStatus(mediaId: String): DownloadStatus {

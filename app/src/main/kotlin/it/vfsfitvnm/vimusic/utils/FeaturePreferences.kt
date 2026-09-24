@@ -28,4 +28,6 @@ const val videoLyricsKey = "videoLyrics"
 
 /** false = audio only (default), true = play the music video when the source has one. */
 const val videoModeKey = "videoMode"
+const val youtubeCookieKey = "youtubeCookie"
+const val backupTreeUriKey = "backupTreeUri"
 fun playlistCoverKey(playlistId: Long) = "playlistCover_$playlistId"

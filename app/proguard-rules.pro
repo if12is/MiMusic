@@ -34,6 +34,8 @@
 -dontwarn org.slf4j.impl.StaticLoggerBinder
 
 # NewPipe Extractor + Rhino (YouTube signature / n-sig)
+-keep class it.vfsfitvnm.vimusic.service.CastOptionsProvider { *; }
+
 -keep class org.schabi.newpipe.** { *; }
 -keep class org.mozilla.javascript.** { *; }
 -keep class org.mozilla.classfile.ClassFileWriter
