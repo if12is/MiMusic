@@ -19,22 +19,31 @@ import it.vfsfitvnm.innertube.utils.toRelatedPage
 const val DefaultLandingVideoId = "J7p4bzqLvCw"
 private const val ArabicHitsQuery = "أغاني عربية"
 
+val ArabRegions = setOf(
+    "EG", "SA", "AE", "KW", "QA", "BH", "OM", "YE", "IQ", "SY", "JO", "LB",
+    "PS", "LY", "TN", "DZ", "MA", "SD", "MR", "SO", "DJ", "KM"
+)
+
 suspend fun Innertube.landingPage(videoId: String = DefaultLandingVideoId) = runCatchingNonCancellable {
-    if (Context.hl.startsWith("ar", ignoreCase = true)) {
+    // Recommendations follow the listener's region (Context.gl), not the UI language:
+    // someone in the US using the Arabic UI should not get Egyptian hits by default.
+    if (Context.gl.uppercase() in ArabRegions) {
         val arabic = arabicLandingPage(videoId)
         if (arabic != null && !arabic.isEmpty) {
             return@runCatchingNonCancellable arabic
         }
     }
 
+    // YouTube Music's own home is localized by gl, so prefer it outside the Arab world;
+    // the default seed video is an Arabic song and would skew "related" results.
+    val home = runCatching { homePageOrNull() }.getOrNull()
+    if (home != null && !home.isEmpty) {
+        return@runCatchingNonCancellable home
+    }
+
     val related = runCatching { relatedPageOrNull(videoId) }.getOrNull()
     if (related != null && !related.isEmpty) {
         return@runCatchingNonCancellable related
-    }
-
-    val home = homePageOrNull()
-    if (home != null && !home.isEmpty) {
-        return@runCatchingNonCancellable home
     }
 
     related ?: home ?: error("Unable to load home recommendations")

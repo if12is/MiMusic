@@ -27,4 +27,7 @@ const val pipOnLeaveKey = "pipOnLeave"
 const val lastPlayedMediaIdKey = "lastPlayedMediaId"
 const val lastPlayedPositionKey = "lastPlayedPosition"
 const val videoLyricsKey = "videoLyrics"
+
+/** false = audio only (default), true = play the music video when the source has one. */
+const val videoModeKey = "videoMode"
 fun playlistCoverKey(playlistId: Long) = "playlistCover_$playlistId"

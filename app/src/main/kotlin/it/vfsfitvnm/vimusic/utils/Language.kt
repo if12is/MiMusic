@@ -20,10 +20,13 @@ fun Context.preferredAppLanguage(): AppLanguage =
 
 fun applyInnertubeLocale(language: AppLanguage) {
     InnertubeContext.hl = language.code
-    InnertubeContext.gl = language.region
+    // Content follows where the listener actually is; the language only picks the
+    // fallback region when detection has not produced anything yet.
+    InnertubeContext.gl = Region.current ?: language.region
 }
 
 fun Context.withAppLanguage(language: AppLanguage = preferredAppLanguage()): Context {
+    if (Region.current == null) Region.load(this)
     applyInnertubeLocale(language)
     Locale.setDefault(language.locale)
 

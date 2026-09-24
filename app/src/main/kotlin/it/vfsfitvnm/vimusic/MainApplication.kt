@@ -13,6 +13,9 @@ import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.withAppLanguage
+import it.vfsfitvnm.vimusic.utils.Region
+import kotlinx.coroutines.MainScope
+import kotlinx.coroutines.launch
 
 class MainApplication : Application(), ImageLoaderFactory {
     override fun attachBaseContext(base: Context) {
@@ -21,7 +24,12 @@ class MainApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        Region.load(this)
         applyInnertubeLocale(preferredAppLanguage())
+        MainScope().launch {
+            Region.refresh(this@MainApplication)
+            applyInnertubeLocale(preferredAppLanguage())
+        }
         PlaybackLogStore.init(this)
         DatabaseInitializer()
     }

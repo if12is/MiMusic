@@ -57,6 +57,26 @@ class UiStrings(private val language: AppLanguage) {
     val navigationStyleSide = t("Side menu", "قائمة جانبية")
     val navigationStyleGlass = t("Glassy bottom bar", "شريط سفلي زجاجي")
     val navigationAction = t("Menu action", "إجراء القائمة")
+    val navigationBack = t("Back", "رجوع")
+    val speedShort = t("Speed", "السرعة")
+    val sleepTimerShort = t("Timer", "المؤقت")
+    val moreTools = t("More", "المزيد")
+    val repeatSong = t("Repeat song", "تكرار الأغنية")
+    val modeAudio = t("Song", "صوت")
+    val modeVideo = t("Video", "فيديو")
+    val videoAvailableHint = t("A video is available for this track", "هذا المقطع متاح كفيديو أيضاً")
+    val videoModeSetting = t("Play music videos", "تشغيل الفيديو بدل الصوت")
+    val videoModeSettingDescription = t(
+        "Off plays audio only (saves data). You can switch per track from the player.",
+        "مغلق = صوت فقط (يوفّر البيانات). يمكنك التبديل لكل مقطع من المشغّل."
+    )
+    fun trendingIn(country: String) = t("Trending in $country", "الترند في $country")
+    fun mostPopularIn(country: String) = t("Most popular in $country", "الأكثر انتشاراً في $country")
+    val newArabicSongs = t("New Arabic releases", "جديد الأغاني العربية")
+    val topArabicSongs = t("Most played Arabic songs", "الأعلى استماعاً عربياً")
+    val classicArabicSongs = t("Classic Arabic & tarab", "طرب وتراث أصيل")
+    val newReleases = t("New releases", "إصدارات جديدة")
+    val navigationSettings = t("Settings", "الإعدادات")
     val textGroup = t("TEXT", "النص")
     val lockscreen = t("LOCKSCREEN", "شاشة القفل")
     val playerGroup = t("PLAYER", "المشغّل")
@@ -210,6 +230,7 @@ class UiStrings(private val language: AppLanguage) {
     val delete = t("Delete", "حذف")
     val hide = t("Hide", "إخفاء")
     val shuffle = t("Shuffle", "خلط")
+    val playAll = t("Play all", "تشغيل الكل")
     val viewAll = t("View all", "عرض الكل")
     val startRadio = t("Start radio", "بدء الراديو")
     val playNext = t("Play next", "تشغيل التالي")
@@ -586,8 +607,8 @@ class UiStrings(private val language: AppLanguage) {
     val jellyfinConnectFailed = t("Couldn't connect to Jellyfin", "تعذر الاتصال بجيليفين")
     val videoLyrics = t("Lyrics on video", "كلمات على الفيديو")
     val videoLyricsDescription = t(
-        "Play the video when available and show the current lyric line on it",
-        "شغّل الفيديو عند توفره واعرض السطر الحالي من الكلمات عليه"
+        "While watching a music video, show the current lyric line on it",
+        "أثناء مشاهدة الفيديو، اعرض السطر الحالي من الكلمات عليه"
     )
     val becauseYouListened = { name: String ->
         t("Because you listened to $name", "لأنك سمعت $name")

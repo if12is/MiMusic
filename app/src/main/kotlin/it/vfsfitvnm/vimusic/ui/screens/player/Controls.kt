@@ -1,9 +1,10 @@
 package it.vfsfitvnm.vimusic.ui.screens.player
 
-import androidx.compose.animation.core.LinearEasing
-import androidx.compose.animation.core.animateDp
-import androidx.compose.animation.core.tween
-import androidx.compose.animation.core.updateTransition
+import androidx.compose.animation.AnimatedVisibility
+import androidx.compose.animation.expandVertically
+import androidx.compose.animation.fadeIn
+import androidx.compose.animation.fadeOut
+import androidx.compose.animation.shrinkVertically
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -17,6 +18,7 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
@@ -34,7 +36,12 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
+import androidx.compose.ui.unit.sp
+import androidx.compose.ui.semantics.Role
+import androidx.compose.ui.semantics.contentDescription
+import androidx.compose.ui.semantics.semantics
 import androidx.compose.ui.unit.dp
 import androidx.media3.common.C
 import androidx.media3.common.Player
@@ -50,6 +57,7 @@ import it.vfsfitvnm.vimusic.ui.styling.favoritesIcon
 import it.vfsfitvnm.vimusic.utils.bold
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
+import it.vfsfitvnm.vimusic.utils.shuffleQueue
 import it.vfsfitvnm.vimusic.utils.formatAsDuration
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.secondary
@@ -58,6 +66,7 @@ import it.vfsfitvnm.vimusic.utils.carModeKey
 import it.vfsfitvnm.vimusic.utils.playbackPitchKey
 import it.vfsfitvnm.vimusic.utils.playbackSpeedKey
 import it.vfsfitvnm.vimusic.utils.trackLoopEnabledKey
+import it.vfsfitvnm.vimusic.utils.videoModeKey
 import it.vfsfitvnm.vimusic.utils.LocalStrings
 import kotlinx.coroutines.flow.distinctUntilChanged
 
@@ -80,12 +89,15 @@ fun Controls(
     var trackLoopEnabled by rememberPreference(trackLoopEnabledKey, defaultValue = false)
     var playbackSpeed by rememberPreference(playbackSpeedKey, 1f)
     var playbackPitch by rememberPreference(playbackPitchKey, 1f)
-    var carMode by rememberPreference(carModeKey, false)
+    val carMode by rememberPreference(carModeKey, false)
     val strings = LocalStrings.current
     val speedOptions = listOf(0.75f, 1f, 1.25f, 1.5f)
     val pitchOptions = listOf(0.8f, 0.9f, 1f, 1.1f, 1.2f)
     var loopA by remember(mediaId) { mutableStateOf<Long?>(null) }
     var loopB by remember(mediaId) { mutableStateOf<Long?>(null) }
+    var showMoreTools by rememberSaveable { mutableStateOf(false) }
+    val videoMode by rememberPreference(videoModeKey, false)
+    val hasVideo = binder.hasVideo(mediaId) || binder.isPlayingVideo(mediaId)
 
     var scrubbingPosition by remember(mediaId) {
         mutableStateOf<Long?>(null)
@@ -99,44 +111,100 @@ fun Controls(
         Database.likedAt(mediaId).distinctUntilChanged().collect { likedAt = it }
     }
 
-    val shouldBePlayingTransition = updateTransition(shouldBePlaying, label = "shouldBePlaying")
-
-    val playPauseRoundness by shouldBePlayingTransition.animateDp(
-        transitionSpec = { tween(durationMillis = 100, easing = LinearEasing) },
-        label = "playPauseRoundness",
-        targetValueByState = { if (it) 32.dp else 16.dp }
-    )
+    val skipIconSize = if (carMode) 36.dp else 30.dp
+    val playButtonSize = if (carMode) 84.dp else 68.dp
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
         modifier = modifier
             .fillMaxWidth()
-            .padding(horizontal = 32.dp)
+            .padding(horizontal = 28.dp)
     ) {
         Spacer(
             modifier = Modifier
                 .weight(1f)
         )
 
-        BasicText(
-            text = title ?: "",
-            style = typography.l.bold,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        // 0. Song / Video switch, like YouTube Music; only when a real video exists.
+        AnimatedVisibility(
+            visible = hasVideo,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            Column(
+                horizontalAlignment = Alignment.CenterHorizontally,
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .padding(bottom = 14.dp)
+            ) {
+                AudioVideoSwitch(
+                    videoMode = videoMode,
+                    onChange = binder::setVideoMode
+                )
+                if (!videoMode) {
+                    BasicText(
+                        text = strings.videoAvailableHint,
+                        style = typography.xxs.semiBold.secondary,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 6.dp)
+                    )
+                }
+            }
+        }
 
-        BasicText(
-            text = artist ?: "",
-            style = typography.s.semiBold.secondary,
-            maxLines = 1,
-            overflow = TextOverflow.Ellipsis
-        )
+        // 1. What is playing + like, the most common action on a song.
+        Row(
+            verticalAlignment = Alignment.CenterVertically,
+            modifier = Modifier.fillMaxWidth()
+        ) {
+            Column(modifier = Modifier.weight(1f)) {
+                BasicText(
+                    text = title ?: "",
+                    style = typography.l.bold,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+
+                BasicText(
+                    text = artist ?: "",
+                    style = typography.s.semiBold.secondary,
+                    maxLines = 1,
+                    overflow = TextOverflow.Ellipsis
+                )
+            }
+
+            IconButton(
+                icon = if (likedAt == null) R.drawable.heart_outline else R.drawable.heart,
+                color = colorPalette.favoritesIcon,
+                onClick = {
+                    val currentMediaItem = binder.player.currentMediaItem
+                    query {
+                        if (Database.like(
+                                mediaId,
+                                if (likedAt == null) System.currentTimeMillis() else null
+                            ) == 0
+                        ) {
+                            currentMediaItem
+                                ?.takeIf { it.mediaId == mediaId }
+                                ?.let {
+                                    Database.insert(currentMediaItem, Song::toggleLike)
+                                }
+                        }
+                    }
+                },
+                modifier = Modifier
+                    .padding(start = 12.dp)
+                    .size(26.dp)
+            )
+        }
 
         Spacer(
             modifier = Modifier
-                .weight(0.5f)
+                .height(20.dp)
         )
 
+        // 2. Progress.
         SeekBar(
             value = scrubbingPosition ?: position,
             minimumValue = 0,
@@ -174,7 +242,7 @@ fun Controls(
             ) {
                 BasicText(
                     text = formatAsDuration(scrubbingPosition ?: position),
-                    style = typography.xxs.semiBold,
+                    style = typography.xxs.semiBold.secondary,
                     maxLines = 1,
                     overflow = TextOverflow.Ellipsis,
                 )
@@ -182,7 +250,7 @@ fun Controls(
                 if (duration != C.TIME_UNSET) {
                     BasicText(
                         text = formatAsDuration(duration),
-                        style = typography.xxs.semiBold,
+                        style = typography.xxs.semiBold.secondary,
                         maxLines = 1,
                         overflow = TextOverflow.Ellipsis,
                     )
@@ -192,204 +260,306 @@ fun Controls(
 
         Spacer(
             modifier = Modifier
-                .weight(1f)
+                .weight(0.6f)
         )
 
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier
-                .fillMaxWidth()
-        ) {
-            IconButton(
-                icon = if (likedAt == null) R.drawable.heart_outline else R.drawable.heart,
-                color = colorPalette.favoritesIcon,
-                onClick = {
-                    val currentMediaItem = binder.player.currentMediaItem
-                    query {
-                        if (Database.like(
-                                mediaId,
-                                if (likedAt == null) System.currentTimeMillis() else null
-                            ) == 0
-                        ) {
-                            currentMediaItem
-                                ?.takeIf { it.mediaId == mediaId }
-                                ?.let {
-                                    Database.insert(currentMediaItem, Song::toggleLike)
-                                }
-                        }
-                    }
-                },
+        // 3. Transport: symmetric, with the play button as the clear focal point.
+        //    Media controls keep LTR order in RTL too (previous on the left).
+        CompositionLocalProvider(LocalLayoutDirection provides LayoutDirection.Ltr) {
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                horizontalArrangement = Arrangement.SpaceBetween,
                 modifier = Modifier
-                    .weight(1f)
-                    .size(24.dp)
-            )
-
-            IconButton(
-                icon = R.drawable.play_skip_back,
-                color = colorPalette.text,
-                onClick = binder.player::forceSeekToPrevious,
-                modifier = Modifier
-                    .weight(1f)
-                    .size(if (carMode) 36.dp else 24.dp)
-            )
-
-            Spacer(
-                modifier = Modifier
-                    .width(8.dp)
-            )
-
-            Box(
-                modifier = Modifier
-                    .clip(RoundedCornerShape(playPauseRoundness))
-                    .clickable {
-                        if (shouldBePlaying) {
-                            binder.player.pause()
-                        } else {
-                            if (binder.player.playbackState == Player.STATE_IDLE) {
-                                binder.player.prepare()
-                            }
-                            binder.player.play()
-                        }
-                    }
-                    .background(colorPalette.background2)
-                    .size(if (carMode) 80.dp else 64.dp)
+                    .fillMaxWidth()
             ) {
-                Image(
-                    painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
-                    contentDescription = null,
-                    colorFilter = ColorFilter.tint(colorPalette.text),
+                IconButton(
+                    icon = R.drawable.infinite,
+                    color = if (trackLoopEnabled) colorPalette.accent else colorPalette.textSecondary,
+                    onClick = { trackLoopEnabled = !trackLoopEnabled },
                     modifier = Modifier
-                        .align(Alignment.Center)
-                        .size(28.dp)
+                        .semantics { contentDescription = strings.repeatSong }
+                        .size(22.dp)
+                )
+
+                IconButton(
+                    icon = R.drawable.play_skip_back,
+                    color = colorPalette.text,
+                    onClick = binder.player::forceSeekToPrevious,
+                    modifier = Modifier.size(skipIconSize)
+                )
+
+                Box(
+                    modifier = Modifier
+                        .clip(CircleShape)
+                        .background(colorPalette.text)
+                        .clickable(role = Role.Button) {
+                            if (shouldBePlaying) {
+                                binder.player.pause()
+                            } else {
+                                if (binder.player.playbackState == Player.STATE_IDLE) {
+                                    binder.player.prepare()
+                                }
+                                binder.player.play()
+                            }
+                        }
+                        .size(playButtonSize)
+                ) {
+                    Image(
+                        painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
+                        contentDescription = null,
+                        colorFilter = ColorFilter.tint(colorPalette.background0),
+                        modifier = Modifier
+                            .align(Alignment.Center)
+                            .size(if (carMode) 34.dp else 28.dp)
+                    )
+                }
+
+                IconButton(
+                    icon = R.drawable.play_skip_forward,
+                    color = colorPalette.text,
+                    onClick = binder.player::forceSeekToNext,
+                    modifier = Modifier.size(skipIconSize)
+                )
+
+                IconButton(
+                    icon = R.drawable.shuffle,
+                    color = colorPalette.textSecondary,
+                    onClick = { binder.player.shuffleQueue() },
+                    modifier = Modifier
+                        .semantics { contentDescription = strings.shuffle }
+                        .size(22.dp)
                 )
             }
-
-            Spacer(
-                modifier = Modifier
-                    .width(8.dp)
-            )
-
-            IconButton(
-                icon = R.drawable.play_skip_forward,
-                color = colorPalette.text,
-                onClick = binder.player::forceSeekToNext,
-                modifier = Modifier
-                    .weight(1f)
-                    .size(if (carMode) 36.dp else 24.dp)
-            )
-
-            IconButton(
-                icon = R.drawable.infinite,
-                color = if (trackLoopEnabled) colorPalette.text else colorPalette.textDisabled,
-                onClick = { trackLoopEnabled = !trackLoopEnabled },
-                modifier = Modifier
-                    .weight(1f)
-                    .size(24.dp)
-            )
-
-            IconButton(
-                icon = R.drawable.text,
-                color = colorPalette.text,
-                onClick = onShowLyrics,
-                modifier = Modifier
-                    .weight(1f)
-                    .size(24.dp)
-            )
         }
 
         Spacer(
             modifier = Modifier
-                .height(12.dp)
+                .weight(0.6f)
         )
 
+        // 4. Secondary tools: one evenly spaced row, every icon labelled.
         Row(
-            verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceEvenly,
+            verticalAlignment = Alignment.Top,
             modifier = Modifier.fillMaxWidth()
         ) {
-            IconButton(
+            PlayerToolButton(
+                label = strings.lyrics,
+                icon = R.drawable.text,
+                onClick = onShowLyrics,
+                modifier = Modifier.weight(1f)
+            )
+
+            PlayerToolButton(
+                label = strings.speedShort,
+                badge = "${playbackSpeed}×",
+                active = playbackSpeed != 1f,
+                onClick = {
+                    val index = speedOptions.indexOfFirst { it == playbackSpeed }
+                    playbackSpeed = speedOptions[(index + 1).mod(speedOptions.size)]
+                    binder.setPlaybackSpeed(playbackSpeed)
+                },
+                modifier = Modifier.weight(1f)
+            )
+
+            PlayerToolButton(
+                label = strings.sleepTimerShort,
                 icon = R.drawable.alarm,
-                color = colorPalette.text,
                 onClick = onShowSleepTimer,
-                modifier = Modifier.size(20.dp)
+                modifier = Modifier.weight(1f)
             )
 
-            BasicText(
-                text = "${playbackSpeed}×",
-                style = typography.xs.semiBold,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable {
-                        val index = speedOptions.indexOfFirst { it == playbackSpeed }
-                        playbackSpeed = speedOptions[(index + 1).mod(speedOptions.size)]
-                        binder.setPlaybackSpeed(playbackSpeed)
-                    }
-                    .padding(horizontal = 12.dp, vertical = 6.dp)
+            PlayerToolButton(
+                label = strings.moreTools,
+                icon = if (showMoreTools) R.drawable.chevron_up else R.drawable.ellipsis_horizontal,
+                active = showMoreTools || playbackPitch != 1f || loopA != null || loopB != null,
+                onClick = { showMoreTools = !showMoreTools },
+                modifier = Modifier.weight(1f)
             )
+        }
 
-            BasicText(
-                text = "${strings.pitch} ${playbackPitch}",
-                style = typography.xxs.semiBold,
+        // 5. Advanced tools stay out of the way until asked for.
+        AnimatedVisibility(
+            visible = showMoreTools,
+            enter = fadeIn() + expandVertically(),
+            exit = fadeOut() + shrinkVertically()
+        ) {
+            Row(
+                horizontalArrangement = Arrangement.spacedBy(8.dp, Alignment.CenterHorizontally),
+                verticalAlignment = Alignment.CenterVertically,
                 modifier = Modifier
-                    .clip(RoundedCornerShape(16.dp))
-                    .clickable {
+                    .fillMaxWidth()
+                    .padding(top = 12.dp)
+            ) {
+                PlayerChip(
+                    text = "${strings.pitch} ${playbackPitch}",
+                    active = playbackPitch != 1f,
+                    onClick = {
                         val index = pitchOptions.indexOfFirst { it == playbackPitch }
                         playbackPitch = pitchOptions[(index + 1).mod(pitchOptions.size)]
                         binder.setPlaybackPitch(playbackPitch)
                     }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            )
-        }
-
-        Spacer(modifier = Modifier.height(8.dp))
-
-        Row(
-            horizontalArrangement = Arrangement.SpaceEvenly,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            BasicText(
-                text = strings.markA,
-                style = typography.xxs.semiBold,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable {
+                )
+                PlayerChip(
+                    text = loopA?.let { "A ${formatAsDuration(it)}" } ?: strings.markA,
+                    active = loopA != null,
+                    onClick = {
                         loopA = binder.player.currentPosition
                         loopB?.let { end ->
                             loopA?.let { start -> binder.setAbLoop(start, end) }
                         }
                     }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            )
-            BasicText(
-                text = strings.markB,
-                style = typography.xxs.semiBold,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable {
+                )
+                PlayerChip(
+                    text = loopB?.let { "B ${formatAsDuration(it)}" } ?: strings.markB,
+                    active = loopB != null,
+                    onClick = {
                         loopB = binder.player.currentPosition
                         loopA?.let { start ->
                             loopB?.let { end -> binder.setAbLoop(start, end) }
                         }
                     }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            )
-            BasicText(
-                text = strings.clearLoop,
-                style = typography.xxs.semiBold.secondary,
-                modifier = Modifier
-                    .clip(RoundedCornerShape(12.dp))
-                    .clickable {
-                        loopA = null
-                        loopB = null
-                        binder.clearAbLoop()
-                    }
-                    .padding(horizontal = 10.dp, vertical = 6.dp)
-            )
+                )
+                if (loopA != null || loopB != null) {
+                    PlayerChip(
+                        text = strings.clearLoop,
+                        active = false,
+                        onClick = {
+                            loopA = null
+                            loopB = null
+                            binder.clearAbLoop()
+                        }
+                    )
+                }
+            }
         }
 
         Spacer(
             modifier = Modifier
                 .weight(1f)
         )
+    }
+}
+
+@Composable
+private fun PlayerToolButton(
+    label: String,
+    onClick: () -> Unit,
+    modifier: Modifier = Modifier,
+    icon: Int? = null,
+    badge: String? = null,
+    active: Boolean = false
+) {
+    val (colorPalette, typography) = LocalAppearance.current
+    val contentColor = if (active) colorPalette.accent else colorPalette.text
+
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = modifier
+            .clip(RoundedCornerShape(14.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(vertical = 8.dp)
+    ) {
+        Box(
+            contentAlignment = Alignment.Center,
+            modifier = Modifier.size(24.dp)
+        ) {
+            if (icon != null) {
+                Image(
+                    painter = painterResource(icon),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(contentColor),
+                    modifier = Modifier.size(20.dp)
+                )
+            } else if (badge != null) {
+                BasicText(
+                    text = badge,
+                    maxLines = 1,
+                    style = typography.xs.bold.copy(color = contentColor, fontSize = 13.sp)
+                )
+            }
+        }
+
+        BasicText(
+            text = label,
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            style = typography.xxs.semiBold.copy(
+                color = if (active) colorPalette.accent else colorPalette.textSecondary,
+                fontSize = 11.sp,
+                textAlign = TextAlign.Center
+            ),
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(top = 4.dp)
+        )
+    }
+}
+
+@Composable
+private fun PlayerChip(
+    text: String,
+    active: Boolean,
+    onClick: () -> Unit
+) {
+    val (colorPalette, typography) = LocalAppearance.current
+
+    BasicText(
+        text = text,
+        maxLines = 1,
+        style = typography.xxs.semiBold.copy(
+            color = if (active) colorPalette.accent else colorPalette.text
+        ),
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(
+                if (active) colorPalette.accent.copy(alpha = 0.16f) else colorPalette.background2
+            )
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 12.dp, vertical = 8.dp)
+    )
+}
+
+@Composable
+private fun AudioVideoSwitch(
+    videoMode: Boolean,
+    onChange: (Boolean) -> Unit
+) {
+    val (colorPalette, typography) = LocalAppearance.current
+    val strings = LocalStrings.current
+
+    Row(
+        verticalAlignment = Alignment.CenterVertically,
+        modifier = Modifier
+            .clip(RoundedCornerShape(50))
+            .background(colorPalette.background2)
+            .padding(3.dp)
+    ) {
+        listOf(false to strings.modeAudio, true to strings.modeVideo).forEach { (isVideo, label) ->
+            val selected = videoMode == isVideo
+            Row(
+                verticalAlignment = Alignment.CenterVertically,
+                modifier = Modifier
+                    .clip(RoundedCornerShape(50))
+                    .background(if (selected) colorPalette.text else colorPalette.background2)
+                    .clickable(role = Role.Tab) { if (!selected) onChange(isVideo) }
+                    .padding(horizontal = 16.dp, vertical = 6.dp)
+            ) {
+                Image(
+                    painter = painterResource(if (isVideo) R.drawable.film else R.drawable.musical_notes),
+                    contentDescription = null,
+                    colorFilter = ColorFilter.tint(
+                        if (selected) colorPalette.background0 else colorPalette.textSecondary
+                    ),
+                    modifier = Modifier.size(14.dp)
+                )
+                BasicText(
+                    text = label,
+                    style = typography.xxs.semiBold.copy(
+                        color = if (selected) colorPalette.background0 else colorPalette.textSecondary
+                    ),
+                    modifier = Modifier.padding(start = 6.dp)
+                )
+            }
+        }
     }
 }
