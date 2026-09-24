@@ -3,6 +3,9 @@ package it.vfsfitvnm.vimusic.utils
 import android.content.Context
 import android.content.SharedPreferences
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.DisposableEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberUpdatedState
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.SnapshotMutationPolicy
 import androidx.compose.runtime.mutableStateOf
@@ -76,50 +79,85 @@ fun SharedPreferences.selectedAppFont(): AppFont {
 @Composable
 fun rememberPreference(key: String, defaultValue: Boolean): MutableState<Boolean> {
     val context = LocalContext.current
-    return remember {
+    val state = remember {
         mutableStatePreferenceOf(context.preferences.getBoolean(key, defaultValue)) {
             context.preferences.edit { putBoolean(key, it) }
         }
     }
+    ObservePreference(key, state) { getBoolean(key, defaultValue) }
+    return state
 }
 
 @Composable
 fun rememberPreference(key: String, defaultValue: Int): MutableState<Int> {
     val context = LocalContext.current
-    return remember {
+    val state = remember {
         mutableStatePreferenceOf(context.preferences.getInt(key, defaultValue)) {
             context.preferences.edit { putInt(key, it) }
         }
     }
+    ObservePreference(key, state) { getInt(key, defaultValue) }
+    return state
 }
 
 @Composable
 fun rememberPreference(key: String, defaultValue: Float): MutableState<Float> {
     val context = LocalContext.current
-    return remember {
+    val state = remember {
         mutableStatePreferenceOf(context.preferences.getFloat(key, defaultValue)) {
             context.preferences.edit { putFloat(key, it) }
         }
     }
+    ObservePreference(key, state) { getFloat(key, defaultValue) }
+    return state
 }
 
 @Composable
 fun rememberPreference(key: String, defaultValue: String): MutableState<String> {
     val context = LocalContext.current
-    return remember {
+    val state = remember {
         mutableStatePreferenceOf(context.preferences.getString(key, null) ?: defaultValue) {
             context.preferences.edit { putString(key, it) }
         }
     }
+    ObservePreference(key, state) { getString(key, null) ?: defaultValue }
+    return state
 }
 
 @Composable
 inline fun <reified T : Enum<T>> rememberPreference(key: String, defaultValue: T): MutableState<T> {
     val context = LocalContext.current
-    return remember {
+    val state = remember {
         mutableStatePreferenceOf(context.preferences.getEnum(key, defaultValue)) {
             context.preferences.edit { putEnum(key, it) }
         }
+    }
+    ObservePreference(key, state) { getEnum(key, defaultValue) }
+    return state
+}
+
+/**
+ * Keeps [state] in sync with SharedPreferences so a change made from any other screen
+ * (or outside Compose) is reflected immediately.
+ */
+@Composable
+fun <T> ObservePreference(
+    key: String,
+    state: MutableState<T>,
+    read: SharedPreferences.() -> T
+) {
+    val context = LocalContext.current
+    val currentRead by rememberUpdatedState(read)
+    DisposableEffect(key, state) {
+        val preferences = context.preferences
+        val listener = SharedPreferences.OnSharedPreferenceChangeListener { sharedPreferences, changedKey ->
+            if (changedKey == key) {
+                val newValue = sharedPreferences.currentRead()
+                if (state.value != newValue) state.value = newValue
+            }
+        }
+        preferences.registerOnSharedPreferenceChangeListener(listener)
+        onDispose { preferences.unregisterOnSharedPreferenceChangeListener(listener) }
     }
 }
 

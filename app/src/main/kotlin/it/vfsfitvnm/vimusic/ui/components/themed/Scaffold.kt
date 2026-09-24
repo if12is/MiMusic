@@ -18,6 +18,7 @@ import androidx.compose.runtime.getValue
 import androidx.compose.runtime.remember
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.IntOffset
+import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.enums.NavigationStyle
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.utils.LocalStrings
@@ -46,7 +47,11 @@ fun Scaffold(
         host.bind(
             id = registrationId,
             leadingIconId = topIconButtonId,
-            leadingIconDescription = strings.navigationAction,
+            leadingIconDescription = if (topIconButtonId == R.drawable.chevron_back) {
+                strings.navigationBack
+            } else {
+                strings.navigationSettings
+            },
             onLeadingIconClick = onTopIconButtonClick,
             tabIndex = tabIndex,
             onTabIndexChanged = onTabChanged,

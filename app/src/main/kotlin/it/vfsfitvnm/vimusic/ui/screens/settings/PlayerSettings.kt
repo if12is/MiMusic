@@ -1,5 +1,7 @@
 package it.vfsfitvnm.vimusic.ui.screens.settings
 
+import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.videoModeKey
 import android.content.ActivityNotFoundException
 import android.content.Intent
 import android.media.audiofx.AudioEffect
@@ -187,6 +189,17 @@ fun PlayerSettings() {
             text = strings.pictureInPictureDescription,
             isChecked = pipOnLeave,
             onCheckedChange = { pipOnLeave = it }
+        )
+
+        val videoMode by rememberPreference(videoModeKey, false)
+        SwitchSettingEntry(
+            title = strings.videoModeSetting,
+            text = strings.videoModeSettingDescription,
+            isChecked = videoMode,
+            onCheckedChange = { enabled ->
+                binder?.setVideoMode(enabled)
+                    ?: context.preferences.edit().putBoolean(videoModeKey, enabled).apply()
+            }
         )
 
         var videoLyrics by rememberPreference(it.vfsfitvnm.vimusic.utils.videoLyricsKey, true)

@@ -31,6 +31,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.DisposableEffect
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -96,6 +97,7 @@ import it.vfsfitvnm.vimusic.utils.lastPlayedPositionKey
 import it.vfsfitvnm.vimusic.utils.orderedHomeMoods
 import it.vfsfitvnm.vimusic.utils.HomeMood
 import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.utils.Region
 import it.vfsfitvnm.vimusic.utils.secondary
 import it.vfsfitvnm.vimusic.utils.semiBold
 import kotlinx.coroutines.Dispatchers
@@ -149,9 +151,13 @@ fun QuickPicks(
         } ?: Result.failure(TimeoutException("home"))
     }
 
-    LaunchedEffect(reloadToken, appLanguage) {
-        if (relatedPageResult == null || reloadToken > 0) {
-            val seed = if (appLanguage == AppLanguage.Arabic) {
+    val region by Region.flow.collectAsState()
+    var landingRegion by persist<String?>("home/landingRegion")
+
+    LaunchedEffect(reloadToken, appLanguage, region) {
+        if (relatedPageResult == null || reloadToken > 0 || landingRegion != region) {
+            landingRegion = region
+            val seed = if (Region.isArab(region ?: appLanguage.region)) {
                 DefaultLandingVideoId
             } else {
                 trending?.id ?: DefaultLandingVideoId
@@ -218,7 +224,7 @@ fun QuickPicks(
                 song != null &&
                 changed &&
                 relatedPageResult != null &&
-                appLanguage != AppLanguage.Arabic
+                !Region.isArab(region ?: appLanguage.region)
             ) {
                 relatedPageResult = loadLanding(song.id)
             }
@@ -364,15 +370,44 @@ fun QuickPicks(
                 )
             }
 
+            // Moods follow the listener's region: Egyptian shaabi only makes sense in Egypt,
+            // and outside the Arab world the chips search in English for local music.
+            val moodRegion = (region ?: appLanguage.region).uppercase()
             val moods = orderedHomeMoods(
-                listOf(
-                    HomeMood(strings.moodCalm, "موسيقى هادئة"),
-                    HomeMood(strings.moodEnergetic, "أغاني حماسية"),
-                    HomeMood(strings.moodTarab, "طرب عربي"),
-                    HomeMood(strings.moodShaabi, "شعبي مصري"),
-                    HomeMood(strings.moodQuran, "تلاوة قرآن"),
-                    HomeMood(strings.moodFocus, "موسيقى للعمل")
-                ),
+                when {
+                    moodRegion == "EG" -> listOf(
+                        HomeMood(strings.moodCalm, "موسيقى هادئة"),
+                        HomeMood(strings.moodEnergetic, "أغاني حماسية"),
+                        HomeMood(strings.moodTarab, "طرب عربي"),
+                        HomeMood(strings.moodShaabi, "شعبي مصري"),
+                        HomeMood(strings.moodQuran, "تلاوة قرآن"),
+                        HomeMood(strings.moodFocus, "موسيقى للعمل")
+                    )
+
+                    Region.isArab(moodRegion) -> listOf(
+                        HomeMood(strings.moodCalm, "موسيقى هادئة"),
+                        HomeMood(strings.moodEnergetic, "أغاني حماسية"),
+                        HomeMood(strings.moodTarab, "طرب عربي"),
+                        HomeMood(
+                            strings.moodLocal,
+                            "أغاني ${Region.displayName(moodRegion, java.util.Locale("ar"))}"
+                        ),
+                        HomeMood(strings.moodQuran, "تلاوة قرآن"),
+                        HomeMood(strings.moodFocus, "موسيقى للعمل")
+                    )
+
+                    else -> {
+                        val country = Region.displayName(moodRegion, java.util.Locale.ENGLISH)
+                        listOf(
+                            HomeMood(strings.moodLocal, "top hits $country"),
+                            HomeMood(strings.moodCalm, "calm chill music"),
+                            HomeMood(strings.moodEnergetic, "workout hits"),
+                            HomeMood(strings.moodParty, "party hits $country"),
+                            HomeMood(strings.moodFocus, "focus music"),
+                            HomeMood(strings.moodQuran, "Quran recitation")
+                        )
+                    }
+                },
                 clock
             )
             val hour = clock.get(Calendar.HOUR_OF_DAY)
@@ -418,6 +453,25 @@ fun QuickPicks(
                             .background(colorPalette.background2, androidx.compose.foundation.shape.RoundedCornerShape(16.dp))
                             .padding(horizontal = 14.dp, vertical = 8.dp)
                     )
+                }
+            }
+
+            region?.let { currentRegion ->
+                val sections = remember(currentRegion, appLanguage) {
+                    regionalSections(currentRegion, strings, appLanguage.locale)
+                }
+                sections.forEach { section ->
+                    androidx.compose.runtime.key(currentRegion, section.id) {
+                        RegionalSongsSection(
+                            section = section,
+                            region = currentRegion,
+                            itemWidth = itemInHorizontalGridWidth,
+                            thumbnailSizeDp = songThumbnailSizeDp,
+                            thumbnailSizePx = songThumbnailSizePx,
+                            contentPadding = endPaddingValues,
+                            titleModifier = sectionTextModifier
+                        )
+                    }
                 }
             }
 

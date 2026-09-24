@@ -88,6 +88,8 @@ data class PlayerResponse(
 
     @Serializable
     data class VideoDetails(
-        val videoId: String? = null
+        val videoId: String? = null,
+        /** e.g. MUSIC_VIDEO_TYPE_ATV (song with static art) or MUSIC_VIDEO_TYPE_OMV (real video). */
+        val musicVideoType: String? = null
     )
 }

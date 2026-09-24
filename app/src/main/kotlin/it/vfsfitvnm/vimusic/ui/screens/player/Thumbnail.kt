@@ -52,6 +52,8 @@ import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
 import it.vfsfitvnm.vimusic.utils.forceSeekToPrevious
 import it.vfsfitvnm.vimusic.utils.thumbnail
+import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.videoLyricsKey
 import java.net.UnknownHostException
 import java.nio.channels.UnresolvedAddressException
 
@@ -65,6 +67,7 @@ fun Thumbnail(
     onSwipeCollapse: () -> Unit = {},
     modifier: Modifier = Modifier
 ) {
+    val videoLyrics by rememberPreference(videoLyricsKey, true)
     val binder = LocalPlayerServiceBinder.current
     val player = binder?.player ?: return
     val strings = LocalStrings.current
@@ -146,7 +149,7 @@ fun Thumbnail(
                 modifier = Modifier.fillMaxSize()
             )
 
-            val showVideo = binder.isCurrentVideo
+            val showVideo = binder.isPlayingVideo(currentWindow.mediaItem.mediaId)
             if (showVideo) {
                 AndroidView(
                     factory = { context ->
@@ -198,7 +201,7 @@ fun Thumbnail(
                     .fillMaxSize()
             )
 
-            if (showVideo && !isShowingLyrics && error == null) {
+            if (showVideo && videoLyrics && !isShowingLyrics && error == null) {
                 VideoLyricsCaption(
                     mediaId = currentWindow.mediaItem.mediaId,
                     mediaMetadata = currentWindow.mediaItem.mediaMetadata,

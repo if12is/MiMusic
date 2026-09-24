@@ -70,8 +70,6 @@ fun GlassNavigationHost.NavigationBar(docked: Boolean) {
         tabIndex = tabIndex,
         onTabIndexChanged = onTabIndexChanged,
         docked = docked,
-        content = { item ->
-            tabs(item)
-        }
+        content = tabs
     )
 }

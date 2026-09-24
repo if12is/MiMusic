@@ -15,7 +15,8 @@ object Dimensions {
     val navigationRailIconOffset = 6.dp
     val headerHeight = 140.dp
 
-    val glassNavigationBarHeight = 58.dp
+    val glassNavigationBarHeight = 64.dp
+    val glassNavigationMinItemWidth = 68.dp
     val glassNavigationHorizontalInset = 20.dp
     val glassNavigationBottomGap = 10.dp
     val glassNavigationTopGap = 8.dp
