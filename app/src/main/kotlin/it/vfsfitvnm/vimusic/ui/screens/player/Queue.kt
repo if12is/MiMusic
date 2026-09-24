@@ -114,11 +114,11 @@ fun Queue(
             ) {
                 Image(
                     painter = painterResource(R.drawable.playlist),
-                    contentDescription = null,
+                    contentDescription = strings.queue,
                     colorFilter = ColorFilter.tint(colorPalette.text),
                     modifier = Modifier
                         .align(Alignment.Center)
-                        .size(18.dp)
+                        .size(22.dp)
                 )
 
                 content()
@@ -203,7 +203,7 @@ fun Queue(
                 ) {
                     items(
                         items = windows,
-                        key = { it.uid.hashCode() }
+                        key = { window -> "${window.uid}:${window.firstPeriodIndex}:${window.mediaItem.mediaId}" }
                     ) { window ->
                         val isPlayingThisMediaItem = mediaItemIndex == window.firstPeriodIndex
 

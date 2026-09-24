@@ -88,6 +88,11 @@ fun OnboardingDialog(onFinished: () -> Unit) {
                             Region.useAutomatic(context)
                         }
                     )
+                    BasicText(
+                        text = strings.packageMoveDescription,
+                        style = typography.xxs.secondary,
+                        modifier = Modifier.padding(horizontal = 16.dp, vertical = 8.dp)
+                    )
                     Region.selectableRegions.forEach { code ->
                         ChoiceRow(
                             label = Region.displayName(

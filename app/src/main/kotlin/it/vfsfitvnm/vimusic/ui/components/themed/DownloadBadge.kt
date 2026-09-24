@@ -6,6 +6,7 @@ import androidx.compose.foundation.layout.BoxScope
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.shape.CircleShape
+import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
@@ -18,11 +19,26 @@ import it.vfsfitvnm.vimusic.LocalPlayerServiceBinder
 import it.vfsfitvnm.vimusic.R
 import it.vfsfitvnm.vimusic.service.DownloadStatus
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
+import it.vfsfitvnm.vimusic.utils.semiBold
 @Composable
 fun BoxScope.DownloadBadge(mediaId: String) {
     val binder = LocalPlayerServiceBinder.current ?: return
-    val (colorPalette) = LocalAppearance.current
+    val (colorPalette, typography) = LocalAppearance.current
     val status by binder.downloadStatusFlow(mediaId).collectAsState(initial = binder.downloadStatus(mediaId))
+    val percent by binder.downloadPercentFlow(mediaId).collectAsState(initial = binder.downloadPercent(mediaId))
+
+    if (status == DownloadStatus.Downloading) {
+        BasicText(
+            text = "${percent ?: 0}%",
+            style = typography.xxs.semiBold.copy(color = colorPalette.onAccent),
+            modifier = Modifier
+                .align(Alignment.BottomEnd)
+                .padding(2.dp)
+                .background(colorPalette.accent, CircleShape)
+                .padding(horizontal = 3.dp, vertical = 1.dp)
+        )
+        return
+    }
 
     if (status != DownloadStatus.Completed) return
 

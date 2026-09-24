@@ -23,6 +23,7 @@ import android.media.AudioManager
 import android.media.audiofx.AudioEffect
 import android.media.audiofx.LoudnessEnhancer
 import android.net.Uri
+import android.os.Bundle
 import android.os.Handler
 import android.text.format.DateUtils
 import android.widget.RemoteViews
@@ -56,8 +57,8 @@ import androidx.media3.datasource.cache.ContentMetadata
 import androidx.media3.datasource.cache.LeastRecentlyUsedCacheEvictor
 import androidx.media3.datasource.cache.NoOpCacheEvictor
 import androidx.media3.datasource.cache.SimpleCache
+import androidx.media3.datasource.DataSourceBitmapLoader
 import androidx.media3.exoplayer.ExoPlayer
-import androidx.media3.session.CacheBitmapLoader
 import androidx.media3.session.MediaSession as Media3Session
 import androidx.media3.exoplayer.RenderersFactory
 import androidx.media3.exoplayer.analytics.AnalyticsListener
@@ -74,7 +75,7 @@ import androidx.media3.exoplayer.mediacodec.MediaCodecSelector
 import androidx.media3.exoplayer.source.DefaultMediaSourceFactory
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.video.MediaCodecVideoRenderer
-import androidx.media3.datasource.TransferListener
+import androidx.media3.exoplayer.video.VideoRendererEventListener
 import androidx.media3.extractor.DefaultExtractorsFactory
 import androidx.media3.extractor.ExtractorsFactory
 import androidx.media3.extractor.mp4.Mp4Extractor
@@ -200,7 +201,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                     preferences.getEnum(audioQualityKey, AudioQuality.Auto)
                 }
             },
-            player = { body -> Innertube.player(body) }
+            player = { body, preferVideo -> Innertube.player(body, preferVideo) }
         )
     }
 
@@ -323,6 +324,9 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         mediaSession = Media3Session.Builder(this, SkipAwarePlayer(player))
             .setId("PlayerService")
+            .setBitmapLoader(
+                LockscreenArtworkLoader(DataSourceBitmapLoader(this)) { isShowingThumbnailInLockscreen }
+            )
             .setCallback(LibrarySessionCallback { song ->
                 song.contentLength?.let { length -> downloadCache.isCached(song.song.id, 0, length) } == true
             })
@@ -607,7 +611,23 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         }
     }
 
-    private fun maybeShowSongCoverInLockScreen() = Unit
+    private fun refreshLockscreenArtwork() {
+        if (!::player.isInitialized) return
+        val item = player.currentMediaItem ?: return
+        if (isNotificationStarted) {
+            notificationManager?.notify(NotificationId, buildPlaybackNotification(bitmapProvider.bitmap))
+        }
+        val extras = Bundle(item.mediaMetadata.extras ?: Bundle())
+        extras.putBoolean("lockscreenArtwork", isShowingThumbnailInLockscreen)
+        val refreshed = item.buildUpon()
+            .setMediaMetadata(item.mediaMetadata.buildUpon().setExtras(extras).build())
+            .build()
+        try {
+            player.replaceMediaItem(player.currentMediaItemIndex, refreshed)
+        } catch (e: IllegalStateException) {
+            PlaybackLogStore.append("lock artwork ${e.javaClass.simpleName}: ${e.message}")
+        }
+    }
 
     @SuppressLint("NewApi")
     private fun maybeResumePlaybackWhenDeviceConnected() {
@@ -784,8 +804,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
             skipSilenceKey -> player.skipSilenceEnabled = sharedPreferences.getBoolean(key, false)
             isShowingThumbnailInLockscreenKey -> {
-                isShowingThumbnailInLockscreen = sharedPreferences.getBoolean(key, true)
-                maybeShowSongCoverInLockScreen()
+                isShowingThumbnailInLockscreen = sharedPreferences.getBoolean(key, false)
+                refreshLockscreenArtwork()
             }
 
             trackLoopEnabledKey, queueLoopEnabledKey -> {
@@ -805,7 +825,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         val built = buildPlaybackNotification(artwork)
 
         bitmapProvider.load(player.mediaMetadata.artworkUri) { bitmap ->
-            maybeShowSongCoverInLockScreen()
             notificationManager?.notify(NotificationId, buildPlaybackNotification(bitmap))
         }
 
@@ -838,7 +857,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 ).joinToString(" · ")
             )
             .setSubText(player.playerError?.message)
-            .setLargeIcon(artwork)
+            .setLargeIcon(if (isShowingThumbnailInLockscreen) artwork else null)
             .setAutoCancel(false)
             .setOnlyAlertOnce(true)
             .setShowWhen(false)
@@ -876,8 +895,11 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         if (isAtLeastAndroid7) {
             val card = RemoteViews(packageName, R.layout.notification_player_card).apply {
-                if (artwork != null) {
+                if (isShowingThumbnailInLockscreen && artwork != null) {
                     setImageViewBitmap(R.id.notification_artwork, artwork)
+                    setViewVisibility(R.id.notification_artwork, android.view.View.VISIBLE)
+                } else {
+                    setViewVisibility(R.id.notification_artwork, android.view.View.GONE)
                 }
                 setTextViewText(R.id.notification_title, mediaMetadata.title ?: "")
                 setTextViewText(R.id.notification_artist, mediaMetadata.artist ?: "")
@@ -990,7 +1012,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         videoId: String,
         preferMuxed: Boolean = preferences.getBoolean(videoModeKey, false)
     ): Pair<it.vfsfitvnm.innertube.models.PlayerResponse, it.vfsfitvnm.innertube.models.PlayerResponse.StreamingData.AdaptiveFormat> {
-        val response = Innertube.player(PlayerBody(videoId = videoId))?.getOrThrow()
+        val response = Innertube.player(PlayerBody(videoId = videoId), preferVideo = preferMuxed)?.getOrThrow()
             ?: throw PlayableFormatNotFoundException()
 
         when (response.playabilityStatus?.status) {
@@ -1120,7 +1142,10 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         ) { rawDataSpec ->
             // Video mode items carry VIDEO_KEY_SUFFIX in their cache key so audio and
             // video bytes never mix in the cache.
-            val videoId = (rawDataSpec.key ?: error("A key must be set")).removeSuffix(VIDEO_KEY_SUFFIX)
+            val rawKey = rawDataSpec.key ?: error("A key must be set")
+            val wantsVideo = rawKey.endsWith(StreamKeys.VIDEO_SUFFIX) ||
+                preferences.getBoolean(videoModeKey, false)
+            val videoId = StreamKeys.songId(rawKey)
             val dataSpec = rawDataSpec.buildUpon().setKey(videoId).build()
             val uri = dataSpec.uri
             if (
@@ -1153,13 +1178,16 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             }
 
             val fullyDownloaded = isFullyDownloaded(videoId)
+            val offlineOrNoNetwork = preferences.getBoolean(offlineModeKey, false) || !hasNetwork()
             val requestedLength = dataSpec.length.takeIf { it != C.LENGTH_UNSET.toLong() } ?: 1L
-            val hasPartialCache = isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
+            val audioCached = isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
                 isRangeCached(cache, videoId, dataSpec.position, requestedLength)
-            when (
+            val hasPartialCache = audioCached && (!wantsVideo || offlineOrNoNetwork)
+            val resolveOnNetwork = wantsVideo && !fullyDownloaded && !offlineOrNoNetwork
+            if (!resolveOnNetwork) when (
                 it.vfsfitvnm.vimusic.AppGraph.choosePlayback(
                     fullyDownloaded = fullyDownloaded,
-                    offlineOrNoNetwork = preferences.getBoolean(offlineModeKey, false) || !hasNetwork(),
+                    offlineOrNoNetwork = offlineOrNoNetwork,
                     hasPartialCache = hasPartialCache
                 )
             ) {
@@ -1177,7 +1205,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 it.vfsfitvnm.vimusic.utils.PlaybackChoice.NeedNetwork -> Unit
             }
 
-            val wantsVideo = preferences.getBoolean(videoModeKey, false)
             val streamKey = streamResolver.key(videoId, wantsVideo)
             val streamSpec = dataSpec.buildUpon().setKey(streamKey).build()
             val cached = streamResolver.peek(streamKey)
@@ -1229,9 +1256,16 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             )
             .build()
 
-        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->
+        return RenderersFactory { handler: Handler?, videoListener: VideoRendererEventListener?, audioListener: AudioRendererEventListener?, _, _ ->
             arrayOf(
-                MediaCodecVideoRenderer(this, MediaCodecSelector.DEFAULT),
+                MediaCodecVideoRenderer(
+                    this,
+                    MediaCodecSelector.DEFAULT,
+                    /* allowedJoiningTimeMs = */ 5_000L,
+                    handler,
+                    videoListener,
+                    /* maxDroppedFramesToNotify = */ 50
+                ),
                 MediaCodecAudioRenderer(
                     this,
                     MediaCodecSelector.DEFAULT,
@@ -1285,14 +1319,18 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             val position = player.currentPosition
             val playWhenReady = player.playWhenReady
             val reloaded = item.buildUpon()
-                .setCustomCacheKey(if (enabled) mediaId + VIDEO_KEY_SUFFIX else mediaId)
+                .setCustomCacheKey(StreamKeys.of(mediaId, enabled))
                 .build()
-
-            player.addMediaItem(index + 1, reloaded)
-            player.seekTo(index + 1, position)
-            player.removeMediaItem(index)
-            player.playWhenReady = playWhenReady
-            player.prepare()
+            try {
+                player.replaceMediaItem(index, reloaded)
+                player.seekTo(index, position)
+                player.playWhenReady = playWhenReady
+                player.prepare()
+            } catch (e: IllegalStateException) {
+                PlaybackLogStore.append("video switch ${e.javaClass.simpleName}: ${e.message}")
+            } catch (e: IllegalArgumentException) {
+                PlaybackLogStore.append("video switch ${e.javaClass.simpleName}: ${e.message}")
+            }
         }
 
         val sleepTimerMillisLeft: StateFlow<Long?>?
@@ -1399,6 +1437,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             }
             .distinctUntilChanged()
 
+        fun downloadPercent(mediaId: String): Int? = DownloadStatusHub.progress.value[mediaId]
+
+        fun downloadPercentFlow(mediaId: String) = DownloadStatusHub.progress
+            .map { it[mediaId] }
+            .distinctUntilChanged()
+
         fun setPlaybackSpeed(speed: Float) {
             preferences.edit().putFloat(playbackSpeedKey, speed.coerceIn(0.5f, 2f)).apply()
             applyPlaybackParameters()
@@ -1488,7 +1532,7 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             this@PlayerService.downloadCache.keys.toList().forEach { key ->
                 this@PlayerService.downloadCache.removeResource(key)
             }
-            DownloadStatusHub.statuses.value = emptyMap()
+            DownloadStatusHub.clear()
         }
     }
 
@@ -1542,7 +1586,6 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
         const val OFFLINE_SCHEME = "mimusic-offline"
         const val DOWNLOAD_CHUNK_LENGTH = 1024 * 1024L
-        const val VIDEO_KEY_SUFFIX = "#video"
         const val STREAM_CACHE_VERSION_KEY = "streamCacheVersion"
         const val STREAM_CACHE_VERSION = 2
 
@@ -1550,84 +1593,4 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             return cache.getCachedLength(key, position, length) > 0
         }
     }
-}
-
-private class HostSwitchDataSource(
-    private val googlevideo: DataSource,
-    private val other: DataSource,
-    private val local: DataSource
-) : DataSource {
-    private var active: DataSource? = null
-
-    override fun addTransferListener(transferListener: TransferListener) {
-        googlevideo.addTransferListener(transferListener)
-        other.addTransferListener(transferListener)
-        local.addTransferListener(transferListener)
-    }
-
-    override fun open(dataSpec: DataSpec): Long {
-        val host = dataSpec.uri.host.orEmpty()
-        active = when {
-            host.contains("googlevideo", ignoreCase = true) -> googlevideo
-            dataSpec.uri.scheme.equals("http", ignoreCase = true) &&
-                it.vfsfitvnm.vimusic.utils.CleartextPolicy.allows(dataSpec.uri.toString()) -> local
-            else -> other
-        }
-        return active!!.open(dataSpec)
-    }
-
-    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
-        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT
-    }
-
-    override fun getUri(): Uri? = active?.uri
-
-    override fun getResponseHeaders(): Map<String, List<String>> {
-        return active?.responseHeaders ?: emptyMap()
-    }
-
-    override fun close() {
-        active?.close()
-        active = null
-    }
-}
-
-/** Sends [PlayerService.OFFLINE_SCHEME] requests to local storage and the rest to the network chain. */
-private class OfflineSwitchDataSource(
-    private val offline: DataSource,
-    private val online: DataSource
-) : DataSource {
-    private var active: DataSource? = null
-
-    override fun addTransferListener(transferListener: TransferListener) {
-        offline.addTransferListener(transferListener)
-        online.addTransferListener(transferListener)
-    }
-
-    override fun open(dataSpec: DataSpec): Long {
-        active = if (dataSpec.uri.scheme == "mimusic-offline") offline else online
-        return active!!.open(dataSpec)
-    }
-
-    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {
-        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT
-    }
-
-    override fun getUri(): Uri? = active?.uri
-
-    override fun getResponseHeaders(): Map<String, List<String>> {
-        return active?.responseHeaders ?: emptyMap()
-    }
-
-    override fun close() {
-        active?.close()
-        active = null
-    }
-}
-
-enum class DownloadStatus {
-    None,
-    Downloading,
-    Completed,
-    Failed
 }

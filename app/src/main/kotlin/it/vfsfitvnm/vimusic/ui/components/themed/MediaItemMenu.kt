@@ -334,6 +334,9 @@ fun MediaItemMenu(
     val downloadStatus by remember(mediaItem.mediaId, binder) {
         binder?.downloadStatusFlow(mediaItem.mediaId) ?: flowOf(DownloadStatus.None)
     }.collectAsState(initial = binder?.downloadStatus(mediaItem.mediaId) ?: DownloadStatus.None)
+    val downloadPercent by remember(mediaItem.mediaId, binder) {
+        binder?.downloadPercentFlow(mediaItem.mediaId) ?: flowOf(null)
+    }.collectAsState(initial = binder?.downloadPercent(mediaItem.mediaId))
 
     var isViewingPlaylists by remember {
         mutableStateOf(false)
@@ -621,7 +624,8 @@ fun MediaItemMenu(
                     secondaryText = when (downloadStatus) {
                         DownloadStatus.Failed -> strings.downloadFailed
                         DownloadStatus.Completed -> strings.downloaded
-                        else -> null
+                        DownloadStatus.Downloading -> "${downloadPercent ?: 0}%"
+                        DownloadStatus.None -> null
                     },
                     enabled = downloadStatus != DownloadStatus.Downloading,
                     onClick = {

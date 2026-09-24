@@ -27,8 +27,9 @@ android {
         applicationId = "app.mimusic.player"
         minSdk = 21
         targetSdk = 35
-        versionCode = 38
-        versionName = "0.7.6"
+        versionCode = 39
+        versionName = "0.7.7"
+        testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 
     signingConfigs {
@@ -141,6 +142,8 @@ dependencies {
 
     implementation(libs.palette)
     implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.koin.android)
+    implementation(libs.koin.compose)
     implementation(libs.security.crypto)
 
     implementation(libs.exoplayer)
@@ -158,6 +161,9 @@ dependencies {
     coreLibraryDesugaring(libs.desugaring)
 
     testImplementation(testLibs.junit)
+    androidTestImplementation("androidx.test.ext:junit:1.2.1")
+    androidTestImplementation("androidx.test:core:1.6.1")
+    androidTestImplementation("androidx.test:runner:1.6.2")
 }
 
 composeCompiler {

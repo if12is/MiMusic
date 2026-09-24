@@ -86,4 +86,29 @@ object PlaybackLogStore {
             putExtra(Intent.EXTRA_TEXT, snapshot().ifBlank { "No playback log yet." })
         }
     }
+
+    fun hasCrashReport(): Boolean {
+        val file = crashFile ?: return false
+        return file.exists() && file.length() > 0L
+    }
+
+    fun crashEmailIntent(): Intent {
+        val crash = runCatching { crashFile?.takeIf { it.exists() }?.readText() }.getOrNull().orEmpty()
+        val playback = runCatching { logFile?.takeIf { it.exists() }?.readText() }.getOrNull().orEmpty()
+        val body = buildString {
+            if (crash.isNotBlank()) {
+                appendLine(crash.trim())
+            }
+            if (playback.isNotBlank()) {
+                appendLine()
+                appendLine("=== playback ===")
+                appendLine(playback.trim())
+            }
+        }.ifBlank { "No crash report yet." }
+        return Intent(Intent.ACTION_SEND).apply {
+            type = "message/rfc822"
+            putExtra(Intent.EXTRA_SUBJECT, "MiMusic crash report")
+            putExtra(Intent.EXTRA_TEXT, body)
+        }
+    }
 }

@@ -1,5 +1,6 @@
 package it.vfsfitvnm.vimusic.ui.screens.settings
 
+import android.content.ActivityNotFoundException
 import android.content.Intent
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.background
@@ -197,15 +198,22 @@ fun About() {
             title = strings.crashLog,
             text = strings.crashLogDescription,
             onClick = {
-                val log = PlaybackLogStore.snapshot()
-                if (log.isBlank()) {
+                if (!PlaybackLogStore.hasCrashReport()) {
                     context.toast(strings.crashLogEmpty)
-                } else {
+                    return@SettingsEntry
+                }
+                val email = PlaybackLogStore.crashEmailIntent()
+                    .addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
+                try {
+                    context.startActivity(Intent.createChooser(email, strings.crashLog))
+                } catch (e: ActivityNotFoundException) {
+                    PlaybackLogStore.append("crash email ${e.message}")
                     val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                    clipboard.setPrimaryClip(ClipData.newPlainText("MiMusic log", log))
+                    clipboard.setPrimaryClip(ClipData.newPlainText("MiMusic crash", email.getStringExtra(Intent.EXTRA_TEXT)))
+                    context.toast(strings.crashEmailMissing)
                     runCatching {
                         context.startActivity(
-                            PlaybackLogStore.shareIntent().addFlags(android.content.Intent.FLAG_ACTIVITY_NEW_TASK)
+                            PlaybackLogStore.shareIntent().addFlags(Intent.FLAG_ACTIVITY_NEW_TASK)
                         )
                     }
                 }

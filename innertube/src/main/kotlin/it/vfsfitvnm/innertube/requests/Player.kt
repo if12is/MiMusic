@@ -31,6 +31,11 @@ private val playerClients: List<Context>
 private fun PlayerResponse.hasPlayableAudio(): Boolean =
     playabilityStatus?.status == "OK" && streamingData?.highestQualityFormat?.url != null
 
+/** A progressive music video, not a song whose picture never moves. */
+fun PlayerResponse.hasRealMusicVideo(): Boolean =
+    streamingData?.muxedFallbackFormat?.url != null &&
+        videoDetails?.musicVideoType != "MUSIC_VIDEO_TYPE_ATV"
+
 private suspend fun Innertube.requestPlayer(body: PlayerBody, context: Context): PlayerResponse {
     val requestContext = when {
         context.client.clientName == "TVHTML5_SIMPLY_EMBEDDED_PLAYER" ->
@@ -109,9 +114,10 @@ private fun PlayerResponse.withAudioStreams(
     )
 }
 
-suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
-    PlayerLog.append("resolve ${body.videoId} hl=${Context.hl} gl=${Context.gl}")
+suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = runCatchingNonCancellable {
+    PlayerLog.append("resolve ${body.videoId} hl=${Context.hl} gl=${Context.gl} video=$preferVideo")
     var lastResponse: PlayerResponse? = null
+    var audioResponse: PlayerResponse? = null
 
     for (context in playerClients) {
         val response = runCatching {
@@ -139,18 +145,28 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
             response
         }
         lastResponse = unlocked
-        val unlockedAudio = unlocked.streamingData?.playableAudioFormats.orEmpty()
-        if (unlocked.hasPlayableAudio()) {
-            val format = unlocked.streamingData?.highestQualityFormat
+        if (preferVideo && unlocked.hasRealMusicVideo()) {
+            val muxed = unlocked.streamingData?.muxedFallbackFormat
             PlayerLog.append(
-                "using ${context.client.clientName} itag=${format?.itag} mime=${format?.mimeType} " +
-                    "audioUrls=${unlockedAudio.size}"
+                "using video ${context.client.clientName} itag=${muxed?.itag} mime=${muxed?.mimeType}"
             )
             return@runCatchingNonCancellable unlocked
         }
+        val unlockedAudio = unlocked.streamingData?.playableAudioFormats.orEmpty()
+        if (unlocked.hasPlayableAudio()) {
+            if (audioResponse == null) audioResponse = unlocked
+            if (!preferVideo) {
+                val format = unlocked.streamingData?.highestQualityFormat
+                PlayerLog.append(
+                    "using ${context.client.clientName} itag=${format?.itag} mime=${format?.mimeType} " +
+                        "audioUrls=${unlockedAudio.size}"
+                )
+                return@runCatchingNonCancellable unlocked
+            }
+        }
 
         val muxed = unlocked.streamingData?.muxedFallbackFormat
-        if (muxed != null) {
+        if (muxed != null && !preferVideo) {
             PlayerLog.append(
                 "${context.client.clientName} keeping muxed fallback itag=${muxed.itag} mime=${muxed.mimeType}"
             )
@@ -165,6 +181,25 @@ suspend fun Innertube.player(body: PlayerBody) = runCatchingNonCancellable {
     }.getOrDefault(emptyList())
     val newPipeAudioOnly = audioStreams.filter { stream ->
         stream.mimeType?.contains("audio", ignoreCase = true) == true
+    }
+    if (preferVideo) {
+        val muxedNewPipe = audioStreams.filter { stream ->
+            val mime = stream.mimeType.orEmpty()
+            mime.isNotBlank() && !mime.contains("audio", ignoreCase = true)
+        }
+        if (muxedNewPipe.isNotEmpty()) {
+            PlayerLog.append("using NewPipe video streams=${muxedNewPipe.size}")
+            return@runCatchingNonCancellable (lastResponse ?: PlayerResponse(
+                playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
+                playerConfig = null,
+                streamingData = null,
+                videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
+            )).withAudioStreams(body.videoId, muxedNewPipe)
+        }
+        audioResponse?.let { saved ->
+            PlayerLog.append("no music video, falling back to audio")
+            return@runCatchingNonCancellable saved
+        }
     }
     if (newPipeAudioOnly.isNotEmpty()) {
         PlayerLog.append("using NewPipe audio streams=${newPipeAudioOnly.size}")

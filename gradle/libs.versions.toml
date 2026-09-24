@@ -11,6 +11,7 @@ lifecycle = "2.8.7"
 security = "1.1.0-alpha06"
 work = "2.9.1"
 acra = "5.11.3"
+koin = "3.5.6"
 
 [plugins]
 kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
@@ -32,6 +33,8 @@ media3-cast = { module = "androidx.media3:media3-cast", version.ref = "media3" }
 work-runtime = { module = "androidx.work:work-runtime-ktx", version.ref = "work" }
 acra-core = { module = "ch.acra:acra-core", version.ref = "acra" }
 lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+koin-android = { module = "io.insert-koin:koin-android", version.ref = "koin" }
+koin-compose = { module = "io.insert-koin:koin-androidx-compose", version.ref = "koin" }
 security-crypto = { module = "androidx.security:security-crypto", version.ref = "security" }
 ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
 ktor-client-cio = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }

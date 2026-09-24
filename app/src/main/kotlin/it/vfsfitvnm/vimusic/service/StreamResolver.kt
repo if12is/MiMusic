@@ -34,14 +34,13 @@ fun PlayerResponse.hasMusicVideo(): Boolean =
 class StreamResolver(
     private val cache: StreamUrlCache<ResolvedStream>,
     private val quality: () -> AudioQuality,
-    private val player: suspend (PlayerBody) -> Result<PlayerResponse>?
+    private val player: suspend (PlayerBody, Boolean) -> Result<PlayerResponse>?
 ) {
     private val gates = java.util.concurrent.ConcurrentHashMap<String, Mutex>()
 
     fun peek(key: String): ResolvedStream? = cache.get(key)
 
-    fun key(videoId: String, wantsVideo: Boolean): String =
-        if (wantsVideo) videoId + VIDEO_KEY_SUFFIX else videoId
+    fun key(videoId: String, wantsVideo: Boolean): String = StreamKeys.of(videoId, wantsVideo)
 
     suspend fun resolve(videoId: String, wantsVideo: Boolean): ResolvedStream {
         val streamKey = key(videoId, wantsVideo)
@@ -78,7 +77,7 @@ class StreamResolver(
 
     private suspend fun fetch(videoId: String, wantsVideo: Boolean, streamKey: String): ResolvedStream {
         PlaybackLogStore.append("player request $videoId")
-        val body = player(PlayerBody(videoId = videoId))?.getOrThrow()
+        val body = player(PlayerBody(videoId = videoId), wantsVideo)?.getOrThrow()
             ?: throw PlayableFormatNotFoundException()
         val returnedVideoId = body.videoDetails?.videoId
         if (returnedVideoId != null && returnedVideoId != videoId) {
@@ -115,6 +114,6 @@ class StreamResolver(
     }
 
     companion object {
-        const val VIDEO_KEY_SUFFIX = "#video"
+        const val VIDEO_KEY_SUFFIX = StreamKeys.VIDEO_SUFFIX
     }
 }

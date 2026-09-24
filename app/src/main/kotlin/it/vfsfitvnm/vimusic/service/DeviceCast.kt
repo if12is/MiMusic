@@ -2,6 +2,7 @@ package it.vfsfitvnm.vimusic.service
 
 import android.content.Context
 import android.net.Uri
+import androidx.core.net.toUri
 import androidx.media3.cast.CastPlayer
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
@@ -17,6 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 @OptIn(UnstableApi::class)
 @UnstableApi
@@ -25,6 +27,8 @@ object DeviceCast {
     private var castPlayer: CastPlayer? = null
     private var listening = false
     private var pending: Pending? = null
+    private var appContext: Context? = null
+    private var localServer: LocalCastServer? = null
 
     @Suppress("TooGenericExceptionCaught")
     fun request(
@@ -35,6 +39,7 @@ object DeviceCast {
     ): Boolean {
         val services = GoogleApiAvailability.getInstance().isGooglePlayServicesAvailable(context)
         if (services != ConnectionResult.SUCCESS) return false
+        appContext = context.applicationContext
         val castContext = try {
             CastContext.getSharedInstance(context)
         } catch (e: RuntimeException) {
@@ -70,14 +75,14 @@ object DeviceCast {
     }
 
     private fun sessionListener(castContext: CastContext) = object : SessionManagerListener<CastSession> {
-        override fun onSessionEnded(session: CastSession, error: Int) = Unit
-        override fun onSessionEnding(session: CastSession) = Unit
-        override fun onSessionResumeFailed(session: CastSession, error: Int) = Unit
+        override fun onSessionEnded(session: CastSession, error: Int) = stopLocal()
+        override fun onSessionEnding(session: CastSession) = stopLocal()
+        override fun onSessionResumeFailed(session: CastSession, error: Int) = stopLocal()
         override fun onSessionResumed(session: CastSession, wasSuspended: Boolean) {
             scope.launch { load(castContext) }
         }
         override fun onSessionResuming(session: CastSession, sessionId: String) = Unit
-        override fun onSessionStartFailed(session: CastSession, error: Int) = Unit
+        override fun onSessionStartFailed(session: CastSession, error: Int) = stopLocal()
         override fun onSessionStarted(session: CastSession, sessionId: String) {
             scope.launch { load(castContext) }
         }
@@ -109,7 +114,22 @@ object DeviceCast {
         if (resolved != null) return resolved
         val direct = request.mediaItem.localConfiguration?.uri ?: return null
         val scheme = direct.scheme?.lowercase()
-        return direct.takeIf { scheme == "https" || scheme == "http" }
+        if (scheme == "https" || scheme == "http") return direct
+        if (scheme == "file" || scheme == "content" || request.mediaItem.mediaId.startsWith("local:")) {
+            return serveLocal(direct)
+        }
+        return null
+    }
+
+    private suspend fun serveLocal(uri: Uri): Uri? {
+        val context = appContext ?: return null
+        val server = localServer ?: LocalCastServer(context).also { localServer = it }
+        val url = withContext(Dispatchers.IO) { server.urlFor(uri) } ?: return null
+        return url.toUri()
+    }
+
+    private fun stopLocal() {
+        localServer?.stop()
     }
 
     private data class Pending(

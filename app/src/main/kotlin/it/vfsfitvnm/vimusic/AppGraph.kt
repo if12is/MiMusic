@@ -4,10 +4,8 @@ import it.vfsfitvnm.vimusic.utils.PlaybackPolicy
 import it.vfsfitvnm.vimusic.utils.Region
 
 /**
- * Manual composition root. Screens use [androidx.lifecycle.viewmodel.compose.viewModel]
- * for [it.vfsfitvnm.vimusic.ui.screens.home.HomeViewModel] and
- * [it.vfsfitvnm.vimusic.ui.screens.player.PlayerSessionModel]. Shared decisions that
- * are not a screen live here so the player service and the home screen share one path.
+ * Shared decisions that are not a screen. [it.vfsfitvnm.vimusic.ui.screens.home.HomeViewModel]
+ * and [it.vfsfitvnm.vimusic.ui.screens.player.PlayerSessionModel] come from Koin.
  */
 object AppGraph {
     val region = Region

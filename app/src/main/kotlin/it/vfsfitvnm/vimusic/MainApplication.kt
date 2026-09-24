@@ -16,8 +16,11 @@ import it.vfsfitvnm.vimusic.utils.coilDiskCacheMaxSizeKey
 import it.vfsfitvnm.vimusic.utils.getEnum
 import it.vfsfitvnm.vimusic.utils.preferredAppLanguage
 import it.vfsfitvnm.vimusic.utils.preferences
+import it.vfsfitvnm.vimusic.di.appModule
 import it.vfsfitvnm.vimusic.utils.withAppLanguage
 import org.acra.ACRA
+import org.koin.android.ext.koin.androidContext
+import org.koin.core.context.startKoin
 import org.acra.config.CoreConfigurationBuilder
 import org.acra.data.StringFormat
 import kotlinx.coroutines.MainScope
@@ -38,6 +41,10 @@ class MainApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        startKoin {
+            androidContext(this@MainApplication)
+            modules(appModule)
+        }
         SecretStore.init(this)
         Innertube.cookie = SecretStore.get(youtubeCookieKey).ifBlank { null }
         Region.load(this)

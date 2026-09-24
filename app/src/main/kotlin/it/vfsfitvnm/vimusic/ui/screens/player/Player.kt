@@ -10,6 +10,7 @@ import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.animation.ExperimentalAnimationApi
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.background
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -28,6 +29,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.systemBars
 import androidx.compose.foundation.layout.width
+import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.text.BasicText
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
@@ -38,6 +40,10 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.ColorFilter
+import androidx.compose.ui.res.painterResource
+import androidx.compose.ui.semantics.Role
 import androidx.compose.ui.draw.drawBehind
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.input.nestedscroll.nestedScroll
@@ -45,7 +51,7 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import androidx.media3.common.MediaItem
 import androidx.media3.common.Player
 import coil.compose.AsyncImage
@@ -96,7 +102,7 @@ fun Player(
 
     binder?.player ?: return
 
-    val session = viewModel<PlayerSessionModel>()
+    val session = koinViewModel<PlayerSessionModel>()
     session.attach(binder.player)
     val mediaItem = session.mediaItem ?: return
     val shouldBePlaying = session.shouldBePlaying
@@ -302,10 +308,10 @@ fun Player(
                         .padding(horizontal = 8.dp)
                         .fillMaxHeight()
                 ) {
-                    IconButton(
+                    StripIcon(
                         icon = R.drawable.ellipsis_horizontal,
-                        color = colorPalette.text,
-                        contentDescription = strings.moreOptions,
+                        description = strings.moreOptions,
+                        tint = colorPalette.text,
                         onClick = {
                             menuState.display {
                                 PlayerMenu(
@@ -315,16 +321,13 @@ fun Player(
                                     onShowLyrics = { isShowingLyrics = true }
                                 )
                             }
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(48.dp)
+                        }
                     )
 
-                    IconButton(
+                    StripIcon(
                         icon = R.drawable.cast,
-                        color = colorPalette.text,
-                        contentDescription = strings.cast,
+                        description = strings.cast,
+                        tint = colorPalette.text,
                         onClick = {
                             val started = DeviceCast.request(
                                 context = context,
@@ -333,37 +336,28 @@ fun Player(
                                 resolve = binder::castableUri
                             )
                             if (!started) context.toast(strings.castUnavailable)
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(48.dp)
+                        }
                     )
 
-                    IconButton(
+                    StripIcon(
                         icon = R.drawable.film,
-                        color = colorPalette.text,
-                        contentDescription = strings.pictureInPicture,
+                        description = strings.pictureInPicture,
+                        tint = colorPalette.text,
                         onClick = {
-                            val activity = context as? android.app.Activity ?: return@IconButton
-                            if (Build.VERSION.SDK_INT >= 26) {
+                            val activity = context as? android.app.Activity
+                            if (activity != null && Build.VERSION.SDK_INT >= 26) {
                                 activity.enterPictureInPictureMode(
                                     android.app.PictureInPictureParams.Builder().build()
                                 )
                             }
-                        },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(48.dp)
+                        }
                     )
 
-                    IconButton(
-                        icon = R.drawable.alert_circle,
-                        color = if (playerLocked) colorPalette.accent else colorPalette.text,
-                        contentDescription = strings.playerLock,
-                        onClick = { playerLocked = !playerLocked },
-                        modifier = Modifier
-                            .padding(horizontal = 4.dp)
-                            .size(48.dp)
+                    StripIcon(
+                        icon = R.drawable.lock,
+                        description = strings.playerLock,
+                        tint = if (playerLocked) colorPalette.accent else colorPalette.text,
+                        onClick = { playerLocked = !playerLocked }
                     )
 
                     Spacer(
@@ -487,6 +481,30 @@ private fun CollapsedMiniPlayer(
         Spacer(
             modifier = Modifier
                 .width(2.dp)
+        )
+    }
+}
+
+@Composable
+private fun StripIcon(
+    icon: Int,
+    description: String,
+    tint: Color,
+    onClick: () -> Unit
+) {
+    Box(
+        contentAlignment = Alignment.Center,
+        modifier = Modifier
+            .padding(horizontal = 2.dp)
+            .size(40.dp)
+            .clip(CircleShape)
+            .clickable(role = Role.Button, onClick = onClick)
+    ) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = description,
+            colorFilter = ColorFilter.tint(tint),
+            modifier = Modifier.size(22.dp)
         )
     }
 }

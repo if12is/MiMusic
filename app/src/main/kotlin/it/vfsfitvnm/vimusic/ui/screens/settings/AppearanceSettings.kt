@@ -37,7 +37,6 @@ import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
 import it.vfsfitvnm.vimusic.utils.contentRegionKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
-import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
 import it.vfsfitvnm.vimusic.utils.Region
@@ -225,17 +224,15 @@ fun AppearanceSettings() {
             }
         )
 
-        if (!isAtLeastAndroid13) {
-            SettingsGroupSpacer()
+        SettingsGroupSpacer()
 
-            SettingsEntryGroupText(title = strings.lockscreen)
+        SettingsEntryGroupText(title = strings.lockscreen)
 
-            SwitchSettingEntry(
-                title = strings.showSongCover,
-                text = strings.showSongCoverDescription,
-                isChecked = isShowingThumbnailInLockscreen,
-                onCheckedChange = { isShowingThumbnailInLockscreen = it }
-            )
-        }
+        SwitchSettingEntry(
+            title = strings.showSongCover,
+            text = strings.showSongCoverDescription,
+            isChecked = isShowingThumbnailInLockscreen,
+            onCheckedChange = { isShowingThumbnailInLockscreen = it }
+        )
     }
 }

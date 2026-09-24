@@ -28,11 +28,23 @@ import androidx.work.Constraints
 
 object DownloadStatusHub {
     val statuses = kotlinx.coroutines.flow.MutableStateFlow<Map<String, DownloadStatus>>(emptyMap())
+    val progress = kotlinx.coroutines.flow.MutableStateFlow<Map<String, Int>>(emptyMap())
 
-    fun set(mediaId: String, status: DownloadStatus) {
+    fun set(mediaId: String, status: DownloadStatus, percent: Int? = null) {
         statuses.value = statuses.value.let { current ->
             if (status == DownloadStatus.None) current - mediaId else current + (mediaId to status)
         }
+        progress.value = if (status == DownloadStatus.Downloading) {
+            val shown = (percent ?: progress.value[mediaId] ?: 0).coerceIn(0, 100)
+            progress.value + (mediaId to shown)
+        } else {
+            progress.value - mediaId
+        }
+    }
+
+    fun clear() {
+        statuses.value = emptyMap()
+        progress.value = emptyMap()
     }
 }
 
@@ -117,6 +129,7 @@ class SongDownloadWorker(
                 album = inputData.getString(DownloadScheduler.KEY_ALBUM),
                 thumbnail = inputData.getString(DownloadScheduler.KEY_THUMBNAIL)
             ) { percent ->
+                DownloadStatusHub.set(mediaId, DownloadStatus.Downloading, percent)
                 setProgressNotification(mediaId, title ?: strings.downloading, percent, "$percent%")
             }
             DownloadStatusHub.set(mediaId, DownloadStatus.Completed)

@@ -43,7 +43,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.viewmodel.compose.viewModel
+import org.koin.androidx.compose.koinViewModel
 import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.compose.persist.persistList
 import it.vfsfitvnm.innertube.Innertube
@@ -97,7 +97,6 @@ import it.vfsfitvnm.vimusic.utils.lastPlayedMediaIdKey
 import it.vfsfitvnm.vimusic.utils.lastPlayedPositionKey
 import it.vfsfitvnm.vimusic.utils.orderedHomeMoods
 import it.vfsfitvnm.vimusic.utils.HomeMood
-import it.vfsfitvnm.vimusic.utils.planDailyMixes
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.Region
 import it.vfsfitvnm.vimusic.utils.secondary
@@ -153,7 +152,8 @@ fun QuickPicks(
         } ?: Result.failure(TimeoutException("home"))
     }
 
-    val region by viewModel<HomeViewModel>().region.collectAsState()
+    val home = koinViewModel<HomeViewModel>()
+    val region by home.region.collectAsState()
     var landingRegion by persist<String?>("home/landingRegion")
 
     LaunchedEffect(reloadToken, appLanguage, region) {
@@ -461,13 +461,13 @@ fun QuickPicks(
             val playbackHistory by remember {
                 Database.playbackHistory().distinctUntilChanged()
             }.collectAsState(initial = emptyList())
-            val epochDay = java.util.concurrent.TimeUnit.MILLISECONDS.toDays(System.currentTimeMillis())
-            val dailyMixes = remember(playbackHistory, epochDay) {
+            LaunchedEffect(playbackHistory) {
+                home.onPlaybackHistory(playbackHistory.map { song -> song.id to song.artistsText.orEmpty() })
+            }
+            val plannedMixes by home.dailyMixes.collectAsState()
+            val dailyMixes = remember(plannedMixes, playbackHistory) {
                 val songsById = playbackHistory.associateBy { it.id }
-                planDailyMixes(
-                    playbackHistory.map { song -> song.id to song.artistsText.orEmpty() },
-                    epochDay
-                ).map { mix -> mix to mix.songIds.mapNotNull(songsById::get) }
+                plannedMixes.map { mix -> mix to mix.songIds.mapNotNull(songsById::get) }
                     .filter { it.second.isNotEmpty() }
             }
             dailyMixes.forEachIndexed { index, (mix, mixSongs) ->

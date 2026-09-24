@@ -114,9 +114,10 @@ fun Controls(
         Database.likedAt(mediaId).distinctUntilChanged().collect { likedAt = it }
     }
 
-    val skipIconSize = if (carMode) 56.dp else 48.dp
-    val playButtonSize = if (carMode) 84.dp else 68.dp
-    val sideIconSize = 48.dp
+    val skipGlyph = if (carMode) 40.dp else 34.dp
+    val playButtonSize = if (carMode) 72.dp else 56.dp
+    val sideGlyph = if (carMode) 34.dp else 28.dp
+    val sideIconSize = if (carMode) 44.dp else 40.dp
 
     Column(
         horizontalAlignment = Alignment.CenterHorizontally,
@@ -277,62 +278,74 @@ fun Controls(
                 modifier = Modifier
                     .fillMaxWidth()
             ) {
-                IconButton(
+                LabeledTransportButton(
                     icon = R.drawable.infinite,
+                    label = strings.repeatShort,
                     color = if (trackLoopEnabled) colorPalette.accent else colorPalette.textSecondary,
-                    onClick = { trackLoopEnabled = !trackLoopEnabled },
-                    contentDescription = strings.repeatSong,
-                    modifier = Modifier.size(sideIconSize)
+                    glyph = sideGlyph,
+                    onClick = { trackLoopEnabled = !trackLoopEnabled }
                 )
 
-                IconButton(
+                LabeledTransportButton(
                     icon = R.drawable.play_skip_back,
+                    label = strings.previousSong,
                     color = colorPalette.text,
-                    onClick = binder.player::forceSeekToPrevious,
-                    contentDescription = strings.previousSong,
-                    modifier = Modifier.size(skipIconSize)
+                    glyph = skipGlyph,
+                    onClick = binder.player::forceSeekToPrevious
                 )
 
-                Box(
-                    modifier = Modifier
-                        .clip(CircleShape)
-                        .background(colorPalette.text)
-                        .clickable(role = Role.Button) {
-                            if (shouldBePlaying) {
-                                binder.player.pause()
-                            } else {
-                                if (binder.player.playbackState == Player.STATE_IDLE) {
-                                    binder.player.prepare()
-                                }
-                                binder.player.play()
-                            }
-                        }
-                        .size(playButtonSize)
-                ) {
-                    Image(
-                        painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
-                        contentDescription = if (shouldBePlaying) strings.pause else strings.play,
-                        colorFilter = ColorFilter.tint(colorPalette.background0),
+                Column(horizontalAlignment = Alignment.CenterHorizontally) {
+                    Box(
                         modifier = Modifier
-                            .align(Alignment.Center)
-                            .size(if (carMode) 34.dp else 28.dp)
+                            .clip(CircleShape)
+                            .background(colorPalette.text)
+                            .clickable(role = Role.Button) {
+                                if (shouldBePlaying) {
+                                    binder.player.pause()
+                                } else {
+                                    if (binder.player.playbackState == Player.STATE_IDLE) {
+                                        binder.player.prepare()
+                                    }
+                                    binder.player.play()
+                                }
+                            }
+                            .size(playButtonSize)
+                    ) {
+                        Image(
+                            painter = painterResource(if (shouldBePlaying) R.drawable.pause else R.drawable.play),
+                            contentDescription = if (shouldBePlaying) strings.pause else strings.play,
+                            colorFilter = ColorFilter.tint(colorPalette.background0),
+                            modifier = Modifier
+                                .align(Alignment.Center)
+                                .size(if (carMode) 28.dp else 22.dp)
+                        )
+                    }
+                    BasicText(
+                        text = if (shouldBePlaying) strings.pauseShort else strings.play,
+                        style = typography.xxs.semiBold.copy(
+                            color = colorPalette.textSecondary,
+                            textAlign = TextAlign.Center
+                        ),
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.padding(top = 4.dp)
                     )
                 }
 
-                IconButton(
+                LabeledTransportButton(
                     icon = R.drawable.play_skip_forward,
+                    label = strings.nextSong,
                     color = colorPalette.text,
-                    onClick = binder.player::forceSeekToNext,
-                    contentDescription = strings.nextSong,
-                    modifier = Modifier.size(skipIconSize)
+                    glyph = skipGlyph,
+                    onClick = binder.player::forceSeekToNext
                 )
 
-                IconButton(
+                LabeledTransportButton(
                     icon = R.drawable.shuffle,
+                    label = strings.shuffle,
                     color = colorPalette.textSecondary,
-                    onClick = { binder.player.shuffleQueue(smartShuffle) },
-                    contentDescription = strings.shuffle,
-                    modifier = Modifier.size(sideIconSize)
+                    glyph = sideGlyph,
+                    onClick = { binder.player.shuffleQueue(smartShuffle) }
                 )
             }
         }
@@ -441,6 +454,38 @@ fun Controls(
         Spacer(
             modifier = Modifier
                 .weight(1f)
+        )
+    }
+}
+
+@Composable
+private fun LabeledTransportButton(
+    icon: Int,
+    label: String,
+    color: androidx.compose.ui.graphics.Color,
+    glyph: androidx.compose.ui.unit.Dp,
+    onClick: () -> Unit
+) {
+    val (_, typography) = LocalAppearance.current
+    Column(
+        horizontalAlignment = Alignment.CenterHorizontally,
+        modifier = Modifier
+            .clip(RoundedCornerShape(12.dp))
+            .clickable(role = Role.Button, onClick = onClick)
+            .padding(horizontal = 2.dp, vertical = 2.dp)
+    ) {
+        Image(
+            painter = painterResource(icon),
+            contentDescription = label,
+            colorFilter = ColorFilter.tint(color),
+            modifier = Modifier.size(glyph)
+        )
+        BasicText(
+            text = label,
+            style = typography.xxs.semiBold.copy(color = color, textAlign = TextAlign.Center),
+            maxLines = 1,
+            overflow = TextOverflow.Ellipsis,
+            modifier = Modifier.padding(top = 4.dp)
         )
     }
 }

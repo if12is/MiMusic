@@ -68,6 +68,8 @@ class UiStrings(private val language: AppLanguage) {
     val sleepTimerShort = t("Timer", "المؤقت")
     val moreTools = t("More", "المزيد")
     val repeatSong = t("Repeat song", "تكرار الأغنية")
+    val repeatShort = t("Repeat", "تكرار")
+    val pauseShort = t("Pause", "إيقاف")
     val modeAudio = t("Song", "صوت")
     val modeVideo = t("Video", "فيديو")
     val videoAvailableHint = t("A video is available for this track", "هذا المقطع متاح كفيديو أيضاً")
@@ -163,8 +165,8 @@ class UiStrings(private val language: AppLanguage) {
     val restoreTitle = t("Restore", "استعادة")
     val restoreDescription = t("Import the database from the external storage", "استيراد قاعدة البيانات من وحدة التخزين")
     val packageMoveDescription = t(
-        "This version is a separate app from the old ViMusic package. Export the database here before removing the old install, then import it in this one.",
-        "النسخة دي تطبيق منفصل عن حزمة ViMusic القديمة. صدّر قاعدة البيانات من هنا قبل حذف النسخة القديمة، ثم استوردها في النسخة الجديدة."
+        "MiMusic is a separate app from the old ViMusic install, so updating over that app will not happen. Export the database there, then import it here.",
+        "مي ميوزك تطبيق منفصل عن تثبيت ViMusic القديم، فالتحديث فوق النسخة القديمة مش هيحصل. صدّر قاعدة البيانات من هناك ثم استوردها هنا."
     )
     fun restoreOverwriteWarning(appName: String) = t(
         "Existing data will be overwritten.\n$appName will automatically close itself after restoring the database.",
@@ -564,10 +566,14 @@ class UiStrings(private val language: AppLanguage) {
     val dataUsage = t("Data used", "استهلاك البيانات")
     val crashLog = t("Send problem log", "إرسال سجل المشكلة")
     val crashLogDescription = t(
-        "The crash report stays on this device until you send it",
-        "تقرير العطل يفضل على الجهاز لحد ما تبعتّه"
+        "Stored on this device. Tap to email it with the app you choose.",
+        "متخزّن على الجهاز. اضغط عشان تبعته بالإيميل من التطبيق اللي تختاره."
     )
     val crashLogEmpty = t("No crash log yet", "لا يوجد سجل أعطال بعد")
+    val crashEmailMissing = t(
+        "No email app found. The report was copied instead.",
+        "مفيش تطبيق إيميل. التقرير اتنسخ بدل الإرسال."
+    )
     val removeDownloadConfirm = t(
         "Remove this downloaded song from the device?",
         "هل تريد حذف هذه الأغنية المنزّلة من الجهاز؟"
@@ -637,6 +643,7 @@ class UiStrings(private val language: AppLanguage) {
     val nextSong = t("Next", "التالي")
     val likeSong = t("Like", "إعجاب")
     val moreOptions = t("More options", "المزيد")
+    val queue = t("Queue", "القائمة")
     val selectItems = t("Select", "تحديد")
     val sortRecent = t("Recent", "الأحدث")
     val sortTitle = t("Title", "العنوان")
