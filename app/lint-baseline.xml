@@ -1,0 +1,3709 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<issues format="6" by="lint 8.7.3" type="baseline" client="gradle" dependencies="false" name="AGP (8.7.3)" variant="all" version="8.7.3">
+
+    <issue
+        id="ImpliedTouchscreenHardware"
+        message="Hardware feature `android.hardware.touchscreen` not explicitly marked as optional "
+        errorLine1="&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2=" ~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="2"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="InlinedApi"
+        message="Field requires API level 26 (current min is 21): `android.provider.Settings#ACTION_MANAGE_UNKNOWN_APP_SOURCES`"
+        errorLine1="            Settings.ACTION_MANAGE_UNKNOWN_APP_SOURCES,"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/GitHubUpdater.kt"
+            line="198"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="MissingIntentFilterForMediaSearch"
+        message="Missing `intent-filter` for action `android.media.action.MEDIA_PLAY_FROM_SEARCH`."
+        errorLine1="    &lt;application"
+        errorLine2="    ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="24"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="MissingLeanbackSupport"
+        message="Expecting `&lt;uses-feature android:name=&quot;android.software.leanback&quot; android:required=&quot;false&quot; />` tag"
+        errorLine1="&lt;manifest xmlns:android=&quot;http://schemas.android.com/apk/res/android&quot;>"
+        errorLine2=" ~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="2"
+            column="2"/>
+    </issue>
+
+    <issue
+        id="MissingOnPlayFromSearch"
+        message="This class does not override `onPlayFromSearch` from `MediaSession.Callback` The method should be overridden and implemented to support Voice search on Android Auto."
+        errorLine1="    private inner class SessionCallback("
+        errorLine2="                        ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerMediaBrowserService.kt"
+            line="263"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="MissingOnPlayFromSearch"
+        message="This class does not override `onPlayFromSearch` from `MediaSession.Callback` The method should be overridden and implemented to support Voice search on Android Auto."
+        errorLine1="    private class SessionCallback(private val player: Player) : MediaSession.Callback() {"
+        errorLine2="                  ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1671"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`&lt;it.vfsfitvnm.vimusic.service.PlaybackTileService>` requires API level 24 (current min is 21)"
+        errorLine1="        &lt;service"
+        errorLine2="        ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="142"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:enforceNavigationBarContrast` requires API level 29 (current min is 21)"
+        errorLine1="        &lt;item name=&quot;android:enforceNavigationBarContrast&quot;>false&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values-night/themes.xml"
+            line="10"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="NewApi"
+        message="`android:enforceNavigationBarContrast` requires API level 29 (current min is 21)"
+        errorLine1="        &lt;item name=&quot;android:enforceNavigationBarContrast&quot;>false&lt;/item>"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/values/themes.xml"
+            line="10"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `networkSecurityConfig` is only used in API level 24 and higher (current min is 21)"
+        errorLine1="        android:networkSecurityConfig=&quot;@xml/network_security_config&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="29"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `resizeableActivity` is only used in API level 24 and higher (current min is 21)"
+        errorLine1="        android:resizeableActivity=&quot;true&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="37"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `supportsPictureInPicture` is only used in API level 24 and higher (current min is 21)"
+        errorLine1="            android:supportsPictureInPicture=&quot;true&quot;"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="44"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `shortcutId` is only used in API level 25 and higher (current min is 21)"
+        errorLine1="        android:shortcutId=&quot;search&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/shortcuts.xml"
+            line="6"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `shortcutShortLabel` is only used in API level 25 and higher (current min is 21)"
+        errorLine1="        android:shortcutShortLabel=&quot;@string/shortcut_search&quot;>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/shortcuts.xml"
+            line="7"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `shortcutId` is only used in API level 25 and higher (current min is 21)"
+        errorLine1="        android:shortcutId=&quot;favorites&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/shortcuts.xml"
+            line="16"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `shortcutShortLabel` is only used in API level 25 and higher (current min is 21)"
+        errorLine1="        android:shortcutShortLabel=&quot;@string/shortcut_favorites&quot;>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/shortcuts.xml"
+            line="17"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `shortcutId` is only used in API level 25 and higher (current min is 21)"
+        errorLine1="        android:shortcutId=&quot;offline&quot;"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/shortcuts.xml"
+            line="26"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `shortcutShortLabel` is only used in API level 25 and higher (current min is 21)"
+        errorLine1="        android:shortcutShortLabel=&quot;@string/shortcut_offline&quot;>"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/shortcuts.xml"
+            line="27"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnusedAttribute"
+        message="Attribute `previewLayout` is only used in API level 31 and higher (current min is 21)"
+        errorLine1="    android:previewLayout=&quot;@layout/widget_player&quot;"
+        errorLine2="    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/res/xml/widget_player_info.xml"
+            line="6"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="AppBundleLocaleChanges"
+        message="Found dynamic locale changes, but did not find corresponding Play Core library calls for downloading languages and splitting by language is not disabled in the `bundle` configuration"
+        errorLine1="        configuration.setLocale(language.locale)"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/Language.kt"
+            line="35"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="64"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="68"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="72"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="76"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="80"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="84"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="88"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="92"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="96"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="IntentFilterUniqueDataAttributes"
+        message="Consider splitting data tag into multiple tags with individual attributes to avoid confusion"
+        errorLine1="                &lt;data"
+        errorLine2="                ^">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="100"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="PictureInPictureIssue"
+        message="An activity in this app supports picture-in-picture and the targetSdkVersion is 31 or above; it is therefore strongly recommended to call both `setAutoEnterEnabled(true)` and `setSourceRectHint(...)`"
+        errorLine1="    &lt;application"
+        errorLine2="     ~~~~~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="24"
+            column="6"/>
+    </issue>
+
+    <issue
+        id="VectorRaster"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
+        errorLine1="    android:width=&quot;512dp&quot;"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/drawable/chevron_up.xml"
+            line="2"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="VectorRaster"
+        message="Limit vector icons sizes to 200×200 to keep icon drawing fast; see https://developer.android.com/studio/write/vector-asset-studio#when for more"
+        errorLine1="    android:width=&quot;320dp&quot;"
+        errorLine2="                   ~~~~~">
+        <location
+            file="src/main/res/drawable/ic_banner_foreground.xml"
+            line="2"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        binder?.cache?.let { cache ->"
+        errorLine2="                             ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/settings/CacheSettings.kt"
+            line="108"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    cache.cacheSpace"
+        errorLine2="                          ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/settings/CacheSettings.kt"
+            line="111"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        binder?.downloadCache?.let { downloads ->"
+        errorLine2="                                     ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/settings/CacheSettings.kt"
+            line="137"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                derivedStateOf { downloads.cacheSpace }"
+        errorLine2="                                           ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/settings/CacheSettings.kt"
+            line="139"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                bundle?.let(MediaItem::fromBundle)"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/Database.kt"
+            line="697"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return mediaItem?.toBundle()?.let { persistableBundle ->"
+        errorLine2="                          ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/Database.kt"
+            line="704"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        .setCustomCacheKey(mediaId)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/ExtraSources.kt"
+            line="14"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        .setCustomCacheKey(id)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/LocalDeviceSongs.kt"
+            line="89"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    binder?.cache?.removeResource(song.id)"
+        errorLine2="                                   ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/components/themed/MediaItemMenu.kt"
+            line="112"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="class PlayableFormatNotFoundException : PlaybackException(null, null, ERROR_CODE_REMOTE_ERROR)"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlaybackExceptions.kt"
+            line="5"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="class UnplayableException : PlaybackException(null, null, ERROR_CODE_REMOTE_ERROR)"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlaybackExceptions.kt"
+            line="7"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="class LoginRequiredException : PlaybackException(null, null, ERROR_CODE_REMOTE_ERROR)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlaybackExceptions.kt"
+            line="9"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="class VideoIdMismatchException : PlaybackException(null, null, ERROR_CODE_REMOTE_ERROR)"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlaybackExceptions.kt"
+            line="11"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        putExtra(AudioEffect.EXTRA_AUDIO_SESSION, binder.player.audioSessionId)"
+        errorLine2="                                                                                ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Player.kt"
+            line="497"
+            column="81"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        private val cache: Cache,"
+        errorLine2="                           ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerMediaBrowserService.kt"
+            line="265"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        private val downloadCache: Cache"
+        errorLine2="                                   ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerMediaBrowserService.kt"
+            line="266"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                downloadCache.isCached(song.song.id, 0, length)"
+        errorLine2="                                              ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerMediaBrowserService.kt"
+            line="300"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private lateinit var cache: SimpleCache"
+        errorLine2="                                ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="174"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private lateinit var downloadCache: SimpleCache"
+        errorLine2="                                        ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="175"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val cacheEvictor = when (val size ="
+        errorLine2="            ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="260"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            ExoPlayerDiskCacheMaxSize.Unlimited -> NoOpCacheEvictor()"
+        errorLine2="                                                   ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="262"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            else -> LeastRecentlyUsedCacheEvictor(size.bytes)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="263"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val databaseProvider = StandaloneDatabaseProvider(this)"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="282"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val databaseProvider = StandaloneDatabaseProvider(this)"
+        errorLine2="                               ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="282"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        cache = SimpleCache(directory, cacheEvictor, databaseProvider)"
+        errorLine2="        ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="283"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        cache = SimpleCache(directory, cacheEvictor, databaseProvider)"
+        errorLine2="                ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="283"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            runCatching { cache.keys.toList().forEach(cache::removeResource) }"
+        errorLine2="                                ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="287"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            runCatching { cache.keys.toList().forEach(cache::removeResource) }"
+        errorLine2="                                                      ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="287"
+            column="55"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        downloadCache = SimpleCache("
+        errorLine2="        ~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="290"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        downloadCache = SimpleCache("
+        errorLine2="                        ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="290"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            NoOpCacheEvictor(),"
+        errorLine2="            ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="292"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        player = ExoPlayer.Builder(this, createRendersFactory(), createMediaSourceFactory())"
+        errorLine2="                           ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="296"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUsePlatformDiagnostics(false)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="306"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING"
+        errorLine2="        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="309"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING"
+        errorLine2="               ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="309"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        player.videoScalingMode = C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="309"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        player.skipSilenceEnabled = preferences.getBoolean(skipSilenceKey, false)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="317"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        player.addAnalyticsListener(PlaybackStatsListener(false, this))"
+        errorLine2="                                    ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="320"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        cache.release()"
+        errorLine2="              ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="373"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        downloadCache.release()"
+        errorLine2="                      ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="374"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun onPlaybackStatsReady("
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="392"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        eventTime: AnalyticsListener.EventTime,"
+        errorLine2="                   ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="393"
+            column="20"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        playbackStats: PlaybackStats"
+        errorLine2="                       ~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="394"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window()).mediaItem"
+        errorLine2="                      ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="397"
+            column="23"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            eventTime.timeline.getWindow(eventTime.windowIndex, Timeline.Window()).mediaItem"
+        errorLine2="                                                   ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="397"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val totalPlayTimeMs = playbackStats.totalPlayTimeMs"
+        errorLine2="                                            ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="399"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            .setCustomCacheKey(mediaItem.mediaItem.mediaId)"
+        errorLine2="                             ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="543"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            loudnessEnhancer = LoudnessEnhancer(player.audioSessionId)"
+        errorLine2="                                                       ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="572"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.audioSessionId)"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="655"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                putExtra(AudioEffect.EXTRA_AUDIO_SESSION, player.audioSessionId)"
+        errorLine2="                                                                 ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="665"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            skipSilenceKey -> player.skipSilenceEnabled = sharedPreferences.getBoolean(key, false)"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="804"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val metadataLength = ContentMetadata.getContentLength(downloadCache.getContentMetadata(mediaId))"
+        errorLine2="                                             ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="969"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val metadataLength = ContentMetadata.getContentLength(downloadCache.getContentMetadata(mediaId))"
+        errorLine2="                                                                            ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="969"
+            column="77"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val cachedBytes = downloadCache.getCachedBytes(mediaId, 0, Long.MAX_VALUE)"
+        errorLine2="                                        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="972"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return downloadCache.isCached(mediaId, 0, length)"
+        errorLine2="                             ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1007"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setConnectTimeoutMs(16000)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1035"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setReadTimeoutMs(8000)"
+        errorLine2="             ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1036"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUserAgent("
+        errorLine2="             ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1037"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setDefaultRequestProperties("
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1040"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setConnectTimeoutMs(16000)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1047"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setReadTimeoutMs(8000)"
+        errorLine2="             ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1048"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUserAgent(&quot;com.google.android.youtube/21.26.364 (Linux; U; Android 11) gzip&quot;)"
+        errorLine2="             ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1049"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return DataSource.Factory {"
+        errorLine2="                                  ^">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1051"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                googlevideo = youtube.createDataSource(),"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1053"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                other = browser.createDataSource(),"
+        errorLine2="                                ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1054"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val downloadSourceFactory = CacheDataSource.Factory()"
+        errorLine2="            ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1061"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val downloadSourceFactory = CacheDataSource.Factory()"
+        errorLine2="                                                    ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1061"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setCache(downloadCache)"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1062"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUpstreamDataSourceFactory(createHttpDataSourceFactory())"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1063"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setCacheWriteDataSinkFactory(null)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1064"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1065"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setFlags(CacheDataSource.FLAG_IGNORE_CACHE_ON_ERROR)"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1065"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val onlineFactory = CacheDataSource.Factory()"
+        errorLine2="            ~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1067"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val onlineFactory = CacheDataSource.Factory()"
+        errorLine2="                                            ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1067"
+            column="45"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setCache(cache)"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1068"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUpstreamDataSourceFactory(downloadSourceFactory)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1069"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val offlineFactory = CacheDataSource.Factory()"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1073"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val offlineFactory = CacheDataSource.Factory()"
+        errorLine2="                                             ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1073"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setCache(downloadCache)"
+        errorLine2="             ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1074"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setCacheWriteDataSinkFactory(null)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1075"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUpstreamDataSourceFactory("
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1076"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                CacheDataSource.Factory()"
+        errorLine2="                                ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1077"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setCache(cache)"
+        errorLine2="                     ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1078"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setCacheWriteDataSinkFactory(null)"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1079"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setUpstreamDataSourceFactory { PlaceholderDataSource.INSTANCE }"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1080"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setUpstreamDataSourceFactory { PlaceholderDataSource.INSTANCE }"
+        errorLine2="                                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1080"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setUpstreamDataSourceFactory { PlaceholderDataSource.INSTANCE }"
+        errorLine2="                                                                          ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1080"
+            column="75"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return DataSource.Factory {"
+        errorLine2="                                  ^">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1083"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                offline = offlineFactory.createDataSource(),"
+        errorLine2="                                         ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1085"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                online = onlineFactory.createDataSource()"
+        errorLine2="                                       ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1086"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private fun offlineDataSpec(dataSpec: DataSpec, videoId: String): DataSpec ="
+        errorLine2="                                          ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1091"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private fun offlineDataSpec(dataSpec: DataSpec, videoId: String): DataSpec ="
+        errorLine2="                                                                      ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1091"
+            column="71"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        dataSpec.buildUpon()"
+        errorLine2="                 ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1092"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setUri(Uri.Builder().scheme(OFFLINE_SCHEME).authority(videoId).build())"
+        errorLine2="             ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1093"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setKey(videoId)"
+        errorLine2="             ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1094"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .build()"
+        errorLine2="             ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1095"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private fun applyResolvedUri(dataSpec: DataSpec, resolved: ResolvedUri, chunkLength: Long): DataSpec {"
+        errorLine2="                                           ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1111"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private fun applyResolvedUri(dataSpec: DataSpec, resolved: ResolvedUri, chunkLength: Long): DataSpec {"
+        errorLine2="                                                                                                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1111"
+            column="97"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val withUri = dataSpec.withUri(resolved.uri)"
+        errorLine2="            ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1112"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val withUri = dataSpec.withUri(resolved.uri)"
+        errorLine2="                               ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1112"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            withUri.subrange(dataSpec.uriPositionOffset, chunkLength)"
+        errorLine2="                    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1116"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            withUri.subrange(dataSpec.uriPositionOffset, chunkLength)"
+        errorLine2="                                      ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1116"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return ResolvingDataSource.Factory("
+        errorLine2="                                   ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1138"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        ) { rawDataSpec ->"
+        errorLine2="            ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1140"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val videoId = (rawDataSpec.key ?: error(&quot;A key must be set&quot;)).removeSuffix(VIDEO_KEY_SUFFIX)"
+        errorLine2="                                       ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1143"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val dataSpec = rawDataSpec.buildUpon().setKey(videoId).build()"
+        errorLine2="                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1144"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val dataSpec = rawDataSpec.buildUpon().setKey(videoId).build()"
+        errorLine2="                                       ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1144"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val dataSpec = rawDataSpec.buildUpon().setKey(videoId).build()"
+        errorLine2="                                                   ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1144"
+            column="52"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val dataSpec = rawDataSpec.buildUpon().setKey(videoId).build()"
+        errorLine2="                                                                   ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1144"
+            column="68"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val uri = dataSpec.uri"
+        errorLine2="                               ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1145"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val requestedLength = dataSpec.length.takeIf { it != C.LENGTH_UNSET.toLong() } ?: 1L"
+        errorLine2="                                           ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1176"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val hasPartialCache = isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||"
+        errorLine2="                                                                                 ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1177"
+            column="82"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                isRangeCached(cache, videoId, dataSpec.position, requestedLength)"
+        errorLine2="                                                       ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1178"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val streamSpec = dataSpec.buildUpon().setKey(streamKey).build()"
+        errorLine2="                ~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1202"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val streamSpec = dataSpec.buildUpon().setKey(streamKey).build()"
+        errorLine2="                                      ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1202"
+            column="39"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val streamSpec = dataSpec.buildUpon().setKey(streamKey).build()"
+        errorLine2="                                                  ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1202"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val streamSpec = dataSpec.buildUpon().setKey(streamKey).build()"
+        errorLine2="                                                                    ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1202"
+            column="69"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                else -> throw PlaybackException("
+        errorLine2="                                              ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1269"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            throw PlaybackException("
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1286"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return DefaultMediaSourceFactory(createDataSourceFactory(), createExtractorsFactory())"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1299"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private fun createExtractorsFactory(): ExtractorsFactory {"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1302"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return DefaultExtractorsFactory()"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1303"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setMp4ExtractorFlags(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1304"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setMp4ExtractorFlags(Mp4Extractor.FLAG_WORKAROUND_IGNORE_EDIT_LISTS)"
+        errorLine2="                                               ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1304"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    private fun createRendersFactory(): RenderersFactory {"
+        errorLine2="                                        ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1307"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val audioSink: AudioSink = DefaultAudioSink.Builder(this)"
+        errorLine2="                       ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1308"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val audioSink: AudioSink = DefaultAudioSink.Builder(this)"
+        errorLine2="                                                    ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1308"
+            column="53"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setEnableFloatOutput(false)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1309"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setEnableAudioTrackPlaybackParams(false)"
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1310"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .setAudioProcessorChain("
+        errorLine2="             ~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1311"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                DefaultAudioProcessorChain("
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1312"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    SilenceSkippingAudioProcessor("
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1314"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    SonicAudioProcessor()"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1321"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            .build()"
+        errorLine2="             ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1324"
+            column="14"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->"
+        errorLine2="               ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1326"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->"
+        errorLine2="                                ^">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1326"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->"
+        errorLine2="                                                     ~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1326"
+            column="54"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->"
+        errorLine2="                                                                       ~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1326"
+            column="72"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->"
+        errorLine2="                                                                                                    ~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1326"
+            column="101"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return RenderersFactory { handler: Handler?, _, audioListener: AudioRendererEventListener?, _, _ ->"
+        errorLine2="                                                                                                       ~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1326"
+            column="104"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                MediaCodecVideoRenderer(this, MediaCodecSelector.DEFAULT),"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1328"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                MediaCodecVideoRenderer(this, MediaCodecSelector.DEFAULT),"
+        errorLine2="                                                                 ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1328"
+            column="66"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                MediaCodecAudioRenderer("
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1329"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    MediaCodecSelector.DEFAULT,"
+        errorLine2="                                       ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1331"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                .setCustomCacheKey(if (enabled) mediaId + VIDEO_KEY_SUFFIX else mediaId)"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1382"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            return isFullyDownloaded(mediaId) || cache.isCached(mediaId, 0, contentLength)"
+        errorLine2="                                                       ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1469"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                val source = CacheDataSource.Factory()"
+        errorLine2="                    ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1514"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                val source = CacheDataSource.Factory()"
+        errorLine2="                                             ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1514"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setCache(this@PlayerService.downloadCache)"
+        errorLine2="                     ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1515"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setUpstreamDataSourceFactory(createHttpDataSourceFactory())"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1516"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .createDataSource()"
+        errorLine2="                     ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1517"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                val spec = DataSpec.Builder()"
+        errorLine2="                    ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1518"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                val spec = DataSpec.Builder()"
+        errorLine2="                                    ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1518"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setUri(&quot;https://youtube.com/watch?v=$mediaId&quot;.toUri())"
+        errorLine2="                     ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1519"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setKey(mediaId)"
+        errorLine2="                     ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1520"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .setLength(length)"
+        errorLine2="                     ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1521"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    .build()"
+        errorLine2="                     ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1522"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    source.open(spec)"
+        errorLine2="                           ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1524"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            val read = source.read(buffer, 0, buffer.size)"
+        errorLine2="                                              ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1528"
+            column="47"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            if (read == C.RESULT_END_OF_INPUT) break"
+        errorLine2="                                          ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1529"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                runCatching { source.close() }"
+        errorLine2="                                     ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1534"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    downloadCache.removeResource(mediaId)"
+        errorLine2="                                  ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1559"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    val writerSource = CacheDataSource.Factory()"
+        errorLine2="                        ~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1576"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    val writerSource = CacheDataSource.Factory()"
+        errorLine2="                                                       ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1576"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        .setCache(this@PlayerService.downloadCache)"
+        errorLine2="                         ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1577"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        .setUpstreamDataSourceFactory(createHttpDataSourceFactory())"
+        errorLine2="                         ~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1578"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        .createDataSource()"
+        errorLine2="                         ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1579"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        CacheWriter("
+        errorLine2="                        ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1583"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            DataSpec.Builder().setUri(url).setKey(mediaId).build(),"
+        errorLine2="                                     ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1585"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            DataSpec.Builder().setUri(url).setKey(mediaId).build(),"
+        errorLine2="                                               ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1585"
+            column="48"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            DataSpec.Builder().setUri(url).setKey(mediaId).build(),"
+        errorLine2="                                                           ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1585"
+            column="60"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            DataSpec.Builder().setUri(url).setKey(mediaId).build(),"
+        errorLine2="                                                                           ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1585"
+            column="76"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        ).cache()"
+        errorLine2="                          ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1588"
+            column="27"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            CacheWriter("
+        errorLine2="                            ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1596"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                DataSpec.Builder()"
+        errorLine2="                                         ~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1598"
+            column="42"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                    .setUri(url)"
+        errorLine2="                                     ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1599"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                    .setKey(mediaId)"
+        errorLine2="                                     ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1600"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                    .setPosition(position)"
+        errorLine2="                                     ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1601"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                    .setLength(length)"
+        errorLine2="                                     ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1602"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                                    .build(),"
+        errorLine2="                                     ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1603"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            ).cache()"
+        errorLine2="                              ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1606"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    downloadCache.applyContentMetadataMutations("
+        errorLine2="                                  ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1614"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        ContentMetadataMutations.setContentLength("
+        errorLine2="                                                 ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1616"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            ContentMetadataMutations(),"
+        errorLine2="                            ~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1617"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            runCatching { downloadCache.removeResource(mediaId) }"
+        errorLine2="                                                        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1646"
+            column="57"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            this@PlayerService.downloadCache.removeResource(mediaId)"
+        errorLine2="                                             ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1657"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            this@PlayerService.downloadCache.keys.toList().forEach { key ->"
+        errorLine2="                                             ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1664"
+            column="46"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                this@PlayerService.downloadCache.removeResource(key)"
+        errorLine2="                                                 ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1665"
+            column="50"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        fun isRangeCached(cache: Cache, key: String, position: Long, length: Long): Boolean {"
+        errorLine2="                                 ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1738"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            return cache.getCachedLength(key, position, length) > 0"
+        errorLine2="                         ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1739"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun addTransferListener(transferListener: TransferListener) {"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1751"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun addTransferListener(transferListener: TransferListener) {"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1751"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        googlevideo.addTransferListener(transferListener)"
+        errorLine2="                    ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1752"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        other.addTransferListener(transferListener)"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1753"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        local.addTransferListener(transferListener)"
+        errorLine2="              ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1754"
+            column="15"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun open(dataSpec: DataSpec): Long {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1757"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun open(dataSpec: DataSpec): Long {"
+        errorLine2="                                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1757"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val host = dataSpec.uri.host.orEmpty()"
+        errorLine2="                            ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1758"
+            column="29"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            dataSpec.uri.scheme.equals(&quot;http&quot;, ignoreCase = true) &amp;&amp;"
+        errorLine2="                     ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1761"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                it.vfsfitvnm.vimusic.utils.CleartextPolicy.allows(dataSpec.uri.toString()) -> local"
+        errorLine2="                                                                           ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1762"
+            column="76"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active!!.open(dataSpec)"
+        errorLine2="                        ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1765"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1768"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT"
+        errorLine2="                       ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1769"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT"
+        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1769"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getUri(): Uri? = active?.uri"
+        errorLine2="                 ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1772"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getUri(): Uri? = active?.uri"
+        errorLine2="                                          ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1772"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getResponseHeaders(): Map&lt;String, List&lt;String>> {"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1774"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active?.responseHeaders ?: emptyMap()"
+        errorLine2="                       ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1775"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun close() {"
+        errorLine2="                 ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1778"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        active?.close()"
+        errorLine2="                ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1779"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun addTransferListener(transferListener: TransferListener) {"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1791"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun addTransferListener(transferListener: TransferListener) {"
+        errorLine2="                                                       ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1791"
+            column="56"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        offline.addTransferListener(transferListener)"
+        errorLine2="                ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1792"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        online.addTransferListener(transferListener)"
+        errorLine2="               ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1793"
+            column="16"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun open(dataSpec: DataSpec): Long {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1796"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun open(dataSpec: DataSpec): Long {"
+        errorLine2="                                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1796"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        active = if (dataSpec.uri.scheme == &quot;mimusic-offline&quot;) offline else online"
+        errorLine2="                              ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1797"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active!!.open(dataSpec)"
+        errorLine2="                        ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1798"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1801"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT"
+        errorLine2="                       ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1802"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active?.read(buffer, offset, length) ?: C.RESULT_END_OF_INPUT"
+        errorLine2="                                                         ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1802"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getUri(): Uri? = active?.uri"
+        errorLine2="                 ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1805"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getUri(): Uri? = active?.uri"
+        errorLine2="                                          ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1805"
+            column="43"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getResponseHeaders(): Map&lt;String, List&lt;String>> {"
+        errorLine2="                 ~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1807"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        return active?.responseHeaders ?: emptyMap()"
+        errorLine2="                       ~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1808"
+            column="24"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun close() {"
+        errorLine2="                 ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1811"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        active?.close()"
+        errorLine2="                ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PlayerService.kt"
+            line="1812"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    putExtra(AudioEffect.EXTRA_AUDIO_SESSION, binder?.player?.audioSessionId)"
+        errorLine2="                                                                              ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/settings/PlayerSettings.kt"
+            line="218"
+            column="79"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="internal class PrivateHttpDataSource : BaseDataSource(true) {"
+        errorLine2="                                       ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="17"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="internal class PrivateHttpDataSource : BaseDataSource(true) {"
+        errorLine2="                                       ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="17"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun open(dataSpec: DataSpec): Long {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="23"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun open(dataSpec: DataSpec): Long {"
+        errorLine2="                                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="23"
+            column="33"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val uri = dataSpec.uri"
+        errorLine2="                           ~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="24"
+            column="28"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="26"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                                                          ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="26"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val host = uri.host ?: throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                                     ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="28"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val host = uri.host ?: throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                                                                             ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="28"
+            column="78"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val rangeHeader = if (dataSpec.position > 0 || dataSpec.length > 0) {"
+        errorLine2="                                       ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="37"
+            column="40"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val rangeHeader = if (dataSpec.position > 0 || dataSpec.length > 0) {"
+        errorLine2="                                                                ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="37"
+            column="65"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val end = if (dataSpec.length > 0) (dataSpec.position + dataSpec.length - 1).toString() else &quot;&quot;"
+        errorLine2="                                   ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="38"
+            column="36"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val end = if (dataSpec.length > 0) (dataSpec.position + dataSpec.length - 1).toString() else &quot;&quot;"
+        errorLine2="                                                         ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="38"
+            column="58"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val end = if (dataSpec.length > 0) (dataSpec.position + dataSpec.length - 1).toString() else &quot;&quot;"
+        errorLine2="                                                                             ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="38"
+            column="78"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            &quot;Range: bytes=${dataSpec.position}-$end\r\n&quot;"
+        errorLine2="                                     ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="39"
+            column="38"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            ?: throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                     ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="55"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            ?: throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                                                             ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="55"
+            column="62"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                  ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="58"
+            column="19"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            throw DataSourceException(DataSourceException.POSITION_OUT_OF_RANGE)"
+        errorLine2="                                                          ~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="58"
+            column="59"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun read(buffer: ByteArray, offset: Int, length: Int): Int {"
+        errorLine2="                 ~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="72"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        if (bytesRemaining == 0L) return C.RESULT_END_OF_INPUT"
+        errorLine2="                                           ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="74"
+            column="44"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        val read = input?.read(buffer, offset, toRead) ?: C.RESULT_END_OF_INPUT"
+        errorLine2="                                                            ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="76"
+            column="61"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        if (read == -1) return C.RESULT_END_OF_INPUT"
+        errorLine2="                                 ~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="77"
+            column="34"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        bytesTransferred(read)"
+        errorLine2="        ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="79"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun getUri(): Uri? = openedUri"
+        errorLine2="                 ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="83"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="    override fun close() {"
+        errorLine2="                 ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/service/PrivateHttpDataSource.kt"
+            line="85"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            mutableStateOf(binder.cache.getCachedBytes(mediaId, 0, -1))"
+        errorLine2="                                        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="65"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            val listener = object : Cache.Listener {"
+        errorLine2="                ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="103"
+            column="17"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanAdded(cache: Cache, span: CacheSpan) {"
+        errorLine2="                             ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="104"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanAdded(cache: Cache, span: CacheSpan) {"
+        errorLine2="                                                ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="104"
+            column="49"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanAdded(cache: Cache, span: CacheSpan) {"
+        errorLine2="                                                             ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="104"
+            column="62"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    cachedBytes += span.length"
+        errorLine2="                    ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="105"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    cachedBytes += span.length"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="105"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanRemoved(cache: Cache, span: CacheSpan) {"
+        errorLine2="                             ~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="108"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanRemoved(cache: Cache, span: CacheSpan) {"
+        errorLine2="                                                  ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="108"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanRemoved(cache: Cache, span: CacheSpan) {"
+        errorLine2="                                                               ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="108"
+            column="64"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    cachedBytes -= span.length"
+        errorLine2="                    ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="109"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                    cachedBytes -= span.length"
+        errorLine2="                                        ~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="109"
+            column="41"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanTouched(cache: Cache, oldSpan: CacheSpan, newSpan: CacheSpan) ="
+        errorLine2="                             ~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="112"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanTouched(cache: Cache, oldSpan: CacheSpan, newSpan: CacheSpan) ="
+        errorLine2="                                                  ~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="112"
+            column="51"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanTouched(cache: Cache, oldSpan: CacheSpan, newSpan: CacheSpan) ="
+        errorLine2="                                                                  ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="112"
+            column="67"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                override fun onSpanTouched(cache: Cache, oldSpan: CacheSpan, newSpan: CacheSpan) ="
+        errorLine2="                                                                                      ~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="112"
+            column="87"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="            binder.cache.addListener(mediaId, listener)"
+        errorLine2="                         ~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="116"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                binder.cache.removeListener(mediaId, listener)"
+        errorLine2="                             ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="119"
+            column="30"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        player.videoScalingMode ="
+        errorLine2="                        ~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Thumbnail.kt"
+            line="160"
+            column="25"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                        player.videoScalingMode ="
+        errorLine2="                               ~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Thumbnail.kt"
+            line="160"
+            column="32"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="                            C.VIDEO_SCALING_MODE_SCALE_TO_FIT_WITH_CROPPING"
+        errorLine2="                              ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Thumbnail.kt"
+            line="161"
+            column="31"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        .setCustomCacheKey(key)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/Utils.kt"
+            line="20"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        .setCustomCacheKey(key)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/Utils.kt"
+            line="43"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="UnsafeOptInUsageError"
+        message="This declaration is opt-in and its usage should be marked with `@androidx.media3.common.util.UnstableApi` or `@OptIn(markerClass = androidx.media3.common.util.UnstableApi.class)`"
+        errorLine1="        .setCustomCacheKey(id)"
+        errorLine2="         ~~~~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/Utils.kt"
+            line="76"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Controls.kt"
+            line="83"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ModifierParameter"
+        message="Modifier parameter should be the first optional parameter"
+        errorLine1="    modifier: Modifier = Modifier"
+        errorLine2="    ~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Thumbnail.kt"
+            line="68"
+            column="5"/>
+    </issue>
+
+    <issue
+        id="ExportedService"
+        message="Exported service does not require permission"
+        errorLine1="        &lt;service android:name=&quot;.service.PlayerMediaBrowserService&quot;"
+        errorLine2="         ~~~~~~~">
+        <location
+            file="src/main/AndroidManifest.xml"
+            line="123"
+            column="10"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(0)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/album/AlbumScreen.kt"
+            line="55"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(initialAnchor)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/components/BottomSheet.kt"
+            line="274"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf("
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/builtinplaylist/BuiltInPlaylistScreen.kt"
+            line="25"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="    var leadingIconId by mutableStateOf(0)"
+        errorLine2="                         ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/components/themed/GlassNavigationHost.kt"
+            line="15"
+            column="26"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="    var tabIndex by mutableStateOf(0)"
+        errorLine2="                    ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/components/themed/GlassNavigationHost.kt"
+            line="21"
+            column="21"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="                                    mutableStateOf(1)"
+        errorLine2="                                    ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/components/themed/MediaItemMenu.kt"
+            line="695"
+            column="37"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="            mutableStateOf(if (player.mediaItemCount == 0) -1 else player.currentMediaItemIndex)"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/Queue.kt"
+            line="141"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(context.preferences.getLong(lastPlayedPositionKey, 0L))"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/home/QuickPicks.kt"
+            line="139"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="    var reloadToken by remember { mutableStateOf(0) }"
+        errorLine2="                                  ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/home/QuickPicks.kt"
+            line="147"
+            column="35"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(firstVisibleItemIndex)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/ScrollingInfo.kt"
+            line="25"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(firstVisibleItemScrollOffset)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/ScrollingInfo.kt"
+            line="29"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(firstVisibleItemIndex)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/ScrollingInfo.kt"
+            line="53"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(firstVisibleItemScrollOffset)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/ScrollingInfo.kt"
+            line="57"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(value)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/ScrollingInfo.kt"
+            line="81"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(0)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/search/SearchScreen.kt"
+            line="40"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="        mutableStateOf(0)"
+        errorLine2="        ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/settings/SettingsScreen.kt"
+            line="58"
+            column="9"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableLongStateOf` instead of `mutableStateOf`"
+        errorLine1="            mutableStateOf(binder.cache.getCachedBytes(mediaId, 0, -1))"
+        errorLine2="            ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/ui/screens/player/StatsForNerds.kt"
+            line="65"
+            column="13"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="    var index by mutableStateOf(currentIndex)"
+        errorLine2="                 ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/SynchronizedLyrics.kt"
+            line="16"
+            column="18"/>
+    </issue>
+
+    <issue
+        id="AutoboxingStateCreation"
+        message="Prefer `mutableIntStateOf` instead of `mutableStateOf`"
+        errorLine1="    var wordIndex by mutableStateOf(currentWordIndex)"
+        errorLine2="                     ~~~~~~~~~~~~~~">
+        <location
+            file="src/main/kotlin/it/vfsfitvnm/vimusic/utils/SynchronizedLyrics.kt"
+            line="19"
+            column="22"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-hdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-mdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-xhdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-xxhdpi/ic_launcher.png"/>
+    </issue>
+
+    <issue
+        id="IconLauncherShape"
+        message="Launcher icons should not fill every pixel of their square region; see the design guide for details">
+        <location
+            file="src/main/res/mipmap-xxxhdpi/ic_launcher.png"/>
+    </issue>
+
+</issues>

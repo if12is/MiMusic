@@ -1051,7 +1051,8 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         return DataSource.Factory {
             HostSwitchDataSource(
                 googlevideo = youtube.createDataSource(),
-                other = browser.createDataSource()
+                other = browser.createDataSource(),
+                local = PrivateHttpDataSource()
             )
         }
     }
@@ -1171,24 +1172,29 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 }
             }
 
-            // Downloaded songs are always played from local storage, online or offline,
-            // without asking YouTube for a stream URL again.
-            if (isFullyDownloaded(videoId)) {
-                reportVideoState(
-                    videoId = videoId,
-                    hasVideo = null,
-                    playingVideo = downloadedMimeType(videoId)?.startsWith("video") == true
+            val fullyDownloaded = isFullyDownloaded(videoId)
+            val requestedLength = dataSpec.length.takeIf { it != C.LENGTH_UNSET.toLong() } ?: 1L
+            val hasPartialCache = isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
+                isRangeCached(cache, videoId, dataSpec.position, requestedLength)
+            when (
+                it.vfsfitvnm.vimusic.AppGraph.choosePlayback(
+                    fullyDownloaded = fullyDownloaded,
+                    offlineOrNoNetwork = preferences.getBoolean(offlineModeKey, false) || !hasNetwork(),
+                    hasPartialCache = hasPartialCache
                 )
-                return@Factory offlineDataSpec(dataSpec, videoId)
-            }
-
-            val isOffline = preferences.getBoolean(offlineModeKey, false) || !hasNetwork()
-            if (isOffline) {
-                val requestedLength = dataSpec.length.takeIf { it != C.LENGTH_UNSET.toLong() } ?: 1L
-                val hasLocalData = isRangeCached(downloadCache, videoId, dataSpec.position, requestedLength) ||
-                    isRangeCached(cache, videoId, dataSpec.position, requestedLength)
-                if (hasLocalData) return@Factory offlineDataSpec(dataSpec, videoId)
-                throw UnplayableException()
+            ) {
+                it.vfsfitvnm.vimusic.utils.PlaybackChoice.Downloaded -> {
+                    reportVideoState(
+                        videoId = videoId,
+                        hasVideo = null,
+                        playingVideo = downloadedMimeType(videoId)?.startsWith("video") == true
+                    )
+                    return@Factory offlineDataSpec(dataSpec, videoId)
+                }
+                it.vfsfitvnm.vimusic.utils.PlaybackChoice.LocalCache ->
+                    return@Factory offlineDataSpec(dataSpec, videoId)
+                it.vfsfitvnm.vimusic.utils.PlaybackChoice.Unavailable -> throw UnplayableException()
+                it.vfsfitvnm.vimusic.utils.PlaybackChoice.NeedNetwork -> Unit
             }
 
             val wantsVideo = preferences.getBoolean(videoModeKey, false)
@@ -1737,18 +1743,25 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
 
 private class HostSwitchDataSource(
     private val googlevideo: DataSource,
-    private val other: DataSource
+    private val other: DataSource,
+    private val local: DataSource
 ) : DataSource {
     private var active: DataSource? = null
 
     override fun addTransferListener(transferListener: TransferListener) {
         googlevideo.addTransferListener(transferListener)
         other.addTransferListener(transferListener)
+        local.addTransferListener(transferListener)
     }
 
     override fun open(dataSpec: DataSpec): Long {
         val host = dataSpec.uri.host.orEmpty()
-        active = if (host.contains("googlevideo", ignoreCase = true)) googlevideo else other
+        active = when {
+            host.contains("googlevideo", ignoreCase = true) -> googlevideo
+            dataSpec.uri.scheme.equals("http", ignoreCase = true) &&
+                it.vfsfitvnm.vimusic.utils.CleartextPolicy.allows(dataSpec.uri.toString()) -> local
+            else -> other
+        }
         return active!!.open(dataSpec)
     }
 

@@ -98,6 +98,10 @@ fun DatabaseSettings() {
     ) {
         Header(title = strings.database)
 
+        SettingsDescription(text = strings.packageMoveDescription)
+
+        SettingsGroupSpacer()
+
         SettingsEntryGroupText(title = strings.cleanup)
 
         SettingsEntry(

@@ -1,0 +1,43 @@
+build:
+  maxIssues: 0
+
+config:
+  validation: true
+
+processors:
+  active: false
+
+comments:
+  active: false
+
+style:
+  active: false
+
+naming:
+  active: false
+
+complexity:
+  LongMethod:
+    active: false
+  LongParameterList:
+    active: false
+  ComplexMethod:
+    active: false
+  TooManyFunctions:
+    active: false
+  LargeClass:
+    active: false
+  CyclomaticComplexMethod:
+    active: false
+  ComplexCondition:
+    active: false
+  NestedBlockDepth:
+    active: false
+
+exceptions:
+  SwallowedException:
+    active: false
+
+empty-blocks:
+  EmptyCatchBlock:
+    active: true

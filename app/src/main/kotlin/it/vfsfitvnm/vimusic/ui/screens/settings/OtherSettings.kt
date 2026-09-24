@@ -55,6 +55,7 @@ import it.vfsfitvnm.vimusic.utils.pauseSearchHistoryKey
 import it.vfsfitvnm.vimusic.utils.podcastFeedsKey
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.rememberSecret
 import it.vfsfitvnm.vimusic.utils.toast
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.distinctUntilChanged
@@ -104,11 +105,11 @@ fun OtherSettings() {
     var appLock by rememberPreference(appLockKey, false)
     var hideFromRecents by rememberPreference(hideFromRecentsKey, false)
     var listenBrainzEnabled by rememberPreference(listenBrainzEnabledKey, false)
-    var listenBrainzToken by rememberPreference(listenBrainzTokenKey, "")
+    var listenBrainzToken by rememberSecret(listenBrainzTokenKey, "")
     var podcastFeeds by rememberPreference(podcastFeedsKey, "")
     var jellyfinServer by rememberPreference(jellyfinServerKey, "")
     var jellyfinUser by rememberPreference(jellyfinUserKey, "")
-    var jellyfinPassword by rememberPreference(jellyfinPasswordKey, "")
+    var jellyfinPassword by rememberSecret(jellyfinPasswordKey, "")
     var editingToken by remember { mutableStateOf(false) }
     var editingFeeds by remember { mutableStateOf(false) }
     var editingServer by remember { mutableStateOf(false) }

@@ -5,8 +5,6 @@ import androidx.core.content.edit
 import it.vfsfitvnm.innertube.utils.ExtraMediaIds
 import it.vfsfitvnm.innertube.utils.ExtraTrack
 import org.json.JSONObject
-import java.net.HttpURLConnection
-import java.net.URL
 import java.util.Locale
 
 const val jellyfinServerKey = "jellyfinServer"
@@ -19,30 +17,29 @@ object Jellyfin {
     fun connect(preferences: SharedPreferences): Boolean {
         val server = normalizeServer(preferences.getString(jellyfinServerKey, null)) ?: return false
         val user = preferences.getString(jellyfinUserKey, null)?.trim().orEmpty()
-        val password = preferences.getString(jellyfinPasswordKey, null).orEmpty()
+        val password = SecretStore.get(jellyfinPasswordKey)
         if (user.isEmpty()) return false
 
         val body = JSONObject()
             .put("Username", user)
             .put("Pw", password)
             .toString()
-        val response = httpJson(
-            url = "$server/Users/AuthenticateByName",
-            method = "POST",
-            headers = mapOf(
-                "Content-Type" to "application/json",
-                "X-Emby-Authorization" to embyHeader()
-            ),
-            body = body
+        val json = JSONObject(
+            exchangeHttp(
+                url = "$server/Users/AuthenticateByName",
+                method = "POST",
+                headers = mapOf(
+                    "Content-Type" to "application/json",
+                    "X-Emby-Authorization" to embyHeader()
+                ),
+                body = body
+            )
         )
-        val json = JSONObject(response)
         val token = json.optString("AccessToken")
         val userId = json.optJSONObject("User")?.optString("Id").orEmpty()
         if (token.isBlank() || userId.isBlank()) return false
-        preferences.edit {
-            putString(jellyfinTokenKey, token)
-            putString(jellyfinUserIdKey, userId)
-        }
+        SecretStore.put(jellyfinTokenKey, token)
+        preferences.edit { putString(jellyfinUserIdKey, userId) }
         return true
     }
 
@@ -62,7 +59,7 @@ object Jellyfin {
             }
             append("&Fields=PrimaryImageAspectRatio,BasicSyncInfo")
         }
-        val json = JSONObject(httpGet(url, mapOf("X-Emby-Token" to session.token)))
+        val json = JSONObject(exchangeHttp(url, headers = mapOf("X-Emby-Token" to session.token)))
         val items = json.optJSONArray("Items") ?: return emptyList()
         val tracks = ArrayList<ExtraTrack>(items.length())
         for (index in 0 until items.length()) {
@@ -106,7 +103,7 @@ object Jellyfin {
 
     private fun session(preferences: SharedPreferences): Session? {
         val server = normalizeServer(preferences.getString(jellyfinServerKey, null)) ?: return null
-        val token = preferences.getString(jellyfinTokenKey, null)?.trim().orEmpty()
+        val token = SecretStore.get(jellyfinTokenKey)
         val userId = preferences.getString(jellyfinUserIdKey, null)?.trim().orEmpty()
         if (token.isEmpty() || userId.isEmpty()) return null
         return Session(server, token, userId)
@@ -114,7 +111,9 @@ object Jellyfin {
 
     private fun normalizeServer(raw: String?): String? {
         val value = raw?.trim()?.trimEnd('/') ?: return null
-        return value.takeIf { it.startsWith("http://") || it.startsWith("https://") }
+        if (!value.startsWith("http://") && !value.startsWith("https://")) return null
+        if (!CleartextPolicy.allows(value)) return null
+        return value
     }
 
     private fun embyHeader(): String {
@@ -127,27 +126,5 @@ object Jellyfin {
         val minutes = total / 60
         val secs = total % 60
         return String.format(Locale.US, "%d:%02d", minutes, secs)
-    }
-
-    private fun httpJson(
-        url: String,
-        method: String,
-        headers: Map<String, String>,
-        body: String
-    ): String {
-        val connection = (URL(url).openConnection() as HttpURLConnection).apply {
-            requestMethod = method
-            connectTimeout = 15_000
-            readTimeout = 15_000
-            doOutput = true
-            headers.forEach { (name, value) -> setRequestProperty(name, value) }
-        }
-        connection.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
-        val stream = if (connection.responseCode >= 400) connection.errorStream else connection.inputStream
-        val text = stream?.bufferedReader(Charsets.UTF_8)?.use { it.readText() }.orEmpty()
-        val code = connection.responseCode
-        connection.disconnect()
-        if (code !in 200..299) error("Jellyfin HTTP $code")
-        return text
     }
 }

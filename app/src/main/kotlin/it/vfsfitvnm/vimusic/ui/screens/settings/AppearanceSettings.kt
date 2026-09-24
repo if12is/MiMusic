@@ -15,6 +15,7 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalContext
@@ -32,17 +33,21 @@ import it.vfsfitvnm.vimusic.utils.LocalStrings
 import it.vfsfitvnm.vimusic.utils.appFontKey
 import it.vfsfitvnm.vimusic.utils.appLanguageKey
 import it.vfsfitvnm.vimusic.utils.applyFontPaddingKey
+import it.vfsfitvnm.vimusic.utils.contentRegionKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteModeKey
 import it.vfsfitvnm.vimusic.utils.colorPaletteNameKey
 import it.vfsfitvnm.vimusic.utils.isAtLeastAndroid13
 import it.vfsfitvnm.vimusic.utils.isShowingThumbnailInLockscreenKey
 import it.vfsfitvnm.vimusic.utils.rememberPreference
+import it.vfsfitvnm.vimusic.utils.Region
 import it.vfsfitvnm.vimusic.utils.navigationStyleKey
 import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.selectedAppFont
 import it.vfsfitvnm.vimusic.utils.thumbnailRoundnessKey
 import it.vfsfitvnm.vimusic.utils.lyricsScaleKey
 import it.vfsfitvnm.vimusic.utils.lowPowerModeKey
+import java.util.Locale
+import kotlinx.coroutines.launch
 
 @ExperimentalAnimationApi
 @Composable
@@ -50,6 +55,7 @@ fun AppearanceSettings() {
     val (colorPalette) = LocalAppearance.current
     val strings = LocalStrings.current
     val context = LocalContext.current
+    val scope = rememberCoroutineScope()
 
     var appLanguage by rememberPreference(appLanguageKey, AppLanguage.Arabic)
     var colorPaletteName by rememberPreference(colorPaletteNameKey, ColorPaletteName.Dynamic)
@@ -63,6 +69,7 @@ fun AppearanceSettings() {
         NavigationStyle.Side
     )
     var appFont by rememberPreference(appFontKey, context.preferences.selectedAppFont())
+    var contentRegion by rememberPreference(contentRegionKey, "auto")
     var applyFontPadding by rememberPreference(applyFontPaddingKey, false)
     var lowPowerMode by rememberPreference(lowPowerModeKey, false)
     var lyricsScale by rememberPreference(lyricsScaleKey, 1)
@@ -94,6 +101,31 @@ fun AppearanceSettings() {
         )
 
         SettingsDescription(text = strings.languageDescription)
+
+        val regionChoices = listOf("auto") + Region.selectableRegions
+        ValueSelectorSettingsEntry(
+            title = strings.contentRegion,
+            selectedValue = contentRegion,
+            values = regionChoices,
+            onValueSelected = { value ->
+                contentRegion = value
+                if (value == "auto") {
+                    Region.useAutomatic(context)
+                    scope.launch { Region.refresh(context, force = true) }
+                } else {
+                    Region.useManual(context, value)
+                }
+            },
+            valueText = { code ->
+                if (code == "auto") {
+                    strings.contentRegionAuto
+                } else {
+                    Region.displayName(code, if (appLanguage == AppLanguage.Arabic) Locale("ar") else Locale.ENGLISH)
+                }
+            }
+        )
+
+        SettingsDescription(text = strings.contentRegionDescription)
 
         SettingsGroupSpacer()
 

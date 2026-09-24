@@ -21,7 +21,24 @@ jobs:
           distribution: "temurin"
           cache: gradle
 
+      - name: Decode release keystore
+        env:
+          KEYSTORE_BASE64: ${{ secrets.MIMUSIC_KEYSTORE_BASE64 }}
+        run: |
+          if [ -z "$KEYSTORE_BASE64" ]; then
+            echo "Add GitHub secrets MIMUSIC_KEYSTORE_BASE64, MIMUSIC_KEYSTORE_PASSWORD, MIMUSIC_KEY_ALIAS, and MIMUSIC_KEY_PASSWORD."
+            echo "The old keystore was removed from the repository because its password was public."
+            exit 1
+          fi
+          mkdir -p app/keystore
+          echo "$KEYSTORE_BASE64" | base64 -d > app/keystore/mimusic-release.jks
+
       - name: Build release APK
+        env:
+          MIMUSIC_KEYSTORE_FILE: app/keystore/mimusic-release.jks
+          MIMUSIC_KEYSTORE_PASSWORD: ${{ secrets.MIMUSIC_KEYSTORE_PASSWORD }}
+          MIMUSIC_KEY_ALIAS: ${{ secrets.MIMUSIC_KEY_ALIAS }}
+          MIMUSIC_KEY_PASSWORD: ${{ secrets.MIMUSIC_KEY_PASSWORD }}
         run: ./gradlew assembleRelease --no-daemon
 
       - name: Prepare artifact

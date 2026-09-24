@@ -1,0 +1,40 @@
+[versions]
+kotlin = "2.0.21"
+ksp = "2.0.21-1.0.28"
+agp = "8.7.3"
+coroutines = "1.8.1"
+compose = "1.6.8"
+room = "2.6.1"
+media3 = "1.4.1"
+ktor = "2.3.12"
+lifecycle = "2.8.7"
+security = "1.1.0-alpha06"
+detekt = "1.23.7"
+
+[plugins]
+kotlin-serialization = { id = "org.jetbrains.kotlin.plugin.serialization", version.ref = "kotlin" }
+
+[libraries]
+kotlin-coroutines = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-core", version.ref = "coroutines" }
+compose-foundation = { module = "androidx.compose.foundation:foundation", version.ref = "compose" }
+compose-ui = { module = "androidx.compose.ui:ui", version.ref = "compose" }
+compose-ui-util = { module = "androidx.compose.ui:ui-util", version.ref = "compose" }
+compose-ripple = { module = "androidx.compose.material:material-ripple", version.ref = "compose" }
+compose-shimmer = { module = "com.valentinilk.shimmer:compose-shimmer", version = "1.3.1" }
+compose-activity = { module = "androidx.activity:activity-compose", version = "1.9.3" }
+compose-coil = { module = "io.coil-kt:coil-compose", version = "2.7.0" }
+room = { module = "androidx.room:room-ktx", version.ref = "room" }
+room-compiler = { module = "androidx.room:room-compiler", version.ref = "room" }
+exoplayer = { module = "androidx.media3:media3-exoplayer", version.ref = "media3" }
+lifecycle-viewmodel-compose = { module = "androidx.lifecycle:lifecycle-viewmodel-compose", version.ref = "lifecycle" }
+security-crypto = { module = "androidx.security:security-crypto", version.ref = "security" }
+ktor-client-core = { module = "io.ktor:ktor-client-core", version.ref = "ktor" }
+ktor-client-cio = { module = "io.ktor:ktor-client-okhttp", version.ref = "ktor" }
+ktor-client-content-negotiation = { module = "io.ktor:ktor-client-content-negotiation", version.ref = "ktor" }
+ktor-client-encoding = { module = "io.ktor:ktor-client-encoding", version.ref = "ktor" }
+ktor-client-serialization = { module = "io.ktor:ktor-client-serialization", version.ref = "ktor" }
+ktor-serialization-json = { module = "io.ktor:ktor-serialization-kotlinx-json", version.ref = "ktor" }
+brotli = { module = "org.brotli:dec", version = "0.1.2" }
+newpipe-extractor = { module = "com.github.TeamNewPipe:NewPipeExtractor", version = "0.26.5" }
+palette = { module = "androidx.palette:palette", version = "1.0.0" }
+desugaring = { module = "com.android.tools:desugar_jdk_libs", version = "2.1.4" }

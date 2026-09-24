@@ -1,27 +1,45 @@
+import java.util.Properties
+
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("kapt")
+    id("org.jetbrains.kotlin.plugin.compose")
+    id("com.google.devtools.ksp")
+    id("io.gitlab.arturbosch.detekt")
 }
+
+val keystorePropertiesFile = rootProject.file("keystore.properties")
+val keystoreProperties = Properties().apply {
+    if (keystorePropertiesFile.exists()) {
+        keystorePropertiesFile.inputStream().use { load(it) }
+    }
+}
+
+fun signingValue(envName: String, propertyName: String): String? =
+    System.getenv(envName)?.takeIf { it.isNotBlank() }
+        ?: keystoreProperties.getProperty(propertyName)?.takeIf { it.isNotBlank() }
 
 android {
     namespace = "it.vfsfitvnm.vimusic"
     compileSdk = 35
 
     defaultConfig {
-        applicationId = "it.vfsfitvnm.vimusic"
+        applicationId = "app.mimusic.player"
         minSdk = 21
-        targetSdk = 34
-        versionCode = 34
-        versionName = "0.7.2"
+        targetSdk = 35
+        versionCode = 35
+        versionName = "0.7.3"
     }
 
     signingConfigs {
         create("release") {
-            storeFile = file("keystore/mimusic-release.jks")
-            storePassword = "mimusic-release"
-            keyAlias = "mimusic"
-            keyPassword = "mimusic-release"
+            val storePath = signingValue("MIMUSIC_KEYSTORE_FILE", "storeFile")
+            if (storePath != null) {
+                storeFile = file(storePath)
+                storePassword = signingValue("MIMUSIC_KEYSTORE_PASSWORD", "storePassword")
+                keyAlias = signingValue("MIMUSIC_KEY_ALIAS", "keyAlias")
+                keyPassword = signingValue("MIMUSIC_KEY_PASSWORD", "keyPassword")
+            }
         }
     }
 
@@ -42,7 +60,10 @@ android {
             isMinifyEnabled = true
             isShrinkResources = true
             manifestPlaceholders["appName"] = "MiMusic"
-            signingConfig = signingConfigs.getByName("release")
+            val releaseKeystore = signingConfigs.getByName("release").storeFile
+            if (releaseKeystore != null && releaseKeystore.exists()) {
+                signingConfig = signingConfigs.getByName("release")
+            }
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
         }
     }
@@ -62,20 +83,47 @@ android {
         targetCompatibility = JavaVersion.VERSION_17
     }
 
-    composeOptions {
-        kotlinCompilerExtensionVersion = libs.versions.compose.compiler.get()
-    }
-
     kotlinOptions {
         freeCompilerArgs += "-Xcontext-receivers"
         jvmTarget = "17"
     }
+
+    lint {
+        abortOnError = true
+        checkReleaseBuilds = false
+        baseline = file("lint-baseline.xml")
+        disable += setOf(
+            "MissingTranslation",
+            "ExtraTranslation",
+            "IconDensities",
+            "IconMissingDensityFolder",
+            "ContentDescription",
+            "HardcodedText",
+            "ObsoleteLintCustomCheck",
+            "GradleDependency",
+            "AndroidGradlePluginVersion",
+            "OldTargetApi",
+            "UnusedResources",
+            "RtlSymmetry",
+            "RtlHardcoded",
+            "PluralsCandidate",
+            "Overdraw",
+            "SyntheticAccessor",
+            "VectorPath",
+            "NotifyDataSetChanged"
+        )
+    }
 }
 
-kapt {
-    arguments {
-        arg("room.schemaLocation", "$projectDir/schemas")
-    }
+ksp {
+    arg("room.schemaLocation", "$projectDir/schemas")
+}
+
+detekt {
+    buildUponDefaultConfig = true
+    allRules = false
+    config.setFrom(files("$rootDir/config/detekt/detekt.yml"))
+    baseline = file("detekt-baseline.xml")
 }
 
 dependencies {
@@ -92,14 +140,18 @@ dependencies {
     implementation(libs.compose.coil)
 
     implementation(libs.palette)
+    implementation(libs.lifecycle.viewmodel.compose)
+    implementation(libs.security.crypto)
 
     implementation(libs.exoplayer)
 
     implementation(libs.room)
-    kapt(libs.room.compiler)
+    ksp(libs.room.compiler)
 
     implementation(projects.innertube)
     implementation(projects.kugou)
 
     coreLibraryDesugaring(libs.desugaring)
+
+    testImplementation(testLibs.junit)
 }

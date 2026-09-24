@@ -136,6 +136,17 @@ inline fun <reified T : Enum<T>> rememberPreference(key: String, defaultValue: T
     return state
 }
 
+@Composable
+fun rememberSecret(key: String, defaultValue: String = ""): MutableState<String> {
+    val context = LocalContext.current
+    return remember(key) {
+        SecretStore.init(context.applicationContext)
+        mutableStatePreferenceOf(SecretStore.get(key).ifEmpty { defaultValue }) {
+            SecretStore.put(key, it)
+        }
+    }
+}
+
 /**
  * Keeps [state] in sync with SharedPreferences so a change made from any other screen
  * (or outside Compose) is reflected immediately.

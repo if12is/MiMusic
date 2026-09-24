@@ -43,6 +43,7 @@ import androidx.compose.ui.graphics.ColorFilter
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.unit.dp
+import androidx.lifecycle.viewmodel.compose.viewModel
 import it.vfsfitvnm.compose.persist.persist
 import it.vfsfitvnm.compose.persist.persistList
 import it.vfsfitvnm.innertube.Innertube
@@ -151,7 +152,7 @@ fun QuickPicks(
         } ?: Result.failure(TimeoutException("home"))
     }
 
-    val region by Region.flow.collectAsState()
+    val region by viewModel<HomeViewModel>().region.collectAsState()
     var landingRegion by persist<String?>("home/landingRegion")
 
     LaunchedEffect(reloadToken, appLanguage, region) {

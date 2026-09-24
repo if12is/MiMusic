@@ -19,6 +19,12 @@ class UiStrings(private val language: AppLanguage) {
 
     val languageTitle = t("Language", "اللغة")
     val languageDescription = t("Arabic is the default interface language", "العربية هي لغة الواجهة الأساسية")
+    val contentRegion = t("Content region", "منطقة المحتوى")
+    val contentRegionAuto = t("Automatic", "تلقائي")
+    val contentRegionDescription = t(
+        "Automatic uses your IP address only to choose the country for trends. You can pick a country instead.",
+        "الوضع التلقائي يستخدم عنوان IP لمعرفة الدولة للترند فقط. تقدر تختار الدولة بنفسك."
+    )
 
     val quickPicks = t("Quick picks", "اختيارات سريعة")
     val songs = t("Songs", "الأغاني")
@@ -156,6 +162,10 @@ class UiStrings(private val language: AppLanguage) {
     )
     val restoreTitle = t("Restore", "استعادة")
     val restoreDescription = t("Import the database from the external storage", "استيراد قاعدة البيانات من وحدة التخزين")
+    val packageMoveDescription = t(
+        "This version is a separate app from the old ViMusic package. Export the database here before removing the old install, then import it in this one.",
+        "النسخة دي تطبيق منفصل عن حزمة ViMusic القديمة. صدّر قاعدة البيانات من هنا قبل حذف النسخة القديمة، ثم استوردها في النسخة الجديدة."
+    )
     fun restoreOverwriteWarning(appName: String) = t(
         "Existing data will be overwritten.\n$appName will automatically close itself after restoring the database.",
         "سيتم استبدال البيانات الحالية.\nسيتم إغلاق $appName تلقائياً بعد استعادة قاعدة البيانات."

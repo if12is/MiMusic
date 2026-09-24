@@ -16,6 +16,7 @@ import java.util.Locale
 
 const val detectedRegionKey = "detectedRegion"
 const val detectedRegionAtKey = "detectedRegionAt"
+const val contentRegionKey = "contentRegion"
 
 /**
  * Works out which country the listener is in, so the home screen and YouTube Music
@@ -41,13 +42,29 @@ object Region {
     fun isArab(region: String?) = region?.uppercase() in ArabCountries
 
     fun load(context: Context) {
-        state.value = context.preferences.getString(detectedRegionKey, null)
+        val manual = selectedCode(context.preferences)
+        state.value = manual
+            ?: context.preferences.getString(detectedRegionKey, null)
             ?: offlineGuess(context)
+    }
+
+    fun useManual(context: Context, code: String) {
+        val valid = code.validCode() ?: return
+        context.preferences.edit { putString(contentRegionKey, valid) }
+        state.value = valid
+    }
+
+    fun useAutomatic(context: Context) {
+        context.preferences.edit { putString(contentRegionKey, "auto") }
     }
 
     /** Refreshes the region when the cached value is stale. Returns the region in use. */
     suspend fun refresh(context: Context, force: Boolean = false): String? {
         val preferences = context.preferences
+        selectedCode(preferences)?.let { manual ->
+            state.value = manual
+            return manual
+        }
         val last = preferences.getLong(detectedRegionAtKey, 0L)
         if (!force && current != null && System.currentTimeMillis() - last < RefreshIntervalMs) {
             return current
@@ -66,6 +83,15 @@ object Region {
 
     fun displayName(region: String, locale: Locale = Locale.getDefault()): String =
         Locale("", region).getDisplayCountry(locale).ifBlank { region }
+
+    val selectableRegions: List<String> =
+        (ArabCountries + setOf("US", "GB", "FR", "DE", "TR")).sorted()
+
+    private fun selectedCode(preferences: android.content.SharedPreferences): String? {
+        val raw = preferences.getString(contentRegionKey, "auto") ?: "auto"
+        if (raw.equals("auto", ignoreCase = true)) return null
+        return raw.validCode()
+    }
 
     private fun offlineGuess(context: Context): String? {
         val telephony = context.getSystemService<TelephonyManager>()

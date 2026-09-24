@@ -13,7 +13,7 @@ const val listenBrainzTokenKey = "listenBrainzToken"
 object ListenBrainz {
     fun submit(preferences: SharedPreferences, mediaItem: MediaItem, playTimeMs: Long) {
         if (!preferences.getBoolean(listenBrainzEnabledKey, false)) return
-        val token = preferences.getString(listenBrainzTokenKey, null)?.trim().orEmpty()
+        val token = SecretStore.get(listenBrainzTokenKey)
         if (token.isEmpty() || playTimeMs < 30_000L) return
 
         val title = mediaItem.mediaMetadata.title?.toString()?.trim().orEmpty()

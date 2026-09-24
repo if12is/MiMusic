@@ -14,6 +14,7 @@ import it.vfsfitvnm.vimusic.utils.preferences
 import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.withAppLanguage
 import it.vfsfitvnm.vimusic.utils.Region
+import it.vfsfitvnm.vimusic.utils.SecretStore
 import kotlinx.coroutines.MainScope
 import kotlinx.coroutines.launch
 
@@ -24,6 +25,7 @@ class MainApplication : Application(), ImageLoaderFactory {
 
     override fun onCreate() {
         super.onCreate()
+        SecretStore.init(this)
         Region.load(this)
         applyInnertubeLocale(preferredAppLanguage())
         MainScope().launch {
