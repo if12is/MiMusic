@@ -318,6 +318,35 @@ interface Database {
     @Query("UPDATE Song SET title = :title, artistsText = :artistsText WHERE id = :id")
     fun updateSongMetadata(id: String, title: String, artistsText: String?)
 
+    @Query(
+        """
+        UPDATE Song SET
+            title = :title,
+            artistsText = COALESCE(:artistsText, artistsText),
+            durationText = COALESCE(:durationText, durationText),
+            thumbnailUrl = COALESCE(:thumbnailUrl, thumbnailUrl)
+        WHERE id = :id AND title = id
+        """
+    )
+    fun replacePlaceholderSong(
+        id: String,
+        title: String,
+        artistsText: String?,
+        durationText: String?,
+        thumbnailUrl: String?
+    )
+
+    fun ensureParentSong(songId: String) {
+        insert(
+            Song(
+                id = songId,
+                title = songId,
+                durationText = null,
+                thumbnailUrl = null
+            )
+        )
+    }
+
     @Query("SELECT albumId AS id, NULL AS name FROM SongAlbumMap WHERE songId = :songId")
     fun songAlbumInfo(songId: String): Info
 
@@ -373,10 +402,22 @@ interface Database {
 
     @Insert(onConflict = OnConflictStrategy.IGNORE)
     @Throws(SQLException::class)
-    fun insert(event: Event)
+    fun insertEvent(event: Event)
+
+    @Transaction
+    fun insert(event: Event) {
+        ensureParentSong(event.songId)
+        insertEvent(event)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
-    fun insert(format: Format)
+    fun insertFormat(format: Format)
+
+    @Transaction
+    fun insert(format: Format) {
+        ensureParentSong(format.songId)
+        insertFormat(format)
+    }
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     fun insert(searchQuery: SearchQuery)
@@ -413,8 +454,19 @@ interface Database {
             artistsText = mediaItem.mediaMetadata.artist?.toString(),
             durationText = mediaItem.mediaMetadata.extras?.getString("durationText"),
             thumbnailUrl = mediaItem.mediaMetadata.artworkUri?.toString()
-        ).let(block).also { song ->
-            if (insert(song) == -1L) return
+        ).let(block)
+        val inserted = insert(song)
+        if (inserted == -1L) {
+            if (song.title != song.id) {
+                replacePlaceholderSong(
+                    id = song.id,
+                    title = song.title,
+                    artistsText = song.artistsText,
+                    durationText = song.durationText,
+                    thumbnailUrl = song.thumbnailUrl
+                )
+            }
+            return
         }
 
         mediaItem.mediaMetadata.extras?.getString("albumId")?.let { albumId ->
@@ -450,7 +502,13 @@ interface Database {
     fun update(playlist: Playlist)
 
     @Upsert
-    fun upsert(lyrics: Lyrics)
+    fun upsertLyrics(lyrics: Lyrics)
+
+    @Transaction
+    fun upsert(lyrics: Lyrics) {
+        ensureParentSong(lyrics.songId)
+        upsertLyrics(lyrics)
+    }
 
     @Upsert
     fun upsert(album: Album, songAlbumMaps: List<SongAlbumMap>)

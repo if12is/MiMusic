@@ -191,7 +191,14 @@ suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = r
         }
     }
 
-    PlayerLog.append("no audio-only URL from InnerTube, trying NewPipe extractor")
+    val ready = videoNeedingAudio ?: audioResponse ?: lastResponse
+    val muxed = ready?.streamingData?.muxedFallbackFormat
+    if (ready != null && !muxed?.url.isNullOrBlank()) {
+        PlayerLog.append("using muxed itag=${muxed?.itag} for the same file's sound and picture")
+        return@runCatchingNonCancellable ready
+    }
+
+    PlayerLog.append("no playable InnerTube URL, trying NewPipe extractor")
     val audioStreams = runCatching {
         if (preferVideo) newPipePlaybackStreams(body.videoId) else newPipeAudioStreams(body.videoId)
     }.onFailure { error ->
@@ -228,13 +235,6 @@ suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = r
             streamingData = null,
             videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
         )).withAudioStreams(body.videoId, newPipeAudioOnly)
-    }
-
-    val muxedResponse = lastResponse
-    val muxed = muxedResponse?.streamingData?.muxedFallbackFormat
-    if (muxedResponse != null && muxed?.url != null) {
-        PlayerLog.append("using muxed fallback itag=${muxed.itag} mime=${muxed.mimeType}")
-        return@runCatchingNonCancellable muxedResponse
     }
 
     if (audioStreams.isNotEmpty()) {

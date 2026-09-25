@@ -101,7 +101,7 @@ class StreamResolver(
             ?: body.streamingData?.formatFor(quality(), preferMuxed = false)
             ?: throw PlayableFormatNotFoundException()
         val streamUrl = format.url ?: throw PlayableFormatNotFoundException()
-        val progressive = videoChoice != null
+        val progressive = videoChoice != null || format.isProgressiveMuxed
         PlaybackLogStore.append("resolved $videoId itag=${format.itag} mime=${format.mimeType}")
         return ResolvedStream(
             key = streamKey,

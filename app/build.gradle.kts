@@ -27,8 +27,8 @@ android {
         applicationId = "app.mimusic.player"
         minSdk = 21
         targetSdk = 35
-        versionCode = 41
-        versionName = "0.7.9"
+        versionCode = 42
+        versionName = "0.7.10"
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
     }
 

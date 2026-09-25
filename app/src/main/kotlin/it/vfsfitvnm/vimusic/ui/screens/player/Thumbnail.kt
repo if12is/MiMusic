@@ -48,7 +48,6 @@ import it.vfsfitvnm.vimusic.ui.styling.Dimensions
 import it.vfsfitvnm.vimusic.ui.styling.LocalAppearance
 import it.vfsfitvnm.vimusic.ui.styling.px
 import it.vfsfitvnm.vimusic.utils.LocalStrings
-import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
 import it.vfsfitvnm.vimusic.utils.currentWindow
 import it.vfsfitvnm.vimusic.utils.DisposableListener
 import it.vfsfitvnm.vimusic.utils.forceSeekToNext
@@ -145,7 +144,7 @@ fun Thumbnail(
         contentAlignment = Alignment.Center
     ) {currentWindow ->
         val showVideo = binder.isPlayingVideo(currentWindow.mediaItem.mediaId)
-        val videoFrame = showVideo && videoWidth > 0
+        val videoFrame = showVideo && videoWidth > 0 && error == null
         Box(
             modifier = modifier.then(
                 if (showVideo) {
@@ -155,19 +154,6 @@ fun Thumbnail(
                 }
             )
         ) {
-            if (!showVideo) {
-                Artwork(
-                    data = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
-                        thumbnailSizePx,
-                        currentWindow.mediaItem.mediaId
-                    ),
-                    sizePx = thumbnailSizePx,
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .clip(LocalAppearance.current.thumbnailShape)
-                )
-            }
-
             if (showVideo) {
                 AndroidView(
                     factory = { context ->
@@ -181,6 +167,19 @@ fun Thumbnail(
                         player.clearVideoTextureView(view)
                     },
                     modifier = Modifier.fillMaxSize()
+                )
+            }
+
+            if (!videoFrame) {
+                Artwork(
+                    data = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
+                        thumbnailSizePx,
+                        currentWindow.mediaItem.mediaId
+                    ),
+                    sizePx = thumbnailSizePx,
+                    modifier = Modifier
+                        .fillMaxSize()
+                        .clip(LocalAppearance.current.thumbnailShape)
                 )
             }
 
@@ -261,14 +260,7 @@ fun Thumbnail(
                             strings.loginRequired
                         causes.any { it is VideoIdMismatchException } ->
                             strings.videoIdMismatch
-                        else -> {
-                            val summary = PlaybackLogStore.lastSummary()
-                            if (summary.isBlank()) {
-                                strings.unknownPlaybackError
-                            } else {
-                                "${strings.unknownPlaybackError}\n$summary"
-                            }
-                        }
+                        else -> strings.unknownPlaybackError
                     }
                 },
                 onDismiss = player::prepare

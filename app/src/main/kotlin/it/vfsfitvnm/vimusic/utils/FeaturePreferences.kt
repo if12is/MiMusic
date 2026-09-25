@@ -28,6 +28,12 @@ const val videoLyricsKey = "videoLyrics"
 
 /** false = audio only (default), true = play the music video when the source has one. */
 const val videoModeKey = "videoMode"
+
+/**
+ * 0.7.9 saved video mode, then crashed on the main thread for every later song.
+ * The next launch plays songs as sound again. The video mark still opens the picture.
+ */
+const val videoModeRecoveredKey = "videoModeRecovered0710"
 const val youtubeCookieKey = "youtubeCookie"
 const val backupTreeUriKey = "backupTreeUri"
 fun playlistCoverKey(playlistId: Long) = "playlistCover_$playlistId"

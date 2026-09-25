@@ -1,17 +1,21 @@
 package it.vfsfitvnm.vimusic.service
 
 import androidx.media3.common.MediaItem
-import androidx.media3.common.PlaybackException
+import androidx.media3.common.Timeline
 import androidx.media3.common.util.UnstableApi
+import androidx.media3.datasource.TransferListener
 import androidx.media3.exoplayer.drm.DrmSessionManagerProvider
+import androidx.media3.exoplayer.source.CompositeMediaSource
+import androidx.media3.exoplayer.source.MediaPeriod
 import androidx.media3.exoplayer.source.MediaSource
 import androidx.media3.exoplayer.source.MergingMediaSource
 import androidx.media3.exoplayer.source.ProgressiveMediaSource
+import androidx.media3.exoplayer.upstream.Allocator
 import androidx.media3.exoplayer.upstream.LoadErrorHandlingPolicy
 import it.vfsfitvnm.innertube.requests.hasRealMusicVideo
 import it.vfsfitvnm.innertube.utils.ExtraMediaIds
 import it.vfsfitvnm.vimusic.utils.PlaybackLogStore
-import java.io.IOException
+import kotlin.coroutines.cancellation.CancellationException
 
 /**
  * Plays a real music video when one exists, and the normal audio source otherwise.
@@ -46,15 +50,14 @@ internal class VideoOrAudioMediaSourceFactory(
 
     override fun createMediaSource(mediaItem: MediaItem): MediaSource {
         if (!shouldPlayVideo(mediaItem)) return audio.createMediaSource(mediaItem)
-        return try {
-            buildVideo(mediaItem) ?: audio.createMediaSource(mediaItem)
-        } catch (e: PlaybackException) {
-            PlaybackLogStore.append("video source ${e.javaClass.simpleName}: ${e.message}")
-            audio.createMediaSource(mediaItem)
-        } catch (e: IOException) {
-            PlaybackLogStore.append("video source ${e.javaClass.simpleName}: ${e.message}")
-            audio.createMediaSource(mediaItem)
-        }
+        // ExoPlayer calls this on the thread that tapped play. Resolving the stream
+        // here crashed the app (IllegalStateException: must not block the main thread)
+        // and, once video mode was saved, every following song crashed the same way.
+        return SameFileVideoSource(
+            mediaItem = mediaItem,
+            fallback = { audio.createMediaSource(mediaItem) },
+            video = { buildVideo(mediaItem) }
+        )
     }
 
     private fun shouldPlayVideo(mediaItem: MediaItem): Boolean {
@@ -90,5 +93,60 @@ internal class VideoOrAudioMediaSourceFactory(
             videoSource,
             direct.createMediaSource(audioItem)
         )
+    }
+}
+
+/**
+ * Resolves the picture on the playback thread, then plays that same file.
+ * The tap that starts a song stays on the main thread and must not do network work.
+ * If the picture cannot be opened, the song's sound still plays.
+ */
+@UnstableApi
+private class SameFileVideoSource(
+    private val mediaItem: MediaItem,
+    private val fallback: () -> MediaSource,
+    private val video: () -> MediaSource?
+) : CompositeMediaSource<Int>() {
+    private var child: MediaSource? = null
+
+    override fun getMediaItem(): MediaItem = mediaItem
+
+    @Suppress("TooGenericExceptionCaught")
+    override fun prepareSourceInternal(mediaTransferListener: TransferListener?) {
+        super.prepareSourceInternal(mediaTransferListener)
+        val source = try {
+            video() ?: fallback()
+        } catch (cancelled: CancellationException) {
+            throw cancelled
+        } catch (error: Exception) {
+            PlaybackLogStore.append("video source ${error.javaClass.simpleName}: ${error.message}")
+            fallback()
+        }
+        child = source
+        prepareChildSource(CHILD, source)
+    }
+
+    override fun onChildSourceInfoRefreshed(
+        childSourceId: Int,
+        mediaSource: MediaSource,
+        newTimeline: Timeline
+    ) {
+        refreshSourceInfo(newTimeline)
+    }
+
+    override fun createPeriod(
+        id: MediaSource.MediaPeriodId,
+        allocator: Allocator,
+        startPositionUs: Long
+    ): MediaPeriod {
+        return checkNotNull(child).createPeriod(id, allocator, startPositionUs)
+    }
+
+    override fun releasePeriod(mediaPeriod: MediaPeriod) {
+        child?.releasePeriod(mediaPeriod)
+    }
+
+    private companion object {
+        const val CHILD = 0
     }
 }

@@ -153,6 +153,7 @@ import it.vfsfitvnm.vimusic.utils.equalizerPresetKey
 import it.vfsfitvnm.vimusic.utils.lowPowerModeKey
 import it.vfsfitvnm.vimusic.utils.playbackLookahead
 import it.vfsfitvnm.vimusic.utils.videoModeKey
+import it.vfsfitvnm.vimusic.utils.videoModeRecoveredKey
 import it.vfsfitvnm.vimusic.utils.volumeNormalizationKey
 import it.vfsfitvnm.vimusic.utils.wifiOnlyDownloadKey
 import kotlin.math.roundToInt
@@ -257,6 +258,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
         createNotificationChannel()
 
         preferences.registerOnSharedPreferenceChangeListener(this)
+        if (!preferences.getBoolean(videoModeRecoveredKey, false)) {
+            preferences.edit()
+                .putBoolean(videoModeKey, false)
+                .putBoolean(videoModeRecoveredKey, true)
+                .apply()
+        }
 
         val preferences = preferences
         isPersistentQueueEnabled = preferences.getBoolean(persistentQueueKey, false)
@@ -475,22 +482,25 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
             hasVideo = body.hasMusicVideo(),
             playingVideo = stream.progressiveMuxed
         )
-        query {
-            Database.insert(
-                Format(
-                    songId = stream.videoId,
-                    itag = format.itag,
-                    mimeType = format.mimeType,
-                    bitrate = format.bitrate,
-                    loudnessDb = body.playerConfig?.audioConfig?.normalizedLoudnessDb,
-                    contentLength = format.contentLength,
-                    lastModified = format.lastModified
-                )
-            )
-        }
         coroutineScope.launch(Dispatchers.Main) {
-            val mediaItem = player.findNextMediaItemById(stream.videoId) ?: return@launch
-            query { Database.insert(mediaItem) }
+            val mediaItem = player.findNextMediaItemById(stream.videoId)
+            query {
+                if (mediaItem != null) {
+                    Database.insert(mediaItem)
+                }
+                Database.insert(
+                    Format(
+                        songId = stream.videoId,
+                        itag = format.itag,
+                        mimeType = format.mimeType,
+                        bitrate = format.bitrate,
+                        loudnessDb = body.playerConfig?.audioConfig?.normalizedLoudnessDb,
+                        contentLength = format.contentLength,
+                        lastModified = format.lastModified
+                    )
+                )
+            }
+            if (mediaItem == null) return@launch
             val extras = mediaItem.mediaMetadata.extras ?: return@launch
             if (extras.getString("durationText") != null) return@launch
             val durationText = format.approxDurationMs
@@ -1317,13 +1327,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
          * reloads the current item at the same position so the change is immediate.
          */
         fun setVideoMode(enabled: Boolean) {
-            preferences.edit().putBoolean(videoModeKey, enabled).apply()
-
             val index = player.currentMediaItemIndex
             val item = player.currentMediaItem ?: return
             val mediaId = item.mediaId
             if (mediaId.startsWith("local:") || ExtraMediaIds.isExternal(mediaId)) return
 
+            val previous = preferences.getBoolean(videoModeKey, false)
             val position = player.currentPosition
             val playWhenReady = player.playWhenReady
             val reloaded = item.buildUpon()
@@ -1334,9 +1343,12 @@ class PlayerService : InvincibleService(), Player.Listener, PlaybackStatsListene
                 player.seekTo(index, position)
                 player.playWhenReady = playWhenReady
                 player.prepare()
+                preferences.edit().putBoolean(videoModeKey, enabled).apply()
             } catch (e: IllegalStateException) {
+                preferences.edit().putBoolean(videoModeKey, previous).apply()
                 PlaybackLogStore.append("video switch ${e.javaClass.simpleName}: ${e.message}")
             } catch (e: IllegalArgumentException) {
+                preferences.edit().putBoolean(videoModeKey, previous).apply()
                 PlaybackLogStore.append("video switch ${e.javaClass.simpleName}: ${e.message}")
             }
         }
