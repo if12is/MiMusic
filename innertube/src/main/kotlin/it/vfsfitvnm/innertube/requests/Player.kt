@@ -13,6 +13,7 @@ import it.vfsfitvnm.innertube.utils.NewPipeSupport
 import it.vfsfitvnm.innertube.utils.PlayerLog
 import it.vfsfitvnm.innertube.utils.ResolvedAudioStream
 import it.vfsfitvnm.innertube.utils.newPipeAudioStreams
+import it.vfsfitvnm.innertube.utils.newPipePlaybackStreams
 import it.vfsfitvnm.innertube.utils.runCatchingNonCancellable
 import it.vfsfitvnm.innertube.utils.withDecipheredUrls
 import org.schabi.newpipe.extractor.services.youtube.YoutubeJavaScriptPlayerManager
@@ -118,6 +119,7 @@ suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = r
     PlayerLog.append("resolve ${body.videoId} hl=${Context.hl} gl=${Context.gl} video=$preferVideo")
     var lastResponse: PlayerResponse? = null
     var audioResponse: PlayerResponse? = null
+    var videoNeedingAudio: PlayerResponse? = null
 
     for (context in playerClients) {
         val response = runCatching {
@@ -146,11 +148,16 @@ suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = r
         }
         lastResponse = unlocked
         if (preferVideo && unlocked.hasRealMusicVideo()) {
-            val muxed = unlocked.streamingData?.muxedFallbackFormat
-            PlayerLog.append(
-                "using video ${context.client.clientName} itag=${muxed?.itag} mime=${muxed?.mimeType}"
-            )
-            return@runCatchingNonCancellable unlocked
+            val choice = unlocked.streamingData?.chooseVideo()
+            val hasSound = choice?.audio != null || choice?.video?.isProgressiveMuxed == true
+            if (hasSound) {
+                PlayerLog.append(
+                    "using video ${context.client.clientName} picture=${choice?.video?.itag} " +
+                        "audio=${choice?.audio?.itag ?: "muxed"}"
+                )
+                return@runCatchingNonCancellable unlocked
+            }
+            if (videoNeedingAudio == null) videoNeedingAudio = unlocked
         }
         val unlockedAudio = unlocked.streamingData?.playableAudioFormats.orEmpty()
         if (unlocked.hasPlayableAudio()) {
@@ -173,28 +180,40 @@ suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = r
         }
     }
 
+    if (preferVideo && videoNeedingAudio != null) {
+        val combined = videoNeedingAudio.ensuringSound(audioResponse)
+        val choice = combined.streamingData?.chooseVideo()
+        if (choice?.audio != null || choice?.video?.isProgressiveMuxed == true) {
+            PlayerLog.append(
+                "paired picture itag=${choice?.video?.itag} with audio itag=${choice?.audio?.itag ?: "muxed"}"
+            )
+            return@runCatchingNonCancellable combined
+        }
+    }
+
     PlayerLog.append("no audio-only URL from InnerTube, trying NewPipe extractor")
     val audioStreams = runCatching {
-        newPipeAudioStreams(body.videoId)
+        if (preferVideo) newPipePlaybackStreams(body.videoId) else newPipeAudioStreams(body.videoId)
     }.onFailure { error ->
         PlayerLog.append("NewPipe failed: ${error.message}")
     }.getOrDefault(emptyList())
     val newPipeAudioOnly = audioStreams.filter { stream ->
         stream.mimeType?.contains("audio", ignoreCase = true) == true
     }
-    if (preferVideo) {
-        val muxedNewPipe = audioStreams.filter { stream ->
-            val mime = stream.mimeType.orEmpty()
-            mime.isNotBlank() && !mime.contains("audio", ignoreCase = true)
-        }
-        if (muxedNewPipe.isNotEmpty()) {
-            PlayerLog.append("using NewPipe video streams=${muxedNewPipe.size}")
-            return@runCatchingNonCancellable (lastResponse ?: PlayerResponse(
-                playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
-                playerConfig = null,
-                streamingData = null,
-                videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
-            )).withAudioStreams(body.videoId, muxedNewPipe)
+    if (preferVideo && audioStreams.isNotEmpty()) {
+        val base = videoNeedingAudio ?: lastResponse ?: PlayerResponse(
+            playabilityStatus = PlayerResponse.PlayabilityStatus(status = "OK"),
+            playerConfig = null,
+            streamingData = null,
+            videoDetails = PlayerResponse.VideoDetails(videoId = body.videoId)
+        )
+        val response = base.plusStreams(body.videoId, audioStreams)
+        if (response.hasRealMusicVideo()) {
+            val choice = response.streamingData?.chooseVideo()
+            PlayerLog.append(
+                "using NewPipe picture=${choice?.video?.itag} audio=${choice?.audio?.itag ?: "muxed"}"
+            )
+            return@runCatchingNonCancellable response
         }
         audioResponse?.let { saved ->
             PlayerLog.append("no music video, falling back to audio")
@@ -231,4 +250,36 @@ suspend fun Innertube.player(body: PlayerBody, preferVideo: Boolean = false) = r
     val status = lastResponse?.playabilityStatus
     PlayerLog.append("unresolved status=${status?.status} reason=${status?.reason}")
     lastResponse ?: error("Unable to resolve a playable stream")
+}
+
+/** Keeps a video-only response and adds the song from another client when this one has no audio. */
+private fun PlayerResponse.ensuringSound(audioDonor: PlayerResponse?): PlayerResponse {
+    val choice = streamingData?.chooseVideo() ?: return this
+    if (choice.audio != null || choice.video.isProgressiveMuxed) return this
+    val donorAudio = audioDonor?.streamingData?.playableAudioFormats.orEmpty()
+    if (donorAudio.isEmpty()) return this
+    val mine = streamingData ?: return this
+    val known = mine.playableAudioFormats.map { it.itag }.toSet()
+    val extra = donorAudio.filter { it.itag !in known }
+    if (extra.isEmpty()) return this
+    return copy(
+        streamingData = mine.copy(adaptiveFormats = mine.adaptiveFormats.orEmpty() + extra)
+    )
+}
+
+private fun PlayerResponse.plusStreams(
+    videoId: String,
+    streams: List<ResolvedAudioStream>
+): PlayerResponse {
+    val added = withAudioStreams(videoId, streams)
+    val current = streamingData
+    return copy(
+        playabilityStatus = playabilityStatus ?: added.playabilityStatus,
+        streamingData = PlayerResponse.StreamingData(
+            adaptiveFormats = current?.adaptiveFormats.orEmpty() +
+                added.streamingData?.adaptiveFormats.orEmpty(),
+            formats = current?.formats
+        ),
+        videoDetails = videoDetails ?: added.videoDetails
+    )
 }

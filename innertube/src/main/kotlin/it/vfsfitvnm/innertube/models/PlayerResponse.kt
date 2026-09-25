@@ -71,8 +71,11 @@ data class PlayerResponse(
                 ?: pictures.filterNot { it.isProgressiveMuxed }
                     .maxByOrNull { it.bitrate ?: 0L }
             val audio = playableAudioFormats.maxByOrNull { it.bitrate ?: it.averageBitrate ?: 0L }
-            if (separate != null && !audio?.url.isNullOrBlank()) {
-                return VideoStreamChoice(video = separate, audio = audio)
+            if (separate != null) {
+                return VideoStreamChoice(
+                    video = separate,
+                    audio = audio?.takeIf { !it.url.isNullOrBlank() }
+                )
             }
             return null
         }
@@ -104,8 +107,16 @@ data class PlayerResponse(
             val signatureCipher: String? = null,
             val cipher: String? = null
         ) {
+            /**
+             * Audio-only track. A muxed file can carry [audioQuality] and still contain the picture,
+             * so a video mime is never treated as audio-only.
+             */
             val isAudioOnly: Boolean
-                get() = mimeType.contains("audio", ignoreCase = true) || audioQuality != null
+                get() {
+                    val mime = mimeType.lowercase()
+                    if (mime.contains("video")) return false
+                    return mime.contains("audio") || audioQuality != null
+                }
 
             /** A moving picture, not an audio-only track. */
             val hasVideoPicture: Boolean

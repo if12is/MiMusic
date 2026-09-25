@@ -37,6 +37,18 @@ internal fun PlayerResponse.withDecipheredUrls(videoId: String): PlayerResponse 
     )
 }
 
+/** Picture and sound together: muxed file, separate video, and the audio track. */
+internal fun newPipePlaybackStreams(videoId: String): List<ResolvedAudioStream> {
+    NewPipeSupport.ensureInitialized()
+    val info = StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")
+    val audio = info.audioStreams.mapNotNull { stream -> stream.toResolvedAudio() }
+    val muxed = info.videoStreams.mapNotNull { stream ->
+        if (stream.isVideoOnly) null else stream.toResolvedAudio()
+    }
+    val picture = info.videoOnlyStreams.mapNotNull { stream -> stream.toResolvedAudio() }
+    return muxed + picture + audio
+}
+
 internal fun newPipeAudioStreams(videoId: String): List<ResolvedAudioStream> {
     NewPipeSupport.ensureInitialized()
     val info = StreamInfo.getInfo("https://www.youtube.com/watch?v=$videoId")

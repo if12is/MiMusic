@@ -72,6 +72,46 @@ class PlayerVideoSelectionTest {
     }
 
     @Test
+    fun muxedFileWithAudioQualityStillHasPictureAndSound() {
+        val format = PlayerResponse.StreamingData.AdaptiveFormat(
+            itag = 18,
+            mimeType = "video/mp4; codecs=\"avc1.42001E, mp4a.40.2\"",
+            audioQuality = "AUDIO_QUALITY_LOW",
+            bitrate = 400_000,
+            url = "https://example.com/both"
+        )
+        val response = PlayerResponse(
+            streamingData = PlayerResponse.StreamingData(formats = listOf(format)),
+            videoDetails = PlayerResponse.VideoDetails(
+                videoId = "song",
+                musicVideoType = "MUSIC_VIDEO_TYPE_OMV"
+            )
+        )
+        assertFalse(format.isAudioOnly)
+        val choice = response.streamingData?.chooseVideo()
+        assertEquals(18, choice?.video?.itag)
+        assertEquals("https://example.com/both", choice?.video?.url)
+        assertNull(choice?.audio)
+        assertTrue(response.hasRealMusicVideo())
+    }
+
+    @Test
+    fun videoPictureWithoutSeparateAudioIsStillAVideo() {
+        val response = PlayerResponse(
+            streamingData = PlayerResponse.StreamingData(
+                adaptiveFormats = listOf(
+                    format(itag = 136, mime = "video/mp4", url = "https://example.com/picture", bitrate = 400_000)
+                )
+            ),
+            videoDetails = PlayerResponse.VideoDetails(videoId = "song", musicVideoType = "MUSIC_VIDEO_TYPE_OMV")
+        )
+        val choice = response.streamingData?.chooseVideo()
+        assertEquals(136, choice?.video?.itag)
+        assertNull(choice?.audio)
+        assertTrue(response.hasRealMusicVideo())
+    }
+
+    @Test
     fun audioOnlyResponseIsNotAMusicVideo() {
         val response = player(
             mime = "audio/mp4",

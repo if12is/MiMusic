@@ -155,7 +155,7 @@ fun Thumbnail(
                 }
             )
         ) {
-            if (!videoFrame) {
+            if (!showVideo) {
                 Artwork(
                     data = currentWindow.mediaItem.mediaMetadata.artworkUri.thumbnail(
                         thumbnailSizePx,
